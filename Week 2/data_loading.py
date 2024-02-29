@@ -8,22 +8,10 @@ import os
 from colorama import Fore, Style
 import numpy as np
 
+import load_data
 import replace_values
 
 
-def load_data(file_path: str)-> pd.DataFrame:
-    df = None
-
-    # If Excel file
-    if file_path.endswith(".xlsx"):
-        df = pd.read_excel(file_path)
-
-    # If CSV file
-    elif file_path.endswith(".csv"):
-        df = pd.read_csv(file_path)
-
-
-    return df
 
 
 def display_data(data: pd.DataFrame, print_metadata: bool = False, head_only: bool = True):
@@ -66,7 +54,7 @@ def main():
         
         # Load Data
         print(f"{Fore.LIGHTBLUE_EX}Loading Data{Style.RESET_ALL}")
-        data = load_data(data_file)
+        data = load_data.load_data(data_file)
         print(f"Data loaded from {data_file}")
 
         # Display Data
