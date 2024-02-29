@@ -3,19 +3,13 @@ Week 2 - Prac
 Part 1: Data Loading and Pre-processing
 """
 
-import pandas as pd
 import os
 from colorama import Fore, Style
-import numpy as np
 
 import load_data
 import display_data
 import replace_values
-
-
-
-
-
+import encode_data
 
 
 def main():
@@ -38,23 +32,20 @@ def main():
         data = load_data.load_data(data_file)
         print(f"Data loaded from {data_file}")
 
-        # Display Data
-        # display_data.display_data(data, print_metadata=False, head_only = True)
-
         # Remove null values
         print(f"{Fore.LIGHTBLUE_EX}Removing Null Values{Style.RESET_ALL}")
         data_null_removed = replace_values.remove_null_values(data)
-
-        # Display Data
-        # display_data.display_data(data_null_removed, print_metadata=False, head_only = True)
+        display_data.display_data(data_null_removed, print_metadata=False, head_only = True)
 
         # Replace null values with mean instead
         print(f"{Fore.LIGHTBLUE_EX}Replacing Null Values with Mean{Style.RESET_ALL}")
         data_null_replaces = replace_values.replace_null_values_with_mean(data)
-
-        # Display Data
         display_data.display_data(data_null_replaces, print_metadata=False, head_only = True)
 
+        # Encode non-numeric data
+        print(f"{Fore.LIGHTBLUE_EX}Encoding Non-Numeric Data{Style.RESET_ALL}")
+        data_encoded = encode_data.encode_non_numeric_data(data_null_replaces)
+        display_data.display_data(data_encoded, print_metadata=False, head_only = True)
 
         print("-"*100)
 
