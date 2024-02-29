@@ -21,7 +21,7 @@ def load_data(file_path: str)-> pd.DataFrame:
     return df
 
 
-def display_data(data: pd.DataFrame, print_metadata: bool = False):
+def display_data(data: pd.DataFrame, print_metadata: bool = False, head_only: bool = True):
     if print_metadata:
         print("Metadata")
         for column in data.columns:
@@ -30,11 +30,19 @@ def display_data(data: pd.DataFrame, print_metadata: bool = False):
             print(f"Number of null values: {data[column].isnull().sum()}")
             print(f"Number of unique values: {data[column].nunique()}")
 
-    print("Printing Data")
-    for column in data.columns:
-        print(f"Values: \n{data[column]}")
-        print("\n")
+        print(data.info())
 
+    print("Printing Data")
+    if head_only:
+        print(data.head())
+    else:
+        for column in data.columns:
+            print(f"Values: \n{data[column]}")
+            print("\n")
+
+
+def remove_null_values(data: pd.DataFrame) -> pd.DataFrame:
+    return data.dropna()
 
 
 def main():
@@ -44,17 +52,16 @@ def main():
     seedlings_data_file = os.path.join(current_folder, "seedlings.csv")
     snakes_data_file = os.path.join(current_folder, "Snakes.xlsx")
 
-    pokemon_data = load_data(pokemon_data_file)
-    display_data(pokemon_data)
-    # Data is partly text and mostly numerical floats
+    data_files = [pokemon_data_file, seedlings_data_file, snakes_data_file]
 
-    seedlings_data = load_data(seedlings_data_file)
-    display_data(seedlings_data)
-    # Data is mostly numerical with some text
+    for data_file in data_files:
+        if not os.path.exists(data_file):
+            raise FileNotFoundError(f"File {data_file} not found")
+        
+        data = load_data(data_file)
+        print(f"Data loaded from {data_file}")
+        display_data(data, print_metadata=False, head_only = True)
 
-    snakes_data = load_data(snakes_data_file)
-    display_data(snakes_data)
-    # Data is a mix of numerical, categorical and text based.
 
 
 if __name__ == "__main__":
