@@ -8,6 +8,9 @@ import os
 from colorama import Fore, Style
 import numpy as np
 
+import replace_values
+
+
 def load_data(file_path: str)-> pd.DataFrame:
     df = None
 
@@ -43,25 +46,7 @@ def display_data(data: pd.DataFrame, print_metadata: bool = False, head_only: bo
             print("\n")
 
 
-def remove_null_values(data: pd.DataFrame) -> pd.DataFrame:
-    return data.dropna()
 
-def replace_null_values_with_mean(data: pd.DataFrame, supress_logs: bool = True) -> pd.DataFrame:
-    # Create a copy of the data
-    data = data.copy()
-
-    for column in data.columns:
-        if data[column].dtype in [int, float]:
-            column_mean = data[column].mean()
-
-            for row in range(len(data[column])):
-                data_point = data.loc[row, column]
-                if pd.isna(data_point):
-                    if not supress_logs:
-                        print(f"{Fore.LIGHTRED_EX}Replacing null value at column {column} and row {row} with mean value {column_mean}{Fore.WHITE}")
-                    data.loc[row, column] = column_mean
-
-    return data
 
 
 def main():
@@ -89,14 +74,14 @@ def main():
 
         # Remove null values
         print(f"{Fore.LIGHTBLUE_EX}Removing Null Values{Style.RESET_ALL}")
-        data_null_removed = remove_null_values(data)
+        data_null_removed = replace_values.remove_null_values(data)
 
         # Display Data
         # display_data(data_null_removed, print_metadata=False, head_only = True)
 
         # Replace null values with mean instead
         print(f"{Fore.LIGHTBLUE_EX}Replacing Null Values with Mean{Style.RESET_ALL}")
-        data_null_replaces = replace_null_values_with_mean(data)
+        data_null_replaces = replace_values.replace_null_values_with_mean(data)
 
         # Display Data
         display_data(data_null_replaces, print_metadata=False, head_only = True)
