@@ -39,14 +39,14 @@ def main():
         print(f"Data loaded from {data_file}")
 
         # Display Data
-        # display_data(data, print_metadata=False, head_only = True)
+        # display_data.display_data(data, print_metadata=False, head_only = True)
 
         # Remove null values
         print(f"{Fore.LIGHTBLUE_EX}Removing Null Values{Style.RESET_ALL}")
         data_null_removed = replace_values.remove_null_values(data)
 
         # Display Data
-        # display_data(data_null_removed, print_metadata=False, head_only = True)
+        # display_data.display_data(data_null_removed, print_metadata=False, head_only = True)
 
         # Replace null values with mean instead
         print(f"{Fore.LIGHTBLUE_EX}Replacing Null Values with Mean{Style.RESET_ALL}")
