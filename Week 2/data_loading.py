@@ -53,7 +53,7 @@ def main():
         data_null_replaces = replace_values.replace_null_values_with_mean(data)
 
         # Display Data
-        display_data(data_null_replaces, print_metadata=False, head_only = True)
+        display_data.display_data(data_null_replaces, print_metadata=False, head_only = True)
 
 
         print("-"*100)
