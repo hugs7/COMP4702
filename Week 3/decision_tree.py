@@ -7,10 +7,10 @@ from sklearn.tree import DecisionTreeClassifier
 import pandas as pd
 from pandas import DataFrame
 
-from model import Model
+from classifier import Classifier
 
 
-class DecisionTree(Model):
+class DecisionTree(Classifier):
     def __init__(
         self,
         X_train: DataFrame,
@@ -18,14 +18,30 @@ class DecisionTree(Model):
         X_test: DataFrame,
         y_test: DataFrame,
         feature_names: list[str],
-        k: int = 3,
     ):
-        super().__init__(X_train, X_test, y_train, y_test, feature_names, k)
-
         self.model = DecisionTreeClassifier()
 
-    def train(self, X: DataFrame, y: DataFrame):
+        super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
+
+    def classify(self) -> Tuple[Any, float, float]:
+        """
+        Trains the decision tree model using the provided training data.
+
+        Returns a tuple containing the test predictions, train accuracy, and test accuracy.
+
+        :return: A tuple containing the test predictions, train accuracy, and test accuracy.
+        """
+
+        X = pd.DataFrame(self.X_train, columns=self.feature_names)
+        y = self.y_train
+
+        # Fit model
         self.model.fit(X, y)
 
-    def predict(self, X):
-        return self.model.predict(X)
+        # Get results
+        train_accuracy = self.model.score(X, y)
+
+        test_predictions = self.model.predict(self.X_test)
+        test_accuracy = self.model.score(self.X_test, self.y_test)
+
+        return test_predictions, train_accuracy, test_accuracy
