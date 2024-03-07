@@ -5,18 +5,19 @@ Hugo Burton
 """
 
 import os
+from typing import Union
+from colorama import Fore
+from pandas import DataFrame
 
 import load_data
 import scatterplot
 import knn
-from colorama import Fore
+import decision_tree
 
 
-def classification(data_folder):
-    """
-    Classification task
-    """
-
+def process_classification_data(
+    data_folder, show_scatterplot: bool = False
+) -> Union[DataFrame, DataFrame, DataFrame, DataFrame, DataFrame, list[str]]:
     # Load the data
     file_path = os.path.join(data_folder, "w3classif.csv")
 
@@ -36,28 +37,43 @@ def classification(data_folder):
     y = data_randomised.loc[:, "Y"]
     ratio = 0.3
 
-    X_train, y_train, X_test, y_test = load_data.test_train_split(X, y)
+    X_train, y_train, X_test, y_test = load_data.test_train_split(X, y, ratio=ratio)
 
-    # Apply the knn classifier
+    return data, X_train, y_train, X_test, y_test, feature_names
 
-    knn_classifier = knn.KNNClassify(
-        X_train, y_train, X_test, y_test, feature_names, k=3
-    )
 
-    test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
-
+def print_classify_results(train_accuracy: float, test_accuracy: float) -> None:
     print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Fore.WHITE}", train_accuracy)
     print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Fore.WHITE}", test_accuracy)
     print("")
     print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.WHITE}", 1 - train_accuracy)
     print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.WHITE}", 1 - test_accuracy)
 
+
+def knn_classify(data_folder):
+    """
+    Classification task using knn
+    """
+
+    data, X_train, y_train, X_test, y_test, feature_names = process_classification_data(
+        data_folder
+    )
+
+    # Apply the knn classifier
+    knn_classifier = knn.KNNClassify(
+        X_train, y_train, X_test, y_test, feature_names, k=3
+    )
+
+    test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+
+    print_classify_results(train_accuracy, test_accuracy)
+
     # Plot decision regions
 
     knn_classifier.plot_decision_regions(X_test, test_preds, resolution=0.02)
 
 
-def regression(data_folder):
+def knn_regress(data_folder):
     """
     Regression task
     """
@@ -91,13 +107,44 @@ def regression(data_folder):
     knn_regressor.plot_regression_line(test_preds)
 
 
+def decision_tree_classify(data_folder):
+    """
+    Classification task using decision tree
+    """
+
+    data, X_train, y_train, X_test, y_test, feature_names = process_classification_data(
+        data_folder
+    )
+
+    # Create the decision tree classifier
+
+    decision_tree_model = decision_tree.DecisionTree(
+        X_train, y_train, X_test, y_test, feature_names
+    )
+
+    test_preds, train_accuracy, test_accuracy = decision_tree_model.classify()
+
+    print_classify_results(train_accuracy, test_accuracy)
+
+    # Plot decision tree regions
+    decision_tree_model.plot_decision_regions(X_test, test_preds, resolution=0.02)
+
+
+def decision_tree_regress(data_folder):
+    return 0
+
+
 def main():
     current_folder = os.path.dirname(__file__)
     data_folder = os.path.join(current_folder, "data")
 
-    # classification(data_folder)
+    knn_classify(data_folder)
 
-    regression(data_folder)
+    knn_regress(data_folder)
+
+    decision_tree_classify(data_folder)
+
+    decision_tree_regress(data_folder)
 
 
 if __name__ == "__main__":
