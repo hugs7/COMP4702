@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 
 from model import Model
 from classifier import Classifier
+from regressor import Regressor
 
 
 class KNNClassify(Classifier):
@@ -65,7 +66,7 @@ class KNNClassify(Classifier):
         return test_predictions, train_accuracy, test_accuracy
 
 
-class KNNRegress(Model):
+class KNNRegress(Regressor):
     def __init__(
         self,
         X_train: DataFrame,
@@ -75,12 +76,14 @@ class KNNRegress(Model):
         feature_names: list[str],
         k: int = 3,
     ):
-        super().__init__(X_train, X_test, y_train, y_test, feature_names)
-
-        self.k = k
-
         # Define Model
         self.model = KNeighborsRegressor()
+        self.k = k
+
+        super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
+
+    def get_k(self) -> int:
+        return self.k
 
     def regress(
         self,
@@ -110,28 +113,3 @@ class KNNRegress(Model):
         test_accuracy = self.model.score(self.X_test, self.y_test)
 
         return test_predictions, train_accuracy, test_accuracy
-
-    def plot_regression_line(self, test_preds: np.ndarray) -> None:
-        """
-        Plots the regression line for a k-nearest neighbors regressor.
-
-        Parameters:
-        - test_preds (ndarray): The predicted target values for the test data.
-
-        Returns:
-        - None
-
-        This function plots the regression line for a k-nearest neighbors regressor by plotting the test data points
-        and the predicted values on the same graph.
-
-        Note:
-        - The input data should have exactly one feature for proper visualization.
-        - The regressor should have a `predict` method that takes a feature matrix as input and returns the predicted target values.
-        """
-
-        plt.scatter(self.X_test, test_preds, color="blue")
-        # plt.plot(self.X_test, self.model.predict(self.X_test), color="red")
-        plt.title("k-NN Regression Line")
-        plt.xlabel("X")
-        plt.ylabel("Y")
-        plt.show()
