@@ -4,9 +4,10 @@ Hugo Burton
 07/03/2024
 """
 
-import pandas as pd
-import load_data
 import os
+
+import load_data
+import scatterplot
 
 
 def main():
@@ -18,7 +19,10 @@ def main():
 
     data = load_data.load_data(file_path)
 
-    print(data)
+    data = load_data.tag_data(data)
+
+    # Show the data as scatterplot
+    scatterplot.scatterplot(data)
 
 
 if __name__ == "__main__":
