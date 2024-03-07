@@ -1,7 +1,7 @@
 from pandas import DataFrame
 
 
-class Classifier:
+class Model:
     def __init__(
         self,
         X_train: DataFrame,

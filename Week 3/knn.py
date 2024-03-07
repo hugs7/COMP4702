@@ -15,10 +15,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pandas import DataFrame
 
-from generic_classifier import Classifier
+from model import Model
 
 
-class KNNClassify(Classifier):
+class KNNClassify(Model):
     def __init__(
         self,
         X_train: DataFrame,
@@ -137,7 +137,7 @@ class KNNClassify(Classifier):
         plt.show()
 
 
-class KNNRegress(Classifier):
+class KNNRegress(Model):
     def __init__(
         self,
         X_train: DataFrame,
