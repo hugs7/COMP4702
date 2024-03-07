@@ -19,6 +19,6 @@ def scatterplot(data):
         label=data.loc[:, "Y"],
     )
     plt.legend(*scatter.legend_elements())
-    plt.ylabel("X1")
-    plt.xlabel("X2")
+    plt.ylabel("X2")
+    plt.xlabel("X1")
     plt.show()
