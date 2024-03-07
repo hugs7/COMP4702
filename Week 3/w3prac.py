@@ -28,7 +28,7 @@ def classification(data_folder):
     scatterplot.scatterplot_with_colour(data, "X1", "X2", "Y")
 
     # Randomise the data
-    data_randomised = knn.shuffle_data(data)
+    data_randomised = load_data.shuffle_data(data)
 
     feature_names = ["X1", "X2"]
     # Split the data into training and testing data
@@ -36,23 +36,25 @@ def classification(data_folder):
     y = data_randomised.loc[:, "Y"]
     ratio = 0.3
 
-    X_train, X_test, y_train, y_test = knn.test_train_split(X, y)
+    X_train, y_train, X_test, y_test = load_data.test_train_split(X, y)
 
     # Apply the knn classifier
 
-    knn_classifier, test_preds, train_accuracy, test_accuracy = knn.classify(
-        X_train, X_test, y_train, y_test, feature_names, k=3
+    knn_classifier = knn.KNNClassify(
+        X_train, y_train, X_test, y_test, feature_names, k=3
     )
 
-    print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Fore.BLACK}", train_accuracy)
-    print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Fore.BLACK}", test_accuracy)
+    test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+
+    print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Fore.WHITE}", train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Fore.WHITE}", test_accuracy)
     print("")
-    print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.BLACK}", 1 - train_accuracy)
-    print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.BLACK}", 1 - test_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.WHITE}", 1 - train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.WHITE}", 1 - test_accuracy)
 
     # Plot decision regions
 
-    knn.plot_decision_regions(X_test, test_preds, knn_classifier, resolution=0.02)
+    knn_classifier.plot_decision_regions(X_test, test_preds, resolution=0.02)
 
 
 def regression(data_folder):
@@ -74,26 +76,26 @@ def regression(data_folder):
     X = data.loc[:, feature_names]
     y = data.loc[:, "Y"]
 
-    X_train, X_test, y_train, y_test = knn.test_train_split(X, y)
+    X_train, X_test, y_train, y_test = load_data.test_train_split(X, y)
+
+    # Create model
+    knn_regressor = knn.KNNRegress(X_train, X_test, y_train, y_test, feature_names, k=3)
 
     # Apply the knn regressor
-    knn_regressor, test_preds, train_accuracy, test_accuracy = knn.regress(
-        X_train, X_test, y_train, y_test, feature_names, k=3
-    )
+    test_preds, train_accuracy, test_accuracy = knn_regressor.regress()
 
     print(f"{Fore.LIGHTMAGENTA_EX}Training R2: {Fore.WHITE}", train_accuracy)
     print(f"{Fore.LIGHTMAGENTA_EX}Testing R2: {Fore.WHITE}", test_accuracy)
 
     # Plot the regression line
-    knn.plot_regression_line(X_test, test_preds, knn_regressor)
+    knn_regressor.plot_regression_line(test_preds)
 
 
 def main():
     current_folder = os.path.dirname(__file__)
     data_folder = os.path.join(current_folder, "data")
 
-    if False:
-        classification(data_folder)
+    # classification(data_folder)
 
     regression(data_folder)
 
