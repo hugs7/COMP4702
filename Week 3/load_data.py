@@ -46,7 +46,7 @@ def shuffle_data(data: DataFrame) -> DataFrame:
 
 
 def test_train_split(
-    X: DataFrame, y: DataFrame
+    X: DataFrame, y: DataFrame, ratio: float = 0.3
 ) -> tuple[DataFrame, DataFrame, DataFrame, DataFrame]:
     """
     Splits the data into training and testing data.
@@ -54,6 +54,7 @@ def test_train_split(
     Parameters:
     - X (DataFrame): The input features.
     - y (DataFrame): The target variable.
+    - ratio (float): The ratio of the testing data.
 
     Returns:
     - X_train (DataFrame): The training data features.
@@ -62,6 +63,6 @@ def test_train_split(
     - y_test (DataFrame): The testing data target variable.
     """
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio)
 
     return X_train, y_train, X_test, y_test
