@@ -25,7 +25,7 @@ def classification(data_folder):
     data = load_data.tag_data(data, ["X1", "X2", "Y"])
 
     # Show the data as scatterplot
-    scatterplot.scatterplot(data)
+    scatterplot.scatterplot_with_colour(data, "X1", "X2", "Y")
 
     # Randomise the data
     data_randomised = knn.shuffle_data(data)
@@ -64,6 +64,9 @@ def regression(data_folder):
     data = load_data.load_data(file_path)
 
     data = load_data.tag_data(data, ["X", "Y"])
+    print(f"{Fore.RED} Data Loaded {Fore.WHITE}")
+    # Plot the data
+    scatterplot.scatterplot_2d(data)
 
 
 def main():
