@@ -8,10 +8,10 @@ import os
 
 import load_data
 import scatterplot
+import knn
 
 
 def main():
-
     # Load the data
     current_folder = os.path.dirname(__file__)
     data_folder = "data"
@@ -23,6 +23,16 @@ def main():
 
     # Show the data as scatterplot
     scatterplot.scatterplot(data)
+
+    # Randomise the data
+    data_randomised = knn.shuffle_data(data)
+
+    # Split the data into training and testing data
+    X = data_randomised.loc[:, ["X1", "X2"]]
+    y = data_randomised.loc[:, "Y"]
+    ratio = 0.3
+
+    X_train, X_test, y_train, y_test = knn.test_train_split(X, y)
 
 
 if __name__ == "__main__":
