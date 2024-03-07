@@ -37,7 +37,7 @@ def main():
 
     # Apply the knn classifier
 
-    test_preds, train_accuracy, test_accuracy = knn.knn(
+    knn_classifier, test_preds, train_accuracy, test_accuracy = knn.knn(
         X_train, X_test, y_train, y_test, k=3
     )
 
@@ -46,6 +46,10 @@ def main():
     print("")
     print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.BLACK}", 1 - train_accuracy)
     print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.BLACK}", 1 - test_accuracy)
+
+    # Plot decision regions
+
+    knn.plot_decision_regions(X_test, test_preds, knn_classifier, resolution=0.02)
 
 
 if __name__ == "__main__":
