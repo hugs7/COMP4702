@@ -9,6 +9,7 @@ import os
 import load_data
 import scatterplot
 import knn
+from colorama import Fore
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
     data = load_data.tag_data(data)
 
     # Show the data as scatterplot
-    scatterplot.scatterplot(data)
+    # scatterplot.scatterplot(data)
 
     # Randomise the data
     data_randomised = knn.shuffle_data(data)
@@ -33,6 +34,18 @@ def main():
     ratio = 0.3
 
     X_train, X_test, y_train, y_test = knn.test_train_split(X, y)
+
+    # Apply the knn classifier
+
+    test_preds, train_accuracy, test_accuracy = knn.knn(
+        X_train, X_test, y_train, y_test, k=3
+    )
+
+    print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Fore.BLACK}", train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Fore.BLACK}", test_accuracy)
+    print("")
+    print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.BLACK}", 1 - train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.BLACK}", 1 - test_accuracy)
 
 
 if __name__ == "__main__":
