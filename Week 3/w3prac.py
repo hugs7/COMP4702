@@ -33,8 +33,9 @@ def process_classification_data(
 
     data = load_data.tag_data(data, ["X1", "X2", "Y"])
 
-    # Show the data as scatterplot
-    scatterplot.scatterplot_with_colour(data, "X1", "X2", "Y")
+    if show_scatterplot:
+        # Show the data as scatterplot
+        scatterplot.scatterplot_with_colour(data, "X1", "X2", "Y")
 
     # Randomise the data
     data_randomised = load_data.shuffle_data(data)
@@ -64,7 +65,7 @@ def knn_classify(data_folder):
     """
 
     data, X_train, y_train, X_test, y_test, feature_names = process_classification_data(
-        data_folder
+        data_folder, show_scatterplot=True
     )
 
     # Apply the knn classifier
@@ -77,8 +78,10 @@ def knn_classify(data_folder):
     print_classify_results(train_accuracy, test_accuracy)
 
     # Plot decision regions
-
-    knn_classifier.plot_decision_regions(X_test, test_preds, resolution=0.02)
+    knn_plot_title = f"k-NN decision regions (k = {knn_classifier.get_k()})"
+    knn_classifier.plot_decision_regions(
+        test_preds, resolution=0.02, plot_title=knn_plot_title
+    )
 
 
 def knn_regress(data_folder):
@@ -121,7 +124,7 @@ def decision_tree_classify(data_folder):
     """
 
     data, X_train, y_train, X_test, y_test, feature_names = process_classification_data(
-        data_folder
+        data_folder, show_scatterplot=False
     )
 
     # Create the decision tree classifier
@@ -139,7 +142,7 @@ def decision_tree_classify(data_folder):
 
 
 def decision_tree_regress(data_folder):
-    return 0
+    raise NotImplementedError("Decision tree regression is not implemented yet.")
 
 
 def print_invalid_task_type():
