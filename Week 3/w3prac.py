@@ -51,12 +51,39 @@ def process_classification_data(
     return data, X_train, y_train, X_test, y_test, feature_names
 
 
+def process_regression_data(
+    data_folder: str,
+) -> tuple[DataFrame, DataFrame, DataFrame, DataFrame, list[str]]:
+    file_path = os.path.join(data_folder, "w3regr.csv")
+
+    data = load_data.load_data(file_path)
+
+    data = load_data.tag_data(data, ["X", "Y"])
+
+    feature_names = ["X"]
+
+    X = data.loc[:, feature_names]
+    y = data.loc[:, "Y"]
+
+    X_train, X_test, y_train, y_test = load_data.test_train_split(X, y)
+
+    return data, X_train, y_train, X_test, y_test, feature_names
+
+
 def print_classify_results(train_accuracy: float, test_accuracy: float) -> None:
     print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Fore.WHITE}", train_accuracy)
     print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Fore.WHITE}", test_accuracy)
     print("")
     print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.WHITE}", 1 - train_accuracy)
     print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.WHITE}", 1 - test_accuracy)
+
+
+def print_regression_results(train_accuracy: float, test_accuracy: float) -> None:
+    print(f"{Fore.LIGHTMAGENTA_EX}Training R2: {Fore.WHITE}", train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing R2: {Fore.WHITE}", test_accuracy)
+    print("")
+    print(f"{Fore.LIGHTMAGENTA_EX}Training MSE: {Fore.WHITE}", 1 - train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing MSE: {Fore.WHITE}", 1 - test_accuracy)
 
 
 def knn_classify(data_folder):
@@ -86,24 +113,12 @@ def knn_classify(data_folder):
 
 def knn_regress(data_folder):
     """
-    Regression task
+    Regression task for knn model
     """
 
-    file_path = os.path.join(data_folder, "w3regr.csv")
-
-    data = load_data.load_data(file_path)
-
-    data = load_data.tag_data(data, ["X", "Y"])
-    print(f"{Fore.RED} Data Loaded {Fore.WHITE}")
-    # Plot the data
-    scatterplot.scatterplot_2d(data)
-
-    feature_names = ["X"]
-
-    X = data.loc[:, feature_names]
-    y = data.loc[:, "Y"]
-
-    X_train, X_test, y_train, y_test = load_data.test_train_split(X, y)
+    data, X_train, y_train, X_test, y_test, feature_names = process_regression_data(
+        data_folder
+    )
 
     # Create model
     knn_regressor = knn.KNNRegress(X_train, X_test, y_train, y_test, feature_names, k=3)
@@ -111,8 +126,7 @@ def knn_regress(data_folder):
     # Apply the knn regressor
     test_preds, train_accuracy, test_accuracy = knn_regressor.regress()
 
-    print(f"{Fore.LIGHTMAGENTA_EX}Training R2: {Fore.WHITE}", train_accuracy)
-    print(f"{Fore.LIGHTMAGENTA_EX}Testing R2: {Fore.WHITE}", test_accuracy)
+    print_regression_results(train_accuracy, test_accuracy)
 
     # Plot the regression line
     knn_regressor.plot_regression_line(test_preds)
@@ -129,7 +143,7 @@ def decision_tree_classify(data_folder):
 
     # Create the decision tree classifier
 
-    decision_tree_model = decision_tree.DecisionTree(
+    decision_tree_model = decision_tree.DTClassifier(
         X_train, y_train, X_test, y_test, feature_names
     )
 
@@ -142,7 +156,23 @@ def decision_tree_classify(data_folder):
 
 
 def decision_tree_regress(data_folder):
-    raise NotImplementedError("Decision tree regression is not implemented yet.")
+
+    data, X_train, y_train, X_test, y_test, feature_names = process_regression_data(
+        data_folder
+    )
+
+    # Create model
+    tree_regressor = decision_tree.DTRegressor(
+        X_train, X_test, y_train, y_test, feature_names
+    )
+
+    # Apply the knn regressor
+    test_preds, train_accuracy, test_accuracy = tree_regressor.regress()
+
+    print_regression_results(train_accuracy, test_accuracy)
+
+    # Plot the regression line
+    tree_regressor.plot_regression_line(test_preds)
 
 
 def print_invalid_task_type():
