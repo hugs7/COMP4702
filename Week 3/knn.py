@@ -6,7 +6,7 @@ Applies knn classifier to data
 from colorama import Fore
 from matplotlib.colors import ListedColormap
 import numpy as np
-from sklearn.model_selection import train_test_split
+
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 
 from sklearn.metrics import accuracy_score
@@ -15,235 +15,193 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from pandas import DataFrame
 
-
-def shuffle_data(data: DataFrame) -> DataFrame:
-    """
-    Shuffles the data randomly.
-
-    Parameters:
-    - data: A pandas DataFrame containing the data to be shuffled.
-
-    Returns:
-    - A new pandas DataFrame with the data shuffled randomly.
-    """
-
-    return data.sample(frac=1).reset_index(drop=True)
+from generic_classifier import Classifier
 
 
-def test_train_split(
-    X: DataFrame, y: DataFrame
-) -> tuple[DataFrame, DataFrame, DataFrame, DataFrame]:
-    """
-    Splits the data into training and testing data.
+class KNNClassify(Classifier):
+    def __init__(
+        self,
+        X_train: DataFrame,
+        y_train: DataFrame,
+        X_test: DataFrame,
+        y_test: DataFrame,
+        feature_names: list[str],
+        k: int = 3,
+    ):
+        super().__init__(X_train, X_test, y_train, y_test, feature_names, k)
 
-    Parameters:
-    - X (DataFrame): The input features.
-    - y (DataFrame): The target variable.
+        # Define Model
+        self.model = KNeighborsClassifier()
 
-    Returns:
-    - X_train (DataFrame): The training data features.
-    - X_test (DataFrame): The testing data features.
-    - y_train (DataFrame): The training data target variable.
-    - y_test (DataFrame): The testing data target variable.
-    """
+    def classify(
+        self,
+    ) -> tuple[np.ndarray, float, float]:
+        """
+        Performs k-nearest neighbors classification on the given training and test data.
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+        Returns:
+            tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
+        """
 
-    return X_train, X_test, y_train, y_test
+        self.model = KNeighborsClassifier(n_neighbors=self.k)
 
+        print(
+            f"{Fore.RED}X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}{Fore.WHITE}"
+        )
 
-def classify(
-    X_train: DataFrame,
-    X_test: DataFrame,
-    y_train: DataFrame,
-    y_test: DataFrame,
-    feature_names: list[str],
-    k: int = 3,
-) -> tuple[KNeighborsClassifier, np.ndarray, float, float]:
-    """
-    Performs k-nearest neighbors classification on the given training and test data.
+        X_train_df = pd.DataFrame(self.X_train, columns=self.feature_names)
+        X_test_df = pd.DataFrame(self.X_test, columns=self.feature_names)
 
-    Parameters:
-        X_train (DataFrame): The feature matrix of the training data.
-        y_train (DataFrame): The target values of the training data.
-        X_test (DataFrame): The feature matrix of the test data.
-        y_test (DataFrame): The target values of the test data.
-        k (int, optional): The number of neighbors to consider. Defaults to 3.
+        self.model.fit(X_train_df, self.y_train)
 
-    Returns:
-        tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
-    """
+        # Get results
+        train_accuracy = self.model.score(self.X_train, self.y_train)
 
-    model = KNeighborsClassifier(n_neighbors=k)
+        test_predictions = self.model.predict(self.X_test)
+        test_accuracy = accuracy_score(self.y_test, test_predictions)
 
-    print(
-        f"{Fore.RED}X_train dim: {X_train.shape}, y_train dim: {y_train.shape}{Fore.WHITE}"
-    )
+        return test_predictions, train_accuracy, test_accuracy
 
-    X_train_df = pd.DataFrame(X_train, columns=feature_names)
-    X_test_df = pd.DataFrame(X_test, columns=feature_names)
+    def plot_decision_regions(
+        self,
+        X_test: DataFrame,
+        test_preds: np.ndarray,
+        resolution=0.02,
+    ) -> None:
+        """
+        Plots the decision regions for a classifier.
 
-    model.fit(X_train_df, y_train)
+        Parameters:
+        - X_test (DataFrame): The input data used for testing the classifier.
+        - test_preds (ndarray): The predicted labels for the test data.
+        - resolution (float): The step size of the mesh grid used for plotting the decision regions. Default is 0.02.
 
-    # Get results
-    train_accuracy = model.score(X_train, y_train)
+        Returns:
+        - None
 
-    test_predictions = model.predict(X_test)
-    test_accuracy = accuracy_score(y_test, test_predictions)
+        This function plots the decision regions for a classifier by creating a mesh grid based on the input data and
+        classifying each point in the grid. The decision regions are then visualized using a contour plot.
 
-    return model, test_predictions, train_accuracy, test_accuracy
+        Note:
+        - The input data should have exactly two features for proper visualization.
+        - The classifier should have a `predict` method that takes a feature matrix as input and returns the predicted labels.
+        """
 
+        X1_test = X_test.iloc[:, 0]
+        X2_test = X_test.iloc[:, 1]
 
-def regress(
-    X_train: DataFrame,
-    X_test: DataFrame,
-    y_train: DataFrame,
-    y_test: DataFrame,
-    feature_names: list[str],
-    k: int = 3,
-) -> tuple[KNeighborsRegressor, np.ndarray, float, float]:
-    """
-    Performs k-nearest neighbors regression on the given training and test data.
+        print(X1_test.shape)
+        print(X2_test.shape)
 
-    Parameters:
-        X_train (DataFrame): The feature matrix of the training data.
-        y_train (DataFrame): The target values of the training data.
-        X_test (DataFrame): The feature matrix of the test data.
-        y_test (DataFrame): The target values of the test data.
-        k (int, optional): The number of neighbors to consider. Defaults to 3.
+        # Print the range of your input features
+        print("X1 Range:", X1_test.min(), "-", X1_test.max())
+        print("X2 Range:", X2_test.min(), "-", X2_test.max())
 
-    Returns:
-        tuple[KNeighborsRegressor, np.ndarray, float, float]: A tuple containing the knn regressor, test predictions, train accuracy, and test accuracy.
-    """
+        # Generate a meshgrid of points to cover the feature space
+        x_min, x_max = X1_test.min() - 0.5, X1_test.max() + 0.5
+        y_min, y_max = X2_test.min() - 0.5, X2_test.max() + 0.5
 
-    model = KNeighborsRegressor(n_neighbors=k)
+        print(x_min, x_max, y_min, y_max)
 
-    print(
-        f"{Fore.RED}X_train dim: {X_train.shape}, y_train dim: {y_train.shape}{Fore.WHITE}"
-    )
+        xx, yy = np.meshgrid(
+            np.arange(x_min, x_max, resolution), np.arange(y_min, y_max, resolution)
+        )
 
-    X_train_df = pd.DataFrame(X_train, columns=feature_names)
-    X_test_df = pd.DataFrame(X_test, columns=feature_names)
+        print(xx.shape, "|", yy.shape)
 
-    model.fit(X_train_df, y_train)
+        feature_names = ["X1", "X2"]
+        Z = pd.DataFrame(np.c_[xx.ravel(), yy.ravel()], columns=feature_names)
 
-    # Get results
-    train_accuracy = model.score(X_train, y_train)
+        Z_preds = self.model.predict(Z)
 
-    test_predictions = model.predict(X_test)
-    test_accuracy = model.score(X_test, y_test)
+        print("Before reshape Z_pred:", Z_preds.shape)
 
-    return model, test_predictions, train_accuracy, test_accuracy
+        Z_preds = Z_preds.reshape(xx.shape)
 
+        print(Z_preds.shape)
 
-def plot_decision_regions(
-    X_test: DataFrame,
-    test_preds: np.ndarray,
-    classifier: KNeighborsClassifier,
-    resolution=0.02,
-) -> None:
-    """
-    Plots the decision regions for a classifier.
+        # Plot the decision boundary
+        cmap_light = ListedColormap(["#FFAAAA", "#AAFFAA", "#AAAAFF"])
+        plt.pcolormesh(xx, yy, Z_preds, cmap=cmap_light, shading="auto")
 
-    Parameters:
-    - X_test (DataFrame): The input data used for testing the classifier.
-    - test_preds (ndarray): The predicted labels for the test data.
-    - classifier: The trained knn classifier object.
-    - resolution (float): The step size of the mesh grid used for plotting the decision regions. Default is 0.02.
+        # Overlay the test points
+        cmap_bold = ListedColormap(["#FF0000", "#00FF00"])
+        plt.scatter(X1_test, X2_test, c=test_preds, cmap=cmap_bold)
 
-    Returns:
-    - None
-
-    This function plots the decision regions for a classifier by creating a mesh grid based on the input data and
-    classifying each point in the grid. The decision regions are then visualized using a contour plot.
-
-    Note:
-    - The input data should have exactly two features for proper visualization.
-    - The classifier should have a `predict` method that takes a feature matrix as input and returns the predicted labels.
-
-    Example usage:
-    X_test = ...
-    test_preds = ...
-    classifier = ...
-    plot_decision_regions(X_test, test_preds, classifier)
-    """
-
-    k: int = classifier.n_neighbors
-
-    X1_test = X_test.iloc[:, 0]
-    X2_test = X_test.iloc[:, 1]
-
-    print(X1_test.shape)
-    print(X2_test.shape)
-
-    # Print the range of your input features
-    print("X1 Range:", X1_test.min(), "-", X1_test.max())
-    print("X2 Range:", X2_test.min(), "-", X2_test.max())
-
-    # Generate a meshgrid of points to cover the feature space
-    x_min, x_max = X1_test.min() - 0.5, X1_test.max() + 0.5
-    y_min, y_max = X2_test.min() - 0.5, X2_test.max() + 0.5
-    print(x_min, x_max, y_min, y_max)
-    xx, yy = np.meshgrid(
-        np.arange(x_min, x_max, resolution), np.arange(y_min, y_max, resolution)
-    )
-
-    print(xx.shape, "|", yy.shape)
-
-    feature_names = ["X1", "X2"]
-    Z = pd.DataFrame(np.c_[xx.ravel(), yy.ravel()], columns=feature_names)
-
-    Z_preds = classifier.predict(Z)
-    print("Before reshape Z_pred:", Z_preds.shape)
-    Z_preds = Z_preds.reshape(xx.shape)
-    print(Z_preds.shape)
-
-    # Plot the decision boundary
-    cmap_light = ListedColormap(["#FFAAAA", "#AAFFAA", "#AAAAFF"])
-    plt.pcolormesh(xx, yy, Z_preds, cmap=cmap_light, shading="auto")
-
-    # Overlay the test points
-    cmap_bold = ListedColormap(["#FF0000", "#00FF00"])
-    plt.scatter(X1_test, X2_test, c=test_preds, cmap=cmap_bold)
-
-    # Setup plot
-    plt.xlim(xx.min(), xx.max())
-    plt.ylim(yy.min(), yy.max())
-    plt.xlabel("X1")
-    plt.ylabel("X2")
-    plt.title("k-NN decision regions (k = %d)" % k)
-    plt.show()
+        # Setup plot
+        plt.xlim(xx.min(), xx.max())
+        plt.ylim(yy.min(), yy.max())
+        plt.xlabel("X1")
+        plt.ylabel("X2")
+        plt.title("k-NN decision regions (k = %d)" % self.k)
+        plt.show()
 
 
-def plot_regression_line(X_test: DataFrame, test_preds: np.ndarray, regressor) -> None:
-    """
-    Plots the regression line for a k-nearest neighbors regressor.
+class KNNRegress(Classifier):
+    def __init__(
+        self,
+        X_train: DataFrame,
+        y_train: DataFrame,
+        X_test: DataFrame,
+        y_test: DataFrame,
+        feature_names: list[str],
+        k: int = 3,
+    ):
+        super().__init__(X_train, X_test, y_train, y_test, feature_names, k)
 
-    Parameters:
-    - X_test (DataFrame): The input data used for testing the regressor.
-    - test_preds (ndarray): The predicted target values for the test data.
-    - regressor: The trained knn regressor object.
+        # Define Model
+        self.model = KNeighborsRegressor()
 
-    Returns:
-    - None
+    def regress(
+        self,
+    ) -> tuple[np.ndarray, float, float]:
+        """
+        Performs k-nearest neighbors regression on the given training and test data.
 
-    This function plots the regression line for a k-nearest neighbors regressor by plotting the test data points
-    and the predicted values on the same graph.
+        Returns:
+            tuple[KNeighborsRegressor, np.ndarray, float, float]: A tuple containing the knn regressor, test predictions, train accuracy, and test accuracy.
+        """
 
-    Note:
-    - The input data should have exactly one feature for proper visualization.
-    - The regressor should have a `predict` method that takes a feature matrix as input and returns the predicted target values.
+        self.model = KNeighborsRegressor(n_neighbors=self.get_k())
 
-    Example usage:
-    X_test = ...
-    test_preds = ...
-    regressor = ...
-    plot_regression_line(X_test, test_preds, regressor)
-    """
+        print(
+            f"{Fore.RED}X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}{Fore.WHITE}"
+        )
 
-    plt.scatter(X_test, test_preds, color="blue")
-    plt.plot(X_test, regressor.predict(X_test), color="red")
-    plt.title("k-NN Regression Line")
-    plt.xlabel("X")
-    plt.ylabel("Y")
-    plt.show()
+        X_train_df = pd.DataFrame(self.X_train, columns=self.feature_names)
+        X_test_df = pd.DataFrame(self.X_test, columns=self.feature_names)
+
+        self.model.fit(X_train_df, self.y_train)
+
+        # Get results
+        train_accuracy = self.model.score(self.X_train, self.y_train)
+
+        test_predictions = self.model.predict(self.X_test)
+        test_accuracy = self.model.score(self.X_test, self.y_test)
+
+        return test_predictions, train_accuracy, test_accuracy
+
+    def plot_regression_line(self, test_preds: np.ndarray) -> None:
+        """
+        Plots the regression line for a k-nearest neighbors regressor.
+
+        Parameters:
+        - test_preds (ndarray): The predicted target values for the test data.
+
+        Returns:
+        - None
+
+        This function plots the regression line for a k-nearest neighbors regressor by plotting the test data points
+        and the predicted values on the same graph.
+
+        Note:
+        - The input data should have exactly one feature for proper visualization.
+        - The regressor should have a `predict` method that takes a feature matrix as input and returns the predicted target values.
+        """
+
+        plt.scatter(self.X_test, test_preds, color="blue")
+        # plt.plot(self.X_test, self.model.predict(self.X_test), color="red")
+        plt.title("k-NN Regression Line")
+        plt.xlabel("X")
+        plt.ylabel("Y")
+        plt.show()
