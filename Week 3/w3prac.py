@@ -138,7 +138,7 @@ def decision_tree_classify(data_folder):
     print_classify_results(train_accuracy, test_accuracy)
 
     # Plot decision tree regions
-    decision_tree_model.plot_decision_regions(X_test, test_preds, resolution=0.02)
+    decision_tree_model.plot_decision_regions(test_preds, resolution=0.02)
 
 
 def decision_tree_regress(data_folder):
