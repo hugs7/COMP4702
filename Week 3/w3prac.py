@@ -13,6 +13,14 @@ import load_data
 import scatterplot
 import knn
 import decision_tree
+import sys
+
+
+CLASSIFY = "classify"
+REGRESS = "regress"
+
+KNN = "knn"
+TREE = "tree"
 
 
 def process_classification_data(
@@ -134,17 +142,40 @@ def decision_tree_regress(data_folder):
     return 0
 
 
+def print_invalid_task_type():
+    print(f"Invalid task type. Please choose '{CLASSIFY}' or '{REGRESS}'.")
+    sys.exit(1)
+
+
 def main():
     current_folder = os.path.dirname(__file__)
     data_folder = os.path.join(current_folder, "data")
 
-    knn_classify(data_folder)
+    if len(sys.argv) != 3:
+        msg = "Usage: python w3prac.py <classifier> <type>"
+        print(msg)
+        sys.exit(1)
 
-    knn_regress(data_folder)
+    classifier = sys.argv[1]
+    task_type = sys.argv[2]
 
-    decision_tree_classify(data_folder)
-
-    decision_tree_regress(data_folder)
+    if classifier == KNN:
+        if task_type == "classify":
+            knn_classify(data_folder)
+        elif task_type == "regress":
+            knn_regress(data_folder)
+        else:
+            print_invalid_task_type()
+    elif classifier == "tree":
+        if task_type == "classify":
+            decision_tree_classify(data_folder)
+        elif task_type == "regress":
+            decision_tree_regress(data_folder)
+        else:
+            print_invalid_task_type()
+    else:
+        print(f"Invalid classifier. Please choose '{KNN}' or '{TREE}'.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
