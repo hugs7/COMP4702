@@ -160,16 +160,16 @@ def main():
     task_type = sys.argv[2]
 
     if classifier == KNN:
-        if task_type == "classify":
+        if task_type == CLASSIFY:
             knn_classify(data_folder)
-        elif task_type == "regress":
+        elif task_type == REGRESS:
             knn_regress(data_folder)
         else:
             print_invalid_task_type()
-    elif classifier == "tree":
-        if task_type == "classify":
+    elif classifier == TREE:
+        if task_type == CLASSIFY:
             decision_tree_classify(data_folder)
-        elif task_type == "regress":
+        elif task_type == REGRESS:
             decision_tree_regress(data_folder)
         else:
             print_invalid_task_type()
