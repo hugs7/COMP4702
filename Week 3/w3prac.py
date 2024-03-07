@@ -12,18 +12,20 @@ import knn
 from colorama import Fore
 
 
-def main():
+def classification(data_folder):
+    """
+    Classification task
+    """
+
     # Load the data
-    current_folder = os.path.dirname(__file__)
-    data_folder = "data"
-    file_path = os.path.join(current_folder, data_folder, "w3classif.csv")
+    file_path = os.path.join(data_folder, "w3classif.csv")
 
     data = load_data.load_data(file_path)
 
-    data = load_data.tag_data(data)
+    data = load_data.tag_data(data, ["X1", "X2", "Y"])
 
     # Show the data as scatterplot
-    # scatterplot.scatterplot(data)
+    scatterplot.scatterplot(data)
 
     # Randomise the data
     data_randomised = knn.shuffle_data(data)
@@ -50,6 +52,27 @@ def main():
     # Plot decision regions
 
     knn.plot_decision_regions(X_test, test_preds, knn_classifier, resolution=0.02)
+
+
+def regression(data_folder):
+    """
+    Regression task
+    """
+
+    file_path = os.path.join(data_folder, "w3regr.csv")
+
+    data = load_data.load_data(file_path)
+
+    data = load_data.tag_data(data, ["X", "Y"])
+
+
+def main():
+    current_folder = os.path.dirname(__file__)
+    data_folder = os.path.join(current_folder, "data")
+
+    # classification(data_folder)
+
+    regression(data_folder)
 
 
 if __name__ == "__main__":

@@ -20,11 +20,11 @@ def load_data(file_path: str) -> pd.DataFrame:
     return df
 
 
-def tag_data(data: DataFrame) -> DataFrame:
+def tag_data(data: DataFrame, cols: list[str]) -> DataFrame:
     """
     Tags the data as first column X, second column Y and third column class
     """
 
-    data.columns = ["X1", "X2", "Y"]
+    data.columns = cols
 
     return data
