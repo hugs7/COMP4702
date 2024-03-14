@@ -20,7 +20,7 @@ def q1():
     plt.plot(domain, f(domain))
     plt.xlabel("x")
     plt.ylabel("f(x)")
-    # plt.show()
+    plt.show()
 
     # Part B
 
@@ -60,6 +60,9 @@ def q1():
     # Part D - Polynomial Regression
 
     errors = {}
+
+    # Clear the previous plot
+    plt.clf()
 
     for degree in range(2, 8):
         polynomial_model = PolynomialRegressionModel(
