@@ -34,8 +34,18 @@ def q2(data_folder: str):
     linear_model.fit()
 
     # Part C - Get the coefficients
-    print(f"{Fore.LIGHTCYAN_EX}Coefficients:{Fore.WHITE}{linear_model.model.coef_}")
-    print(f"{Fore.LIGHTCYAN_EX}Intercept:{Fore.WHITE}{linear_model.model.intercept_}")
+    coefs = linear_model.model.coef_
+    intercept = linear_model.model.intercept_
+    print(f"{Fore.LIGHTCYAN_EX}Coefficients:{Fore.WHITE}{coefs}")
+    print(f"{Fore.LIGHTCYAN_EX}Intercept:{Fore.WHITE}{intercept}")
     print(
         f"{Fore.LIGHTCYAN_EX}R^2:{Fore.WHITE}{linear_model.model.score(features, target)}"
     )
+
+    # Part D - Variable Importance
+    # Using absolute value of coefficients as importance
+    coefs_dict = {(i, c) for i, c in enumerate(coefs)}
+    coefs_dict = sorted(coefs_dict, key=lambda x: abs(x[1]), reverse=True)
+    print(f"{Fore.LIGHTCYAN_EX}Variable Importance:{Fore.WHITE}")
+    for i, c in coefs_dict:
+        print(f"    {Fore.LIGHTMAGENTA_EX}{features.columns[i]:>10}:{Fore.WHITE} {c}")
