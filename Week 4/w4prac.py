@@ -4,6 +4,7 @@ Week 4 Prac Main file
 
 import matplotlib.pyplot as plt
 import numpy as np
+from linear import LinearRegressionModel
 
 
 def generate_training_point(f: callable, noise: float = 0.2) -> float:
@@ -51,6 +52,25 @@ def q1():
     plt.show()
 
     # Part C
+
+    # Extract x and y values from the training set
+    x_train, y_train = zip(*train_set)
+    # Convert to numpy arrays
+    x_train = np.array(x_train).reshape(-1, 1)
+    y_train = np.array(y_train).reshape(-1, 1)
+
+    # Perform linear regression on the training set
+    linear_model = LinearRegressionModel(x_train, y_train)
+
+    linear_model.fit()
+
+    # Perform testing on the same training set to get SSE
+    predictions = linear_model.predict(x_train)
+    mse = linear_model.mean_squared_error(y_train)
+
+    print("Mean Squared Error:", mse)
+
+    # Part D
 
 
 def q2():
