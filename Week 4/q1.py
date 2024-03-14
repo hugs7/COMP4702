@@ -20,7 +20,7 @@ def q1():
     plt.plot(domain, f(domain))
     plt.xlabel("x")
     plt.ylabel("f(x)")
-    plt.show()
+    # plt.show()
 
     # Part B
 
