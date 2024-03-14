@@ -5,6 +5,7 @@ Week 4 Prac Main file
 import matplotlib.pyplot as plt
 import numpy as np
 from linear import LinearRegressionModel
+from polynomial import PolynomialRegressionModel
 
 
 def generate_training_point(f: callable, noise: float = 0.2) -> float:
@@ -51,7 +52,7 @@ def q1():
 
     plt.show()
 
-    # Part C
+    # Part C - Linear Regression
 
     # Extract x and y values from the training set
     x_train, y_train = zip(*train_set)
@@ -70,7 +71,17 @@ def q1():
 
     print("Mean Squared Error:", mse)
 
-    # Part D
+    # Part D - Polynomial Regression
+
+    polynomial_model = PolynomialRegressionModel(
+        x_train, y_train, x_train, y_train, ["x"], degree=3
+    )
+
+    polynomial_model.fit()
+
+    # Perform testing on the same training set to get SSE
+    predictions = polynomial_model.predict(x_train)
+    mse = polynomial_model.mean_squared_error(y_train)
 
 
 def q2():
