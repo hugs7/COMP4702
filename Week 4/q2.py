@@ -3,6 +3,7 @@ Defined the function for question 2
 """
 
 import os
+from colorama import Fore, Style
 
 from load_data import load_and_process_data
 from linear import LinearRegressionModel
@@ -33,6 +34,8 @@ def q2(data_folder: str):
     linear_model.fit()
 
     # Part C - Get the coefficients
-    print("Coefficients:", linear_model.model.coef_)
-    print("Intercept:", linear_model.model.intercept_)
-    print("R^2:", linear_model.model.score(features, target))
+    print(f"{Fore.LIGHTCYAN_EX}Coefficients:{Fore.WHITE}{linear_model.model.coef_}")
+    print(f"{Fore.LIGHTCYAN_EX}Intercept:{Fore.WHITE}{linear_model.model.intercept_}")
+    print(
+        f"{Fore.LIGHTCYAN_EX}R^2:{Fore.WHITE}{linear_model.model.score(features, target)}"
+    )
