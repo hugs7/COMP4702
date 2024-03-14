@@ -35,7 +35,7 @@ def load_and_process_data(data_file: str, replace_null: bool = False) -> pd.Data
 
     # Load Data
     print(f"{Fore.LIGHTBLUE_EX}Loading Data{Style.RESET_ALL}")
-    data = load_data.load_data(data_file)
+    data = load_data(data_file)
     print(f"Data loaded from {data_file}")
 
     if replace_null:
