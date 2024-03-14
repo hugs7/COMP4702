@@ -8,6 +8,7 @@ from colorama import Fore, Style
 from load_data import load_and_process_data
 from linear import LinearRegressionModel
 from sklearn.preprocessing import StandardScaler
+import pandas as pd
 
 
 def print_coefficients(coefs, intercept, linear_model, features, target):
@@ -41,6 +42,7 @@ def fit_model_and_print_results(features, target, feature_names):
 
     # Variable Importance
     # Using absolute value of coefficients as importance
+    print("Coefficients", coefs)
     variable_importance(coefs, feature_names)
 
 
@@ -68,6 +70,11 @@ def q2(data_folder: str):
     scaler = StandardScaler()
     features_scaled = scaler.fit_transform(features)
     target_scaled = scaler.fit_transform(target.values.reshape(-1, 1))
+    # Convert back to dataframe
+    features_scaled = pd.DataFrame(features_scaled, columns=features.columns)
+
+    # Convert target to series
+    target_scaled = pd.Series(target_scaled.flatten())
 
     # Fit the model again
     print(f"{Fore.RED}Fitting model with normalised data{Fore.WHITE}")
