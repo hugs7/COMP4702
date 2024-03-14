@@ -73,15 +73,25 @@ def q1():
 
     # Part D - Polynomial Regression
 
-    polynomial_model = PolynomialRegressionModel(
-        x_train, y_train, x_train, y_train, ["x"], degree=3
-    )
+    errors = {}
 
-    polynomial_model.fit()
+    for degree in range(2, 8):
+        polynomial_model = PolynomialRegressionModel(
+            x_train, y_train, x_train, y_train, ["x"], degree=degree
+        )
 
-    # Perform testing on the same training set to get SSE
-    predictions = polynomial_model.predict(x_train)
-    mse = polynomial_model.mean_squared_error(y_train)
+        polynomial_model.fit()
+
+        # Perform testing on the same training set to get SSE
+        predictions = polynomial_model.predict(x_train)
+        mse = polynomial_model.mean_squared_error(y_train)
+        errors[degree] = mse
+
+    # Plot the error for each degree
+    plt.plot(errors.keys(), errors.values())
+    plt.xlabel("Degree")
+    plt.ylabel("Mean Squared Error")
+    plt.show()
 
 
 def q2():
