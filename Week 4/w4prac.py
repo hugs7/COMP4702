@@ -60,7 +60,7 @@ def q1():
     y_train = np.array(y_train).reshape(-1, 1)
 
     # Perform linear regression on the training set
-    linear_model = LinearRegressionModel(x_train, y_train)
+    linear_model = LinearRegressionModel(x_train, y_train, x_train, y_train, ["x"])
 
     linear_model.fit()
 
