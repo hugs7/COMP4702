@@ -11,12 +11,10 @@ from sklearn.preprocessing import StandardScaler
 import pandas as pd
 
 
-def print_coefficients(coefs, intercept, linear_model, features, target):
+def print_coefficients(coefs, intercept, model, features, target):
     print(f"{Fore.LIGHTCYAN_EX}Coefficients:{Fore.WHITE}{coefs}")
     print(f"{Fore.LIGHTCYAN_EX}Intercept:{Fore.WHITE}{intercept}")
-    print(
-        f"{Fore.LIGHTCYAN_EX}R^2:{Fore.WHITE}{linear_model.model.score(features, target)}"
-    )
+    print(f"{Fore.LIGHTCYAN_EX}R^2:{Fore.WHITE}{model.model.score(features, target)}")
 
 
 def variable_importance(coefs, feature_names):
