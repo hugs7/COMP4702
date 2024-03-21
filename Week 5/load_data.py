@@ -5,6 +5,8 @@ Helper file to load data using pandas
 import pandas as pd
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
+import os
+from typing import Union
 
 
 def load_data(file_path: str) -> pd.DataFrame:
@@ -66,3 +68,16 @@ def test_train_split(
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio)
 
     return X_train, y_train, X_test, y_test
+
+
+def process_classification_data(
+    data_folder,
+) -> Union[DataFrame, DataFrame, DataFrame, DataFrame, DataFrame, list[str]]:
+    # Load the data
+    file_path = os.path.join(data_folder, "w3classif.csv")
+
+    data = load_data(file_path)
+
+    data = tag_data(data, ["X1", "X2", "Y"])
+
+    return data

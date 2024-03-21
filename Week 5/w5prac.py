@@ -5,73 +5,15 @@ Main file for the Week 5 Practical class
 from typing import Dict, Union
 from pandas import DataFrame
 import os
+from colorama import Fore, Style
 
 import load_data
-
-from colorama import Fore, Style
+import stats
+import knn_helper
+from print_helper import print_question_header
 
 current_folder = os.path.dirname(__file__)
 parent_folder = os.path.dirname(current_folder)
-import knn
-
-
-def print_question_header(question_num: int) -> None:
-    print(f"{Fore.LIGHTYELLOW_EX}Question {question_num}:{Style.RESET_ALL}")
-
-
-def process_classification_data(
-    data_folder,
-) -> Union[DataFrame, DataFrame, DataFrame, DataFrame, DataFrame, list[str]]:
-    # Load the data
-    file_path = os.path.join(data_folder, "w3classif.csv")
-
-    data = load_data.load_data(file_path)
-
-    data = load_data.tag_data(data, ["X1", "X2", "Y"])
-
-    return data
-
-
-def print_classify_results(
-    train_accuracy: float, test_accuracy: float, show_mcr: bool
-) -> None:
-    print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Style.RESET_ALL}", train_accuracy)
-    print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Style.RESET_ALL}", test_accuracy)
-
-    if show_mcr:
-        print("")
-        print(
-            f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Style.RESET_ALL}", 1 - train_accuracy
-        )
-        print(
-            f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Style.RESET_ALL}", 1 - test_accuracy
-        )
-
-
-def knn_classify(
-    X_train, y_train, X_test, y_test, feature_names, plot: bool = False
-) -> tuple[float, float]:
-    """
-    Classification task using knn
-    """
-
-    # Apply the knn classifier
-    knn_classifier = knn.KNNClassify(
-        X_train, y_train, X_test, y_test, feature_names, k=3
-    )
-
-    test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
-
-    print_classify_results(train_accuracy, test_accuracy, False)
-
-    if plot:
-        # Plot decision regions
-        knn_plot_title = f"k-NN decision regions (k = {knn_classifier.get_k()})"
-        knn_classifier.plot_decision_regions(
-            test_preds, resolution=0.02, plot_title=knn_plot_title
-        )
-
-    return train_accuracy, test_accuracy
 
 
 def q1(data_folder: str, split_ratio: float = 0.3, print_header: bool = True):
@@ -81,7 +23,7 @@ def q1(data_folder: str, split_ratio: float = 0.3, print_header: bool = True):
     if print_header:
         print_question_header(1)
 
-    classif_data = process_classification_data(data_folder)
+    classif_data = load_data.process_classification_data(data_folder)
 
     train_test_sets = {}
 
@@ -128,7 +70,7 @@ def q2(
         X_train, y_train, X_test, y_test, feature_names = data
 
         # Train the model
-        train_accuracy, test_accuracy = knn_classify(
+        train_accuracy, test_accuracy = knn_helper.knn_classify(
             X_train,
             y_train,
             X_test,
@@ -162,28 +104,6 @@ def q3(data_folder: str) -> tuple[list[float], list[float]]:
     return train_accuracies, test_accuracies
 
 
-def sample_mean(data: list[float]) -> float:
-    """
-    Calculate the sample mean of a list of numbers
-    """
-
-    return sum(data) / len(data)
-
-
-def sample_standard_deviation(data: list[float]) -> float:
-    """
-    Calculate the sample standard deviation of a list of numbers
-    """
-
-    n = len(data)
-
-    mean = sum(data) / n
-
-    variance = sum((x - mean) ** 2 for x in data) / (n - 1)
-
-    return variance**0.5
-
-
 def q4(
     train_accuracies_q2, test_accuracies_q2, train_accuracies_q3, test_accuracies_q3
 ):
@@ -196,13 +116,15 @@ def q4(
 
     # Question 2
 
-    q2_train_accuracies_sample_mean = sample_mean(train_accuracies_q2)
-    q2_train_accuracies_sample_std = sample_standard_deviation(train_accuracies_q2)
+    q2_train_accuracies_sample_mean = stats.sample_mean(train_accuracies_q2)
+    q2_train_accuracies_sample_std = stats.sample_standard_deviation(
+        train_accuracies_q2
+    )
 
     # Question 3
 
-    q3_test_accuracies_sample_mean = sample_mean(test_accuracies_q3)
-    q3_test_accuracies_sample_std = sample_standard_deviation(test_accuracies_q3)
+    q3_test_accuracies_sample_mean = stats.sample_mean(test_accuracies_q3)
+    q3_test_accuracies_sample_std = stats.sample_standard_deviation(test_accuracies_q3)
 
     print(
         f"{Fore.LIGHTCYAN_EX}Sample mean of training accuracies from Q2: {Style.RESET_ALL}",
@@ -221,6 +143,14 @@ def q4(
         f"{Fore.LIGHTCYAN_EX}Sample standard deviation of test accuracies from Q3: {Style.RESET_ALL}",
         q3_test_accuracies_sample_std,
     )
+
+
+def q5():
+    """
+    Perform 10-fold cross validation using your model and the (original) dataset (use existing
+    Matlab or python functions to do this). What are the mean and standard devations of the
+    cross-validation error?
+    """
 
 
 def main():
