@@ -10,7 +10,11 @@ from colorama import Fore, Style
 import load_data
 import stats
 import knn_helper
-from print_helper import print_question_header
+from print_helper import (
+    print_question_header,
+    print_sample_mean,
+    print_sample_standard_deviation,
+)
 
 current_folder = os.path.dirname(__file__)
 parent_folder = os.path.dirname(current_folder)
@@ -121,28 +125,37 @@ def q4(
         train_accuracies_q2
     )
 
+    q2_test_accuracies_sample_mean = stats.sample_mean(test_accuracies_q2)
+    q2_test_accuracies_sample_std = stats.sample_standard_deviation(test_accuracies_q2)
+
     # Question 3
+
+    q3_train_accuracies_sample_mean = stats.sample_mean(train_accuracies_q3)
+    q3_train_accuracies_sample_std = stats.sample_standard_deviation(
+        train_accuracies_q3
+    )
 
     q3_test_accuracies_sample_mean = stats.sample_mean(test_accuracies_q3)
     q3_test_accuracies_sample_std = stats.sample_standard_deviation(test_accuracies_q3)
 
-    print(
-        f"{Fore.LIGHTCYAN_EX}Sample mean of training accuracies from Q2: {Style.RESET_ALL}",
-        q2_train_accuracies_sample_mean,
-    )
-    print(
-        f"{Fore.LIGHTCYAN_EX}Sample standard deviation of training accuracies from Q2: {Style.RESET_ALL}",
-        q2_train_accuracies_sample_std,
-    )
+    # Print
+    print(f"{Fore.LIGHTGREEN_EX}Question 2:{Style.RESET_ALL}")
+    print("Train Accuracies:")
+    print_sample_mean(2, q2_train_accuracies_sample_mean)
+    print_sample_standard_deviation(2, q2_train_accuracies_sample_std)
 
-    print(
-        f"{Fore.LIGHTCYAN_EX}Sample mean of test accuracies from Q3: {Style.RESET_ALL}",
-        q3_test_accuracies_sample_mean,
-    )
-    print(
-        f"{Fore.LIGHTCYAN_EX}Sample standard deviation of test accuracies from Q3: {Style.RESET_ALL}",
-        q3_test_accuracies_sample_std,
-    )
+    print("Test Accuracies:")
+    print_sample_mean(2, q2_test_accuracies_sample_mean)
+    print_sample_standard_deviation(2, q2_test_accuracies_sample_std)
+
+    print(f"{Fore.LIGHTGREEN_EX}Question 3:{Style.RESET_ALL}")
+    print("Train Accuracies:")
+    print_sample_mean(3, q3_train_accuracies_sample_mean)
+    print_sample_standard_deviation(3, q3_train_accuracies_sample_std)
+
+    print("Test Accuracies:")
+    print_sample_mean(3, q3_test_accuracies_sample_mean)
+    print_sample_standard_deviation(3, q3_test_accuracies_sample_std)
 
 
 def q5():
