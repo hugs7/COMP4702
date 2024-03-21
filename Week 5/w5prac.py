@@ -22,8 +22,7 @@ def process_classification_data(
     return data
 
 
-def q1():
-    data_folder = "data"
+def q1(data_folder: str):
     classif_data = process_classification_data(data_folder)
 
     train_test_sets = {}
@@ -48,8 +47,11 @@ def q1():
 
 
 def main():
+    current_folder = os.path.dirname(__file__)
+    data_folder = os.path.join(current_folder, "data")
+
     # Question 1
-    q1()
+    q1(data_folder)
 
 
 if __name__ == "__main__":
