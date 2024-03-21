@@ -8,11 +8,15 @@ import os
 
 import load_data
 
-from colorama import Fore
+from colorama import Fore, Style
 
 current_folder = os.path.dirname(__file__)
 parent_folder = os.path.dirname(current_folder)
 import knn
+
+
+def print_question_header(question_num: int) -> None:
+    print(f"{Fore.LIGHTYELLOW_EX}Question {question_num}:{Style.RESET_ALL}")
 
 
 def process_classification_data(
@@ -31,13 +35,17 @@ def process_classification_data(
 def print_classify_results(
     train_accuracy: float, test_accuracy: float, show_mcr: bool
 ) -> None:
-    print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Fore.WHITE}", train_accuracy)
-    print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Fore.WHITE}", test_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Training accuracy: {Style.RESET_ALL}", train_accuracy)
+    print(f"{Fore.LIGHTMAGENTA_EX}Testing accuracy: {Style.RESET_ALL}", test_accuracy)
 
     if show_mcr:
         print("")
-        print(f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Fore.WHITE}", 1 - train_accuracy)
-        print(f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Fore.WHITE}", 1 - test_accuracy)
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}Training MCR: {Style.RESET_ALL}", 1 - train_accuracy
+        )
+        print(
+            f"{Fore.LIGHTMAGENTA_EX}Testing MCR: {Style.RESET_ALL}", 1 - test_accuracy
+        )
 
 
 def knn_classify(
@@ -66,10 +74,12 @@ def knn_classify(
     return train_accuracy, test_accuracy
 
 
-def q1(data_folder: str):
+def q1(data_folder: str, split_ratio: float = 0.3, print_header: bool = True):
     """
     Repeat Q2 from Prac W3 10 times, saving the 10 resulting training and test sets.
     """
+    if print_header:
+        print_question_header(1)
 
     classif_data = process_classification_data(data_folder)
 
@@ -84,9 +94,10 @@ def q1(data_folder: str):
         # Split the data into training and testing data
         X = data_randomised.loc[:, feature_names]
         y = data_randomised.loc[:, "Y"]
-        ratio = 0.3
 
-        X_train, y_train, X_test, y_test = load_data.test_train_split(X, y, ratio=ratio)
+        X_train, y_train, X_test, y_test = load_data.test_train_split(
+            X, y, ratio=split_ratio
+        )
 
         # Add the data to the dictionary
         train_test_sets[i] = (X_train, y_train, X_test, y_test, feature_names)
@@ -97,24 +108,42 @@ def q1(data_folder: str):
 def q2(
     train_test_sets: Dict[
         int, tuple[DataFrame, DataFrame, DataFrame, DataFrame, list[str]]
-    ]
+    ],
+    print_header: bool = True,
 ):
     """
     Calculate the training and test set errors over all of the datasets from Q1 and calculate the average
     training and test errors over the 10 trials. Are the averages lower or higher than the values you found
     in Prac W3 (or alternatively compare with the values for the first of your 10 runs)?
     """
+    if print_header:
+        print_question_header(2)
 
     for run_num, data in train_test_sets.items():
-        print(f"{Fore.LIGHTGREEN_EX}Run {run_num + 1}:{Fore.WHITE}")
+        print(f"{Fore.LIGHTGREEN_EX}Run {run_num + 1}:{Style.RESET_ALL}")
         X_train, y_train, X_test, y_test, feature_names = data
 
         # Train the model
         train_accuracy, test_accuracy = knn_classify(
-            X_train, y_train, X_test, y_test, feature_names, plot=False
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            feature_names,
+            plot=False,
         )
 
         print()
+
+
+def q3(data_folder: str):
+    print_question_header(3)
+    split_ratios = [0.1, 0.15, 0.2]
+
+    for split_ratio in split_ratios:
+        train_test_sets = q1(data_folder, split_ratio=split_ratio, print_header=False)
+
+        q2(train_test_sets, False)
 
 
 def main():
@@ -125,6 +154,9 @@ def main():
 
     # Question 2
     q2(train_test_sets)
+
+    # Question 3
+    q3(data_folder)
 
 
 if __name__ == "__main__":
