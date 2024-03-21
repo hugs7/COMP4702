@@ -110,14 +110,18 @@ def q2(
         int, tuple[DataFrame, DataFrame, DataFrame, DataFrame, list[str]]
     ],
     print_header: bool = True,
-):
+) -> tuple[list[float], list[float]]:
     """
     Calculate the training and test set errors over all of the datasets from Q1 and calculate the average
     training and test errors over the 10 trials. Are the averages lower or higher than the values you found
     in Prac W3 (or alternatively compare with the values for the first of your 10 runs)?
     """
+
     if print_header:
         print_question_header(2)
+
+    train_accuracies = []
+    test_accuracies = []
 
     for run_num, data in train_test_sets.items():
         print(f"{Fore.LIGHTGREEN_EX}Run {run_num + 1}:{Style.RESET_ALL}")
@@ -133,17 +137,90 @@ def q2(
             plot=False,
         )
 
+        train_accuracies.append(train_accuracy)
+        test_accuracies.append(test_accuracy)
+
         print()
 
+    return train_accuracies, test_accuracies
 
-def q3(data_folder: str):
+
+def q3(data_folder: str) -> tuple[list[float], list[float]]:
+    """
+    Repeat Q1 and Q2 but use a different split – try 50/50 or 90/10.
+    Compare your average error values with those you found in Q2.
+    """
+
     print_question_header(3)
-    split_ratios = [0.1, 0.15, 0.2]
 
-    for split_ratio in split_ratios:
-        train_test_sets = q1(data_folder, split_ratio=split_ratio, print_header=False)
+    split_ratio = 0.05
 
-        q2(train_test_sets, False)
+    train_test_sets = q1(data_folder, split_ratio=split_ratio, print_header=False)
+
+    train_accuracies, test_accuracies = q2(train_test_sets, False)
+
+    return train_accuracies, test_accuracies
+
+
+def sample_mean(data: list[float]) -> float:
+    """
+    Calculate the sample mean of a list of numbers
+    """
+
+    return sum(data) / len(data)
+
+
+def sample_standard_deviation(data: list[float]) -> float:
+    """
+    Calculate the sample standard deviation of a list of numbers
+    """
+
+    n = len(data)
+
+    mean = sum(data) / n
+
+    variance = sum((x - mean) ** 2 for x in data) / (n - 1)
+
+    return variance**0.5
+
+
+def q4(
+    train_accuracies_q2, test_accuracies_q2, train_accuracies_q3, test_accuracies_q3
+):
+    """
+    Calculate the sample standard deviation of your training and test
+    set error values over the 10 trials from Q2 and Q3. What do you observe?
+    """
+
+    print_question_header(4)
+
+    # Question 2
+
+    q2_train_accuracies_sample_mean = sample_mean(train_accuracies_q2)
+    q2_train_accuracies_sample_std = sample_standard_deviation(train_accuracies_q2)
+
+    # Question 3
+
+    q3_test_accuracies_sample_mean = sample_mean(test_accuracies_q3)
+    q3_test_accuracies_sample_std = sample_standard_deviation(test_accuracies_q3)
+
+    print(
+        f"{Fore.LIGHTCYAN_EX}Sample mean of training accuracies from Q2: {Style.RESET_ALL}",
+        q2_train_accuracies_sample_mean,
+    )
+    print(
+        f"{Fore.LIGHTCYAN_EX}Sample standard deviation of training accuracies from Q2: {Style.RESET_ALL}",
+        q2_train_accuracies_sample_std,
+    )
+
+    print(
+        f"{Fore.LIGHTCYAN_EX}Sample mean of test accuracies from Q3: {Style.RESET_ALL}",
+        q3_test_accuracies_sample_mean,
+    )
+    print(
+        f"{Fore.LIGHTCYAN_EX}Sample standard deviation of test accuracies from Q3: {Style.RESET_ALL}",
+        q3_test_accuracies_sample_std,
+    )
 
 
 def main():
@@ -153,10 +230,13 @@ def main():
     train_test_sets = q1(data_folder)
 
     # Question 2
-    q2(train_test_sets)
+    train_accuracies_q2, test_accuracies_q2 = q2(train_test_sets)
 
     # Question 3
-    q3(data_folder)
+    train_accuracies_q3, test_accuracies_q3 = q3(data_folder)
+
+    # Question 4
+    q4(train_accuracies_q2, test_accuracies_q2, train_accuracies_q3, test_accuracies_q3)
 
 
 if __name__ == "__main__":
