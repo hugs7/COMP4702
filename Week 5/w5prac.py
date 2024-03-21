@@ -158,12 +158,65 @@ def q4(
     print_sample_standard_deviation(3, q3_test_accuracies_sample_std)
 
 
-def q5():
+def q5(data_folder: str):
     """
     Perform 10-fold cross validation using your model and the (original) dataset (use existing
     Matlab or python functions to do this). What are the mean and standard devations of the
     cross-validation error?
     """
+
+    print_question_header(5)
+
+    num_folds = 10
+
+    train_accuracies = []
+    test_accuracies = []
+
+    classif_data = load_data.process_classification_data(data_folder)
+
+    # Randomise the data
+    data_randomised = load_data.shuffle_data(classif_data)
+
+    for fold in range(num_folds):
+        print(f"{Fore.LIGHTGREEN_EX}Fold {fold + 1}:{Style.RESET_ALL}")
+
+        # Split the data into training and testing data
+        X_train, y_train, X_test, y_test = knn_helper.k_fold_split(
+            data_randomised, num_folds, fold
+        )
+
+        feature_names = ["X1", "X2"]
+
+        # Train the model
+        train_accuracy, test_accuracy = knn_helper.knn_classify(
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            feature_names,
+            plot=False,
+        )
+
+        train_accuracies.append(train_accuracy)
+        test_accuracies.append(test_accuracy)
+
+        print()
+
+    # Calculate the sample mean and standard deviation
+    train_accuracies_sample_mean = stats.sample_mean(train_accuracies)
+    train_accuracies_sample_std = stats.sample_standard_deviation(train_accuracies)
+
+    test_accuracies_sample_mean = stats.sample_mean(test_accuracies)
+    test_accuracies_sample_std = stats.sample_standard_deviation(test_accuracies)
+
+    # Print
+    print("Train Accuracies:")
+    print_sample_mean(5, train_accuracies_sample_mean)
+    print_sample_standard_deviation(5, train_accuracies_sample_std)
+
+    print("Test Accuracies:")
+    print_sample_mean(5, test_accuracies_sample_mean)
+    print_sample_standard_deviation(5, test_accuracies_sample_std)
 
 
 def main():
@@ -180,6 +233,9 @@ def main():
 
     # Question 4
     q4(train_accuracies_q2, test_accuracies_q2, train_accuracies_q3, test_accuracies_q3)
+
+    # Question 5
+    q5(data_folder)
 
 
 if __name__ == "__main__":
