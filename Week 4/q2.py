@@ -12,9 +12,9 @@ import pandas as pd
 
 
 def print_coefficients(coefs, intercept, model, features, target):
-    print(f"{Fore.LIGHTCYAN_EX}Coefficients:{Fore.WHITE}{coefs}")
-    print(f"{Fore.LIGHTCYAN_EX}Intercept:{Fore.WHITE}{intercept}")
-    print(f"{Fore.LIGHTCYAN_EX}R^2:{Fore.WHITE}{model.model.score(features, target)}")
+    print(f"{Fore.LIGHTCYAN_EX}Coefficients:{Style.RESET_ALL}{coefs}")
+    print(f"{Fore.LIGHTCYAN_EX}Intercept:{Style.RESET_ALL}{intercept}")
+    print(f"{Fore.LIGHTCYAN_EX}R^2:{Style.RESET_ALL}{model.model.score(features, target)}")
 
 
 def variable_importance(coefs, feature_names):
@@ -22,7 +22,8 @@ def variable_importance(coefs, feature_names):
     coefs_dict = sorted(coefs_dict, key=lambda x: abs(x[1]), reverse=True)
     print(f"{Fore.LIGHTCYAN_EX}Variable Importance:{Fore.WHITE}")
     for i, c in coefs_dict:
-        print(f"    {Fore.LIGHTMAGENTA_EX}{feature_names[i]:>10}:{Fore.WHITE} {c}")
+        print(
+            f"    {Fore.LIGHTMAGENTA_EX}{feature_names[i]:>10}:{Fore.WHITE} {c}")
 
 
 def fit_model_and_print_results(features, target, feature_names):
@@ -76,4 +77,5 @@ def q2(data_folder: str):
 
     # Fit the model again
     print(f"{Fore.RED}Fitting model with normalised data{Fore.WHITE}")
-    fit_model_and_print_results(features_scaled, target_scaled, features.columns)
+    fit_model_and_print_results(
+        features_scaled, target_scaled, features.columns)
