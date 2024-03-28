@@ -2,29 +2,62 @@
 Helper file to load data using pandas
 """
 
+from colorama import Fore, Style
 import pandas as pd
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
 import os
-from typing import Union
+import replace_values
+import encode_data
+from typing import Literal, Sequence, Union
 
 
-def load_data(file_path: str) -> pd.DataFrame:
+def load_data(file_path: str, header: Union[int, Sequence[int], Literal['infer'], None] = None) -> pd.DataFrame:
     df = None
 
     # If Excel file
     if file_path.endswith(".xlsx"):
-        df = pd.read_excel(file_path)
+        df = pd.read_excel(file_path, header=header)
 
     # If CSV file
     elif file_path.endswith(".csv"):
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(file_path, header=header)
 
     # If data file
     elif file_path.endswith(".data"):
-        df = pd.read_csv(file_path, header=None, delim_whitespace=True)
+        df = pd.read_csv(file_path, header=header, delim_whitespace=True)
 
     return df
+
+
+def check_file_exists(file_path: str) -> bool:
+    file_exists = os.path.exists(file_path)
+    if not file_exists:
+        raise FileNotFoundError(f"File {file_path} not found")
+
+
+def load_and_process_data(data_file: str, replace_null: bool = False, header: Union[int, Sequence[int], Literal['infer'], None] = None) -> pd.DataFrame:
+    check_file_exists(data_file)
+
+    # Load Data
+    print(f"{Fore.LIGHTBLUE_EX}Loading Data{Style.RESET_ALL}")
+    data = load_data(data_file, header)
+    print(f"Data loaded from {data_file}")
+
+    if replace_null:
+        # Replace null values with mean instead
+        print(f"{Fore.LIGHTBLUE_EX}Replacing Null Values with Mean{Style.RESET_ALL}")
+        data = replace_values.replace_null_values_with_mean(data)
+    else:
+        # Remove null values
+        print(f"{Fore.LIGHTBLUE_EX}Removing Null Values{Style.RESET_ALL}")
+        data = replace_values.remove_null_values(data)
+
+    # Encode non-numeric data
+    print(f"{Fore.LIGHTBLUE_EX}Encoding Non-Numeric Data{Style.RESET_ALL}")
+    data_encoded = encode_data.encode_non_numeric_data(data)
+
+    return data_encoded
 
 
 def tag_data(data: DataFrame, cols: list[str]) -> DataFrame:
