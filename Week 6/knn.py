@@ -28,7 +28,7 @@ class KNNClassify(Classifier):
     ):
         self.k = k
         # Define Model
-        self.model = KNeighborsClassifier()
+        self.model = KNeighborsClassifier(n_neighbors=self.k)
 
         super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
 
@@ -44,8 +44,6 @@ class KNNClassify(Classifier):
         Returns:
             tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
         """
-
-        self.model = KNeighborsClassifier(n_neighbors=self.k)
 
         print(
             f"{Fore.RED}X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}{Fore.WHITE}"
