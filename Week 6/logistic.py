@@ -2,12 +2,15 @@
 Defines logistic model
 """
 
+from typing import Union
 import numpy as np
 
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 
 from regressor import Regressor
+
+# from types import PenaltyType
 
 
 class LogisticRegressionModel(Regressor):
@@ -34,7 +37,20 @@ class LogisticRegressionModel(Regressor):
         """
         self.model.fit(self.X_train, self.y_train)
 
-    def predict(self, classes: list[str], threshold: float = 0.5) -> np.ndarray:
+    def predict(self) -> np.ndarray:
+        """
+        Predicts the test data
+        """
+        test_predictions = self.model.predict(self.X_test)
+
+        # Get results
+        train_accuracy = self.model.score(self.X_train, self.y_train)
+
+        test_accuracy = accuracy_score(self.y_test, test_predictions)
+
+        return test_predictions, train_accuracy, test_accuracy
+
+    def predict_proba(self, classes: list[str], threshold: float = 0.5) -> np.ndarray:
         """
         Predicts the test data
         """
