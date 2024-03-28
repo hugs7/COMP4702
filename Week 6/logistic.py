@@ -2,15 +2,12 @@
 Defines logistic model
 """
 
-from typing import Union
 import numpy as np
 
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
 
 from regressor import Regressor
-
-# from types import PenaltyType
 
 
 class LogisticRegressionModel(Regressor):
