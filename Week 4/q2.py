@@ -41,7 +41,6 @@ def fit_model_and_print_results(features, target, feature_names):
 
     # Variable Importance
     # Using absolute value of coefficients as importance
-    print("Coefficients", coefs)
     variable_importance(coefs, feature_names)
 
 
