@@ -10,9 +10,7 @@ from pandas import DataFrame
 
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn.metrics import accuracy_score
-import matplotlib.pyplot as plt
 
-from model import Model
 from classifier import Classifier
 from regressor import Regressor
 
