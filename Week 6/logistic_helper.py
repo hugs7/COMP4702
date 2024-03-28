@@ -18,7 +18,7 @@ def logistic_fit(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame,
     logistic_classifier.fit()
 
     # Get results
-    test_predictions, train_accuracy, test_accuracy = logistic_classifier.predict(classes,
-                                                                                  threshold=threshold)
+    test_predictions, train_accuracy, test_accuracy = logistic_classifier.predict_proba(classes,
+                                                                                        threshold=threshold)
 
     return test_predictions, train_accuracy, test_accuracy
