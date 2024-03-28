@@ -3,12 +3,13 @@ Driver file for week 6 practical class
 28/03/2024
 """
 
-from load_data import load_data, split_feature_response, tag_data
+from load_data import load_data, load_and_process_data, split_feature_response, tag_data, test_train_split
 import os
 from colorama import Fore, Style
 from pandas import DataFrame
 from knn_helper import knn_classify
 from logistic_helper import logistic_fit
+from linear_helper import linear_fit
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
@@ -102,11 +103,39 @@ def q2(train_data: DataFrame, test_data: DataFrame, classes: list[str]):
 
     conf_matrix(y_test, test_predictions, new_classes)
 
-    return 0
 
+def q3(data_folder: str):
+    """
+    In Prac W4 we applied linear regression to a pokemon dataset, where the loss function was sum 
+    of squares (or mean squared) error. Revisit this task but add (a) L2; (b) L1 regularisation to
+    the loss function, with some suitable value for the regularization hyperparameter (see Section 
+    5.3 of the textbook). Compare the coefficient values from your different trained models. 
+    """
 
-def q3():
-    return 0
+    pokemon_data = "pokemonregr.csv"
+    pokemon_data_path = os.path.join(data_folder, pokemon_data)
+
+    # Load the data
+    pokemon_data = load_and_process_data(
+        pokemon_data_path, replace_null=True, header="infer")
+
+    X_data, y_data = split_feature_response(pokemon_data)
+    feature_names = X_data.columns
+    print(f"{Fore.LIGHTMAGENTA_EX}Feature names: {Style.RESET_ALL}{feature_names}")
+
+    X_train, y_train, X_test, y_test = test_train_split(X_data, y_data)
+
+    penalties = ["l1", "l2", "elasticnet"]
+
+    for penalty in penalties:
+        print(f"{'-'*100}\n{Fore.LIGHTRED_EX}Penalty: {Style.RESET_ALL}{penalty}")
+
+        if penalty == "elasticnet":
+            linear_fit(X_train, y_train, X_test, y_test,
+                       feature_names, penalty=penalty, l1_ratio=0.5)
+        else:
+            linear_fit(X_train, y_train, X_test, y_test,
+                       feature_names, penalty=penalty)
 
 
 def main():
@@ -141,7 +170,10 @@ def main():
     # q1(train_data, test_data, classes)
 
     # Question 2
-    q2(train_data, test_data, classes)
+    # q2(train_data, test_data, classes)
+
+    # Question 3
+    q3(data_folder)
 
     exit(0)
 
