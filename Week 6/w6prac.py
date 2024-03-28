@@ -8,6 +8,8 @@ import os
 from colorama import Fore, Style
 from pandas import DataFrame
 from knn_helper import knn_classify
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 
 def q1(train_data: DataFrame, test_data: DataFrame):
@@ -32,7 +34,15 @@ def q1(train_data: DataFrame, test_data: DataFrame):
     print(f"{Fore.LIGHTGREEN_EX}Train Accuracy: {Style.RESET_ALL}{train_accuracy}")
     print(f"{Fore.LIGHTGREEN_EX}Test Accuracy: {Style.RESET_ALL}{test_accuracy}")
 
-    return 0
+    # Calculate the confusion matrix
+    print(f"{Fore.LIGHTGREEN_EX}Confusion Matrix: {Style.RESET_ALL}")
+
+    conf_matrix = confusion_matrix(y_test, test_predictions)
+    print(conf_matrix)
+    conf_matrix_disp = ConfusionMatrixDisplay(
+        conf_matrix, display_labels=["1", "2", "3"])
+    conf_matrix_disp.plot(cmap="Blues")
+    plt.show()
 
 
 def q2():
