@@ -22,7 +22,7 @@ def load_data(file_path: str) -> pd.DataFrame:
 
     # If data file
     elif file_path.endswith(".data"):
-        df = pd.read_csv(file_path, header=None, sep=" ")
+        df = pd.read_csv(file_path, header=None, delim_whitespace=True)
 
     return df
 
@@ -85,3 +85,21 @@ def process_classification_data(
     data = tag_data(data, ["X1", "X2", "Y"])
 
     return data
+
+
+def split_feature_response(data: DataFrame) -> tuple[DataFrame, DataFrame]:
+    """
+    Splits the data into features and response variables.
+
+    Parameters:
+    - data (DataFrame): The data to split.
+
+    Returns:
+    - features (DataFrame): The features of the data.
+    - response (DataFrame): The response variable of the data.
+    """
+
+    features = data.iloc[:, :-1]
+    response = data.iloc[:, -1]
+
+    return features, response
