@@ -8,6 +8,7 @@ import os
 from colorama import Fore, Style
 from pandas import DataFrame
 from knn_helper import knn_classify
+from logistic_helper import logistic_fit
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
@@ -90,10 +91,14 @@ def q2(train_data: DataFrame, test_data: DataFrame, classes: list[str]):
     print(f"{Fore.LIGHTGREEN_EX}Test data after amalgamation:{Style.RESET_ALL}")
     print(y_test.value_counts())
 
-    # Apply the knn classifier to the training data
-    test_predictions, train_accuracy, test_accuracy = knn_classify(
-        X_train, y_train, X_test, y_test, feature_names, k=5
+    # Apply the logistic regression model to the training data
+    test_predictions, train_accuracy, test_accuracy = logistic_fit(
+        X_train, y_train, X_test, y_test, feature_names, new_classes, threshold=0.01
     )
+
+    print(test_predictions)
+    print(f"{Fore.LIGHTGREEN_EX}Train Accuracy: {Style.RESET_ALL}{train_accuracy}")
+    print(f"{Fore.LIGHTGREEN_EX}Test Accuracy: {Style.RESET_ALL}{test_accuracy}")
 
     conf_matrix(y_test, test_predictions, new_classes)
 
