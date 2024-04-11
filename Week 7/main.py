@@ -58,8 +58,10 @@ def plot_gelu():
 
     lineplot("X", "GeLU(X)", (input, output))
 
+    return input
 
-def plot_sigmoid():
+
+def plot_sigmoid(input):
     # Sigmoid activation function
 
     sigmoid = torch.nn.Sigmoid()
@@ -210,8 +212,8 @@ def main():
         if sys.argv[1] == "plot":
             # Activation function
 
-            plot_gelu()
-            plot_sigmoid()
+            input = plot_gelu()
+            plot_sigmoid(input)
 
         exit(0)
 
