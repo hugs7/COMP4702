@@ -174,6 +174,8 @@ def main():
     print("Classes:", CIFAR10_train.classes)
 
     # Flatten the dataset and normalise it
+    # We flatten the dataset because we need to pass in a 1D array
+    # not a 3D array (which is (X, Y, Channels))
     train_data = (CIFAR10_train.data.reshape(
         (-1, 32*32*3))/255.0).astype(np.float32)
     train_labels = np.asarray(CIFAR10_train.targets)
@@ -184,6 +186,15 @@ def main():
 
     print("Training data shape:", train_data.shape)
     print("Validation data shape:", validation_data.shape)
+
+    # Classification problem so define cross entropy loss
+    # and stochastic gradient descent optimiser
+
+    criterion = torch.nn.CrossEntropyLoss(reduction="mean")
+
+    learning_rate = 1e-3
+    optimiser = torch.optim.SGD(
+        sequential_model.parameters(), lr=learning_rate)
 
 
 if __name__ == "__main__":
