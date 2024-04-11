@@ -9,6 +9,7 @@ import seaborn as sb
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import List
+import torchvision
 
 
 def welcome():
@@ -111,7 +112,7 @@ def create_sequential_model(dim_input: int, dim_output: int, hidden_layer_dims: 
 def main():
     welcome()
 
-    # check length of command line arguments
+    # Check length of command line arguments
     if len(sys.argv) > 1:
         print("Arguments: ", sys.argv[1:])
 
@@ -121,7 +122,7 @@ def main():
             plot_gelu()
             plot_sigmoid()
 
-    # Model Creation
+    # --- Model Creation ---
 
     dim_in = 2
     dim_out = 1
@@ -130,6 +131,24 @@ def main():
         dim_in, dim_out, hidden_layer_dims)
 
     print(sequential_model)
+
+    # --- Loss Function ---
+    # For classification problems, usually use cross entropy loss
+    # For regression problems, usually use mean squared error
+
+    # Both accuracy and loss are important
+
+    # --- Optimiser ---
+
+    # Stochastic gradient descent is the most popular optimiser when
+    # training a neural network
+
+    # We only compute the gradient on a subset of the data because this
+    # is far faster than computing the gradient on the entire dataset.
+    # Given a large enough subset, the gradient will be a good approximation
+    # of the true gradient.
+
+    # --- Dataset ---
 
 
 if __name__ == "__main__":
