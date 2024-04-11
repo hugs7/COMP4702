@@ -3,6 +3,7 @@ Main file for week 7 prac
 11/04/2024
 """
 
+import os
 import torch
 import sys
 import seaborn as sb
@@ -149,6 +150,40 @@ def main():
     # of the true gradient.
 
     # --- Dataset ---
+
+    folder_of_script = os.path.dirname(__file__)
+    data_folder = os.path.join(folder_of_script, "data")
+
+    # Create data folder if it does not exist
+    if not os.path.exists(data_folder):
+        os.makedirs(data_folder)
+
+    CIFAR10_data_folder = os.path.join(data_folder, "CIFAR10")
+
+    # Check if data already exists
+    is_downloaded = os.path.exists(CIFAR10_data_folder)
+    download = not is_downloaded
+
+    CIFAR10_train = torchvision.datasets.CIFAR10(
+        CIFAR10_data_folder, download=download, train=True, transform=True)
+    CIFAR10_validation = torchvision.datasets.CIFAR10(
+        CIFAR10_data_folder, download=download, train=False, transform=True)
+
+    print("Training data stats")
+    print("Shape:", CIFAR10_train.data.shape)
+    print("Classes:", CIFAR10_train.classes)
+
+    # Flatten the dataset and normalise it
+    train_data = (CIFAR10_train.data.reshape(
+        (-1, 32*32*3))/255.0).astype(np.float32)
+    train_labels = np.asarray(CIFAR10_train.targets)
+
+    validation_data = (CIFAR10_validation.data.reshape(
+        (-1, 32*32*3))/255.0).astype(np.float32)
+    validation_labels = np.asarray(CIFAR10_validation.targets)
+
+    print("Training data shape:", train_data.shape)
+    print("Validation data shape:", validation_data.shape)
 
 
 if __name__ == "__main__":
