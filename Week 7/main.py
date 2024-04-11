@@ -125,9 +125,9 @@ def main():
 
     # --- Model Creation ---
 
-    dim_in = 2
-    dim_out = 1
-    hidden_layer_dims = [4, 8, 16]
+    dim_in = 32*32*3
+    dim_out = 10
+    hidden_layer_dims = [100, 100]
     sequential_model = create_sequential_model(
         dim_in, dim_out, hidden_layer_dims)
 
@@ -195,6 +195,58 @@ def main():
     learning_rate = 1e-3
     optimiser = torch.optim.SGD(
         sequential_model.parameters(), lr=learning_rate)
+
+    # --- Training Loop ---
+
+    batch_size = 256                   # Data points per batch to train on
+    optimisation_steps = int(1e4)      # Number of batches to train on
+
+    metrics = []
+    for i in range(optimisation_steps):
+        # Select a random batch of data
+        indices = np.random.randint(0, train_data.shape[0], size=batch_size)
+
+        # Obtain the data and labels for the batch
+        x = train_data[indices, :]
+        print(x)
+        print("Shape of x: ", x.shape)
+        print()
+
+        # Make predictions
+        y_pred = sequential_model(torch.from_numpy(x))
+        print("Predictions: ", y_pred)
+        print("Shape of predictions: ", y_pred.shape)
+        print()
+
+        # True labels
+        print("True labels:")
+        train_labels_batch = train_labels[indices]
+        print(train_labels_batch)
+        print("Shape of labels: ", train_labels_batch.shape)
+        print()
+        y_true = torch.from_numpy(train_labels_batch)
+        # Convert to long tensor
+        y_true = y_true.long()
+        print("True labels tensor: ", y_true)
+        print("Shape of true labels tensor: ", y_true.shape)
+        print()
+
+        # Compute the loss
+        loss = criterion(y_pred, y_true)
+
+        # Zero the gradients
+        optimiser.zero_grad()
+
+        # Compute the gradients
+        loss.backward()
+
+        # Update the weights
+        optimiser.step()
+
+        if i % 100 == 0:
+            print(f"Epoch: {i} / {optimisation_steps}")
+            print("Loss: ", loss.item())
+            metrics.append(loss.item())
 
 
 if __name__ == "__main__":
