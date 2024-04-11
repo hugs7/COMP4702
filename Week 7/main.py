@@ -5,6 +5,9 @@ Main file for week 7 prac
 
 import torch
 import sys
+import seaborn as sb
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def main():
@@ -22,6 +25,24 @@ def main():
         print("CUDA is not available")
 
     print("Python version: ", sys.version)
+
+    # --- Define a Model ---
+
+    # Activation function
+
+    sb.set_context("talk")
+    sb.set_style("dark")
+
+    geLu = torch.nn.GELU()
+
+    input = torch.arange(-6, 6, step=0.1)
+    output = geLu(input)
+
+    sb.lineplot(x=input, y=output)
+
+    plt.xlabel("X")
+    plt.ylabel("GeLU(X)")
+    plt.show()
 
 
 if __name__ == "__main__":
