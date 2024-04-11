@@ -10,6 +10,20 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+def lineplot(x_label: str, y_label: str, x: np.ndarray, y: np.ndarray):
+    """
+    Plot a line graph
+    """
+
+    sb.set_context("talk")
+    sb.set_style("dark")
+
+    sb.lineplot(x=x, y=y)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.show()
+
+
 def main():
     print("Week 7: PyTorch")
 
@@ -30,19 +44,12 @@ def main():
 
     # Activation function
 
-    sb.set_context("talk")
-    sb.set_style("dark")
-
     geLu = torch.nn.GELU()
 
     input = torch.arange(-6, 6, step=0.1)
     output = geLu(input)
 
-    sb.lineplot(x=input, y=output)
-
-    plt.xlabel("X")
-    plt.ylabel("GeLU(X)")
-    plt.show()
+    lineplot("X", "GeLU(X)", input, output)
 
 
 if __name__ == "__main__":
