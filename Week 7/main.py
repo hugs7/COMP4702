@@ -56,7 +56,7 @@ def plot_gelu():
     input = torch.arange(-6, 6, step=0.1)
     output = geLu(input)
 
-    lineplot("X", "GeLU(X)", input, output)
+    lineplot("X", "GeLU(X)", (input, output))
 
 
 def plot_sigmoid():
@@ -67,7 +67,7 @@ def plot_sigmoid():
     # Input remains the same
     output = sigmoid(input)
 
-    lineplot("X", "Sigmoid(X)", input, output)
+    lineplot("X", "Sigmoid(X)", (input, output))
 
 
 def create_sequential_model(dim_input: int, dim_output: int, hidden_layer_dims: List[int]) -> torch.nn.Sequential:
