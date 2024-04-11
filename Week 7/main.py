@@ -51,6 +51,15 @@ def main():
 
     lineplot("X", "GeLU(X)", input, output)
 
+    # Sigmoid activation function
+
+    sigmoid = torch.nn.Sigmoid()
+
+    # Input remains the same
+    output = sigmoid(input)
+
+    lineplot("X", "Sigmoid(X)", input, output)
+
 
 if __name__ == "__main__":
     main()
