@@ -15,8 +15,15 @@ def main():
     normalising_factor = 255.0
     dim_out = 10
     hidden_layer_dims = [100, 100]
+
+    # Hyperparameters
+    epochs = int(1e5)
+    batch_size = 256
+    learning_rate = 1e-3
+
     classification_model("CIFAR10", dim_in, dim_out,
-                         hidden_layer_dims, normalising_factor)
+                         hidden_layer_dims, normalising_factor,
+                         epochs, batch_size, learning_rate)
 
 
 if __name__ == "__main__":
