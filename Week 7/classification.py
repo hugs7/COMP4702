@@ -101,6 +101,12 @@ def classification_model(dataset_name: str, dim_input: int, dim_output: int, hid
     train_data, train_labels, validation_data, validation_labels = preprocess_data(
         train_data, validation_data, dim_input, normalising_factor)
 
+    # Move data to device
+    train_data = train_data.to(device)
+    train_labels = train_labels.to(device)
+    validation_data = validation_data.to(device)
+    validation_labels = validation_labels.to(device)
+
     print("Training data shape:", train_data.shape)
     print("Validation data shape:", validation_data.shape)
 
@@ -120,7 +126,7 @@ def classification_model(dataset_name: str, dim_input: int, dim_output: int, hid
 
     metrics = []
     for i in range(optimisation_steps):
-        metrics = train.nn_train(i, train_data, train_labels, batch_size,
+        metrics = train.nn_train(i, device, train_data, train_labels, batch_size,
                                  sequential_model, criterion, optimiser, optimisation_steps, metrics)
 
     show_training_results(metrics)
