@@ -126,7 +126,7 @@ def classification_model(dataset_name: str, dim_input: int, dim_output: int, hid
 
     metrics = []
     for i in range(optimisation_steps):
-        metrics = train.nn_train(i, device, train_data, train_labels, batch_size,
+        metrics = train.nn_train(i, train_data, train_labels, batch_size,
                                  sequential_model, criterion, optimiser, optimisation_steps, metrics)
 
     show_training_results(metrics)

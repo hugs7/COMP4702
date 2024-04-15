@@ -3,7 +3,7 @@ from typing import List
 import torch
 
 
-def nn_train(epoch: int, device: torch.device, train_data: torch.Tensor, train_labels: torch.Tensor, batch_size: int,
+def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, batch_size: int,
              sequential_model: torch.nn.Sequential, criterion: torch.nn.CrossEntropyLoss,
              optimiser: torch.optim.SGD, optimisation_steps: int, metrics: List[float], log: bool = False) -> List:
     """
@@ -34,7 +34,7 @@ def nn_train(epoch: int, device: torch.device, train_data: torch.Tensor, train_l
         print()
 
     # Make predictions
-    y_pred = sequential_model(x.to(device))
+    y_pred = sequential_model(x)
     if log:
         print("Predictions: ", y_pred)
         print("Shape of predictions: ", y_pred.shape)
