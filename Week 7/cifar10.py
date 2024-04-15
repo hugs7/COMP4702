@@ -14,11 +14,11 @@ def main():
     dim_in = 32*32*3
     normalising_factor = 255.0
     dim_out = 10
-    hidden_layer_dims = [100, 100]
+    hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1e5)
-    batch_size = 256
+    epochs = int(1e4)
+    batch_size = 20000
     learning_rate = 1e-3
 
     classification_model("CIFAR10", dim_in, dim_out,
