@@ -68,7 +68,7 @@ def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, b
     # Update the weights
     optimiser.step()
 
-    if epoch % 100 == 0:
+    if epoch % 100 == 0 or epoch == optimisation_steps - 1:
         if log:
             print(f"Epoch: {epoch} / {optimisation_steps}")
             print("Loss: ", loss.item())
