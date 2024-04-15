@@ -18,6 +18,7 @@ def create_sequential_model(dim_input: int, dim_output: int, hidden_layer_dims: 
     print("Input dimension: ", dim_input)
 
     hiddens = [dim_input, *hidden_layer_dims]
+    # [32 * 32 * 3, 100, 100]
 
     torch_layers = []
 

@@ -71,6 +71,9 @@ def nn_train(epoch: int, train_data: np.ndarray, train_labels: np.ndarray, batch
     if epoch % 100 == 0:
         print(f"Epoch: {epoch} / {optimisation_steps}")
         print("Loss: ", loss.item())
-        metrics.append(loss.item())
+
+        train_accuracy = torch.mean((y_pred.argmax(dim=1) == y_true).float())
+    
+        metrics.append([epoch, loss.item(), train_accuracy.numpy()])
 
     return metrics

@@ -127,6 +127,14 @@ def main():
     for i in range(optimisation_steps):
         metrics = train.nn_train(i, train_data, train_labels, batch_size,
                                  sequential_model, criterion, optimiser, optimisation_steps, metrics)
+        
+    
+    # Plot metrics
+
+    metrics = np.asarray(metrics)
+    train_metrics = (metrics[:,0], metrics[:,2])
+
+    lineplot("Step", "Accuracy", train_metrics)
 
 
 if __name__ == "__main__":
