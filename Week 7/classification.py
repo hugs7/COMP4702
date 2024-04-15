@@ -8,6 +8,7 @@ import torch
 import torchvision
 import train
 from results import show_training_results
+from tqdm import tqdm
 
 
 def preprocess_data(train_data: np.ndarray, validation_data: np.ndarray, dim_input: int,
@@ -27,7 +28,8 @@ def preprocess_data(train_data: np.ndarray, validation_data: np.ndarray, dim_inp
 
 
 def classification_model(dataset_name: str, dim_input: int, dim_output: int, hidden_layer_dims: List[int],
-                         normalising_factor: float) -> None:
+                         normalising_factor: float, optimisation_steps: int = int(1e4), batch_size: int = 256,
+                         learning_rate: float = 1e-3) -> None:
     print(f"{Fore.GREEN}Creating model for {dataset_name} dataset{Style.RESET_ALL}")
 
     # Move model to GPU if available
@@ -115,17 +117,13 @@ def classification_model(dataset_name: str, dim_input: int, dim_output: int, hid
 
     criterion = torch.nn.CrossEntropyLoss(reduction="mean")
 
-    learning_rate = 1e-3
     optimiser = torch.optim.SGD(
         sequential_model.parameters(), lr=learning_rate)
 
     # --- Training Loop ---
 
-    batch_size = 256                   # Data points per batch to train on
-    optimisation_steps = int(1e4)      # Number of batches to train on
-
     metrics = []
-    for i in range(optimisation_steps):
+    for i in tqdm(range(int(optimisation_steps))):
         metrics = train.nn_train(i, train_data, train_labels, batch_size,
                                  sequential_model, criterion, optimiser, optimisation_steps, metrics)
 
