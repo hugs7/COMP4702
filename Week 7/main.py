@@ -9,25 +9,11 @@ import sys
 import numpy as np
 import torchvision
 
-from plot import lineplot, plot_gelu, plot_sigmoid
+from plot import plot_gelu, plot_sigmoid
 import model
 import train
 from welcome import welcome
-
-
-def show_training_results(metrics):
-    metrics = np.asarray(metrics)
-
-    # Training Loss
-    training_loss_x = metrics[:, 0]
-    training_loss_y = metrics[:, 2]
-
-    # Validation Loss
-    validation_loss_x = metrics[:, 0]
-    validation_loss_y = metrics[:, 3]
-
-    lineplot("Epoch", "Loss", (training_loss_x, training_loss_y),
-             (validation_loss_x, validation_loss_y))
+from results import show_training_results
 
 
 def main():
@@ -127,14 +113,8 @@ def main():
     for i in range(optimisation_steps):
         metrics = train.nn_train(i, train_data, train_labels, batch_size,
                                  sequential_model, criterion, optimiser, optimisation_steps, metrics)
-        
-    
-    # Plot metrics
 
-    metrics = np.asarray(metrics)
-    train_metrics = (metrics[:,0], metrics[:,2])
-
-    lineplot("Step", "Accuracy", train_metrics)
+    show_training_results(metrics)
 
 
 if __name__ == "__main__":
