@@ -11,14 +11,14 @@ from results import show_training_results
 
 
 def preprocess_data(train_data: np.ndarray, validation_data: np.ndarray, dim_input: int,
-                    normalising_factor: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+                    normalising_factor: float) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = np.asarray(data.data.reshape((-1, dim_input)) /
-                              normalising_factor).astype(np.float32)
-        labels = np.asarray(data.targets)
+        new_data = torch.as_tensor(data.data.reshape((-1, dim_input)) /
+                                   normalising_factor, dtype=torch.float32)
+        labels = torch.as_tensor(data.targets)
 
         return_data.append(new_data)
         return_data.append(labels)
@@ -30,8 +30,12 @@ def classification_model(dataset_name: str, dim_input: int, dim_output: int, hid
                          normalising_factor: float) -> None:
     print(f"{Fore.GREEN}Creating model for {dataset_name} dataset{Style.RESET_ALL}")
 
+    # Move model to GPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Instantiate the model and move it to the specified device
     sequential_model = model.create_sequential_model(
-        dim_input, dim_output, hidden_layer_dims)
+        dim_input, dim_output, hidden_layer_dims).to(device)
 
     print(sequential_model)
 
