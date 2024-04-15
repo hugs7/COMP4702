@@ -69,8 +69,9 @@ def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, b
     optimiser.step()
 
     if epoch % 100 == 0:
-        print(f"Epoch: {epoch} / {optimisation_steps}")
-        print("Loss: ", loss.item())
+        if log:
+            print(f"Epoch: {epoch} / {optimisation_steps}")
+            print("Loss: ", loss.item())
 
         train_accuracy = torch.mean((y_pred.argmax(dim=1) == y_true).float())
 
