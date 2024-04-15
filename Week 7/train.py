@@ -3,7 +3,7 @@ from typing import List
 import torch
 
 
-def nn_train(epoch: int, train_data: np.ndarray, train_labels: np.ndarray, batch_size: int,
+def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, batch_size: int,
              sequential_model: torch.nn.Sequential, criterion: torch.nn.CrossEntropyLoss,
              optimiser: torch.optim.SGD, optimisation_steps: int, metrics: List[float], log: bool = False) -> List:
     """
@@ -34,7 +34,7 @@ def nn_train(epoch: int, train_data: np.ndarray, train_labels: np.ndarray, batch
         print()
 
     # Make predictions
-    y_pred = sequential_model(torch.from_numpy(x))
+    y_pred = sequential_model(x)
     if log:
         print("Predictions: ", y_pred)
         print("Shape of predictions: ", y_pred.shape)
@@ -48,9 +48,9 @@ def nn_train(epoch: int, train_data: np.ndarray, train_labels: np.ndarray, batch
         print(train_labels_batch)
         print("Shape of labels: ", train_labels_batch.shape)
         print()
-    y_true = torch.from_numpy(train_labels_batch)
+    y_true = train_labels_batch
     # Convert to long tensor
-    y_true = y_true.long()
+    # y_true = y_true.long()
     if log:
         print("True labels tensor: ", y_true)
         print("Shape of true labels tensor: ", y_true.shape)
@@ -73,7 +73,7 @@ def nn_train(epoch: int, train_data: np.ndarray, train_labels: np.ndarray, batch
         print("Loss: ", loss.item())
 
         train_accuracy = torch.mean((y_pred.argmax(dim=1) == y_true).float())
-    
+
         metrics.append([epoch, loss.item(), train_accuracy.numpy()])
 
     return metrics
