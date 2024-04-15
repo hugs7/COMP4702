@@ -16,8 +16,8 @@ def preprocess_data(train_data: np.ndarray, validation_data: np.ndarray, dim_inp
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = (data.data.reshape((-1, dim_input)) /
-                    normalising_factor).astype(np.float32)
+        new_data = np.asarray(data.data.reshape((-1, dim_input)) /
+                              normalising_factor).astype(np.float32)
         labels = np.asarray(data.targets)
 
         return_data.append(new_data)
