@@ -2,9 +2,8 @@
 Processing data helper
 """
 
-from pandas import DataFrame
 from sklearn.model_selection import train_test_split
-from typing import Union, List
+from typing import List, Tuple
 import load_data
 import os
 import numpy as np
@@ -30,7 +29,7 @@ def process_classification_data(
     X_feature_names: List[str],
     y_feature_names: List[str],
     test_train_split_ratio: float = 0.3,
-) -> Union[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List]:
     # Check if the file exists
     if not file_exists(data_file_path):
         raise FileNotFoundError(f"File {data_file_path} not found.")
@@ -41,6 +40,18 @@ def process_classification_data(
     all_feature_names = y_feature_names + X_feature_names
 
     data = load_data.tag_data(data, all_feature_names)
+
+    # Get the values of the target variables
+    y_classes = []
+    for y_feature_name in y_feature_names:
+        y_values = data.loc[:, y_feature_name].values
+
+        # Get only the unique values
+
+        y_values = list(np.unique(y_values))
+
+        # Append the array to the y_classes array (2D array)
+        y_classes.append(y_values)
 
     # Randomise the data
     data_randomised = load_data.shuffle_data(data)
@@ -69,7 +80,7 @@ def process_classification_data(
         X, y, ratio=test_train_split_ratio
     )
 
-    return data, X_train, y_train, X_test, y_test
+    return data, X_train, y_train, X_test, y_test, y_classes
 
 
 def test_train_split(
