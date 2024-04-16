@@ -2,7 +2,9 @@ import torch
 from typing import List
 
 
-def create_sequential_model(dim_input: int, dim_output: int, hidden_layer_dims: List[int]) -> torch.nn.Sequential:
+def create_sequential_model(
+    dim_input: int, dim_output: int, hidden_layer_dims: List[int]
+) -> torch.nn.Sequential:
     """
     Create a sequential model
 
@@ -25,7 +27,7 @@ def create_sequential_model(dim_input: int, dim_output: int, hidden_layer_dims: 
     # Create a linear layer and feed it through the activation function
     for i in range(len(hiddens) - 1):
         # Create linear layer from i to i+1
-        linear_layer = torch.nn.Linear(hiddens[i], hiddens[i+1])
+        linear_layer = torch.nn.Linear(hiddens[i], hiddens[i + 1])
 
         # Create activation function
         activation = torch.nn.GELU()
