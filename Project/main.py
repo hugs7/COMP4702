@@ -21,10 +21,14 @@ def run_model(dataset_name: str) -> None:
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
-    dim_output = 1  # Things we are predicting
+    num_variables_predicting = 2
 
-    y_labels = columns[0:dim_output]
-    X_labels = columns[dim_output:]
+    # First num_variables_predicting columns are the variables we are predicting
+    # These will be string labels which need to be flattened into a 1D array.
+    # So the output dimension is sum of num classes over the num_variables_predicting
+    # we are predicting
+    y_labels = columns[0:num_variables_predicting]
+    X_labels = columns[num_variables_predicting:]
 
     # --- Dataset ---
 
@@ -38,7 +42,7 @@ def run_model(dataset_name: str) -> None:
     model_data_path = os.path.join(data_folder, dataset_file_name)
 
     # Read the dataset
-    dataset, X_train, y_train, X_test, y_test = (
+    dataset, X_train, y_train, X_test, y_test, y_classes = (
         process_data.process_classification_data(
             model_data_path, X_labels, y_labels, 0.3
         )
@@ -46,11 +50,16 @@ def run_model(dataset_name: str) -> None:
 
     print("Training data stats")
     print("Shape:", X_train.shape)
-    # print("Classes:", X_train.classes)
+    print("Classes:", y_classes)
 
     #################
 
-    dim_input = dataset.shape[1] - dim_output
+    classes_in_output_vars = [len(classes) for classes in y_classes]
+
+    # Ouptut dimension is sum of classes in each output variable
+    # because of one hot encoding
+    dim_output = sum(classes_in_output_vars)
+    dim_input = dataset.shape[1] - num_variables_predicting
     normalising_factor = 1.0
     hidden_layer_dims = [100, 150, 100]
 
@@ -58,13 +67,6 @@ def run_model(dataset_name: str) -> None:
     epochs = int(1e4)
     batch_size = 1000
     learning_rate = 1e-3
-
-    # Flatten the dataset and normalise it
-    # We flatten the dataset because we need to pass in a 1D array
-    # not a 3D array (which is (X, Y, Channels))
-    # X_train, y_train, X_test, y_test = preprocess_data(
-    #     X_train, y_train, X_test, y_test, dim_input, normalising_factor
-    # )
 
     # Convert to tensor
     def to_tensor(data):
@@ -135,7 +137,7 @@ def run_model(dataset_name: str) -> None:
             optimiser,
             epochs,
             metrics,
-            dim_output,
+            classes_in_output_vars
         )
 
     results.show_training_results(metrics)
