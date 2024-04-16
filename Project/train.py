@@ -132,7 +132,8 @@ def nn_train(
                       recovered_var_dim, recovered_var_dim.shape, recovered_var_dim.dtype)
             y_true_dim = y_true[:, dim].long()
             argmax = recovered_var_dim.argmax(dim=1)
-            print("Argmax: ", argmax)
+            if log:
+                print("Argmax: ", argmax)
 
             # Comparison
             comparison = argmax == y_true_dim
