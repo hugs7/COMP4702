@@ -57,8 +57,9 @@ def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, b
         print()
 
     # Compute the loss
+    print("Predictions: ", y_pred, "\n", y_pred.shape, y_pred.dtype)
+    print("True labels: ", y_true, "\n", y_true.shape, y_true.dtype)
     loss = criterion(y_pred, y_true)
-
     # Zero the gradients
     optimiser.zero_grad()
 
@@ -73,7 +74,14 @@ def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, b
             print(f"Epoch: {epoch} / {optimisation_steps}")
             print("Loss: ", loss.item())
 
-        train_accuracy = torch.mean((y_pred.argmax(dim=1) == y_true).float())
+        print(f"Predictions: {y_pred}")
+        argmax = y_pred.argmax(dim=1)
+        print(f"Argmax: {argmax}")
+        comparison = argmax == y_true
+        print(f"Comparison: {comparison}")
+        exit(0)
+
+        train_accuracy = torch.mean((comparison).float())
 
         metrics.append([epoch, loss.item(), train_accuracy.cpu().numpy()])
 
