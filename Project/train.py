@@ -146,7 +146,8 @@ def nn_train(
 
         # Take average of all accuracies
         train_accuracy = sum(accuracies) / len(accuracies)
-        print("Train accuracy: ", train_accuracy)
+        print(
+            f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss.item()}")
 
         metrics.append([epoch, loss.item(), train_accuracy])
 
