@@ -11,88 +11,20 @@ import os
 from colorama import Fore, Style
 import process_data
 import results
+from dataset import DATASET_MAPPING
 
 
 def run_model(dataset_name: str) -> None:
-    dataset_mapping = {
-        "Thorax": [
-            "83_Loeschcke_et_al_2000_Thorax_&_wing_traits_lab pops.csv",
-            [
-                "Species",
-                "Population",
-                "Latitude",
-                "Longitude",
-                "Year_start",
-                "Year_end",
-                "Temperature",
-                "Vial",
-                "Replicate",
-                "Sex",
-                "Thorax_length",
-                "l2",
-                "l3p",
-                "l3d",
-                "lpd",
-                "l3",
-                "w1",
-                "w2",
-                "w3",
-                "wing_loading",
-            ],
-        ],
-        "Wing_traits": [
-            "84_Loeschcke_et_al_2000_Wing_traits_&_asymmetry_lab pops.csv",
-            [
-                "Species",
-                "Population",
-                "Latitude",
-                "Longitude",
-                "Year_start",
-                "Year_end",
-                "Temperature",
-                "Vial",
-                "Replicate",
-                "Sex",
-                "Wing_area",
-                "Wing_shape",
-                "Wing_vein",
-                "Asymmetry_wing_area",
-                "Asymmetry_wing_shape",
-                "Asymmetry_wing_vein",
-            ],
-        ],
-        "Wing_asymmetry": [
-            "85_Loeschcke_et_al_2000_Wing_asymmetry_lab_pops.csv",
-            [
-                "Species",
-                "Population",
-                "Latitude",
-                "Longitude",
-                "Year_start",
-                "Year_end",
-                "Temperature",
-                "Vial",
-                "Replicate",
-                "Sex",
-                "Asymmetry_l2",
-                "Asymmetry_l3p",
-                "Asymmetry_l3d",
-                "Asymmetry_lpd",
-                "Asymmetry_l3",
-                "Asymmetry_w1",
-                "Asymmetry_w2",
-                "Asymmetry_w3",
-            ],
-        ],
-    }
+    if dataset_name not in DATASET_MAPPING:
+        raise ValueError(
+            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
-    if dataset_name not in dataset_mapping:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+    dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
-    dataset_file_name, columns = dataset_mapping[dataset_name]
+    dim_output = 1  # Things we are predicting
 
-    y_labels = columns[0:2]
-    X_labels = columns[2:]
+    y_labels = columns[0:dim_output]
+    X_labels = columns[dim_output:]
 
     # --- Dataset ---
 
@@ -118,14 +50,13 @@ def run_model(dataset_name: str) -> None:
 
     #################
 
-    dim_output = 2  # Things we are predicting
     dim_input = dataset.shape[1] - dim_output
     normalising_factor = 1.0
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
     epochs = int(1e4)
-    batch_size = 100
+    batch_size = 1000
     learning_rate = 1e-3
 
     # Flatten the dataset and normalise it
@@ -164,7 +95,7 @@ def run_model(dataset_name: str) -> None:
         dim_input, dim_output, hidden_layer_dims
     ).to(device)
 
-    print(sequential_model)
+    print(f"{Fore.LIGHTCYAN_EX}Model: \n{Style.RESET_ALL}{sequential_model}\n")
 
     # --- Loss Function ---
     # For classification problems, usually use cross entropy loss
@@ -187,7 +118,8 @@ def run_model(dataset_name: str) -> None:
 
     criterion = torch.nn.CrossEntropyLoss(reduction="mean")
 
-    optimiser = torch.optim.SGD(sequential_model.parameters(), lr=learning_rate)
+    optimiser = torch.optim.SGD(
+        sequential_model.parameters(), lr=learning_rate)
 
     # --- Training Loop ---
 
