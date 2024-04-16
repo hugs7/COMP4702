@@ -64,9 +64,10 @@ def run_model(dataset_name: str) -> None:
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1e4)
+    epochs = int(1e5)
     batch_size = 1000
-    learning_rate = 1e-3
+    learning_rate = 2e-3
+    decay_rate = 0.99
 
     # Convert to tensor
     def to_tensor(data):
