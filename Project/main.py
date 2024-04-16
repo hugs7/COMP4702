@@ -66,8 +66,7 @@ def run_model(dataset_name: str) -> None:
     # Hyperparameters
     epochs = int(1e5)
     batch_size = 1000
-    learning_rate = 2e-3
-    decay_rate = 0.99
+    learning_rate = 1e-4
 
     # Convert to tensor
     def to_tensor(data):
@@ -127,7 +126,8 @@ def run_model(dataset_name: str) -> None:
     # --- Training Loop ---
 
     metrics = []
-    for i in tqdm(range(int(epochs))):
+    # for i in tqdm(range(int(epochs))):
+    for i in range(int(epochs)):
         metrics = train.nn_train(
             i,
             X_train,
