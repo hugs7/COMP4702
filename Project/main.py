@@ -3,27 +3,96 @@ Main Driver file for project
 """
 
 from tqdm import tqdm
-from classification import preprocess_data
 from welcome import welcome
 import train
 import model
 import torch
 import os
 from colorama import Fore, Style
-import read_data
+import process_data
+import results
 
 
 def run_model(dataset_name: str) -> None:
     dataset_mapping = {
-        "Thorax": "83_Loeschcke_et_al_2000_Thorax_&_wing_traits_lab pops.csv",
-        "Wing_traits": "84_Loeschcke_et_al_2000_Wing_traits_&_asymmetry_lab pops.csv",
-        "Wing_asymmetry": "85_Loeschcke_et_al_2000_Wing_asymmetry_lab_pops.csv",
+        "Thorax": [
+            "83_Loeschcke_et_al_2000_Thorax_&_wing_traits_lab pops.csv",
+            [
+                "Species",
+                "Population",
+                "Latitude",
+                "Longitude",
+                "Year_start",
+                "Year_end",
+                "Temperature",
+                "Vial",
+                "Replicate",
+                "Sex",
+                "Thorax_length",
+                "l2",
+                "l3p",
+                "l3d",
+                "lpd",
+                "l3",
+                "w1",
+                "w2",
+                "w3",
+                "wing_loading",
+            ],
+        ],
+        "Wing_traits": [
+            "84_Loeschcke_et_al_2000_Wing_traits_&_asymmetry_lab pops.csv",
+            [
+                "Species",
+                "Population",
+                "Latitude",
+                "Longitude",
+                "Year_start",
+                "Year_end",
+                "Temperature",
+                "Vial",
+                "Replicate",
+                "Sex",
+                "Wing_area",
+                "Wing_shape",
+                "Wing_vein",
+                "Asymmetry_wing_area",
+                "Asymmetry_wing_shape",
+                "Asymmetry_wing_vein",
+            ],
+        ],
+        "Wing_asymmetry": [
+            "85_Loeschcke_et_al_2000_Wing_asymmetry_lab_pops.csv",
+            [
+                "Species",
+                "Population",
+                "Latitude",
+                "Longitude",
+                "Year_start",
+                "Year_end",
+                "Temperature",
+                "Vial",
+                "Replicate",
+                "Sex",
+                "Asymmetry_l2",
+                "Asymmetry_l3p",
+                "Asymmetry_l3d",
+                "Asymmetry_lpd",
+                "Asymmetry_l3",
+                "Asymmetry_w1",
+                "Asymmetry_w2",
+                "Asymmetry_w3",
+            ],
+        ],
     }
 
     if dataset_name not in dataset_mapping:
         raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
-    dataset_file_name = dataset_mapping[dataset_name]
+    dataset_file_name, columns = dataset_mapping[dataset_name]
+
+    y_labels = columns[0:2]
+    X_labels = columns[2:]
 
     # --- Dataset ---
 
@@ -37,52 +106,57 @@ def run_model(dataset_name: str) -> None:
     model_data_path = os.path.join(data_folder, dataset_file_name)
 
     # Read the dataset
-    dataset = read_data.read_excel_file(model_data_path)
-    print(dataset)
-    exit(0)
-
-    train_data = mappped_dataset(
-        model_data_path, download=download, train=True, transform=True
-    )
-    validation_data = mappped_dataset(
-        model_data_path, download=download, train=False, transform=True
+    dataset, X_train, y_train, X_test, y_test = (
+        process_data.process_classification_data(
+            model_data_path, X_labels, y_labels, 0.3
+        )
     )
 
     print("Training data stats")
-    print("Shape:", train_data.data.shape)
-    print("Classes:", train_data.classes)
+    print("Shape:", X_train.shape)
+    # print("Classes:", X_train.classes)
 
     #################
 
-    dim_out = 2  # Things we are predicting
-    dim_in = dataset.shape[1] - dim_out
-    normalising_factor = 255.0
+    dim_output = 2  # Things we are predicting
+    dim_input = dataset.shape[1] - dim_output
+    normalising_factor = 1.0
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
     epochs = int(1e4)
-    batch_size = 20000
+    batch_size = 100
     learning_rate = 1e-3
 
     # Flatten the dataset and normalise it
     # We flatten the dataset because we need to pass in a 1D array
     # not a 3D array (which is (X, Y, Channels))
-    train_data, train_labels, validation_data, validation_labels = preprocess_data(
-        train_data, validation_data, dim_input, normalising_factor
-    )
+    # X_train, y_train, X_test, y_test = preprocess_data(
+    #     X_train, y_train, X_test, y_test, dim_input, normalising_factor
+    # )
 
-    # Move data to device
-    train_data = train_data.to(device)
-    train_labels = train_labels.to(device)
-    validation_data = validation_data.to(device)
-    validation_labels = validation_labels.to(device)
+    # Convert to tensor
+    def to_tensor(data):
+        return torch.tensor(data, dtype=torch.float32)
 
-    print("Training data shape:", train_data.shape)
-    print("Validation data shape:", validation_data.shape)
+    X_train = to_tensor(X_train)
+    y_train = to_tensor(y_train)
+
+    X_test = to_tensor(X_test)
+    y_test = to_tensor(y_test)
 
     # ----- Device ------
     # Move model to GPU if available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # Move data to device
+    X_train = X_train.to(device)
+    y_train = y_train.to(device)
+    X_test = X_test.to(device)
+    y_test = y_test.to(device)
+
+    print("Training data shape:", X_train.shape, "x", y_train.shape)
+    print("Validation data shape:", X_test.shape, "x", y_test.shape)
 
     print(f"{Fore.GREEN}Creating model for {dataset_name} dataset{Style.RESET_ALL}")
     # Instantiate the model and move it to the specified device
@@ -118,20 +192,21 @@ def run_model(dataset_name: str) -> None:
     # --- Training Loop ---
 
     metrics = []
-    for i in tqdm(range(int(optimisation_steps))):
+    for i in tqdm(range(int(epochs))):
         metrics = train.nn_train(
             i,
-            train_data,
-            train_labels,
+            X_train,
+            y_train,
             batch_size,
             sequential_model,
             criterion,
             optimiser,
-            optimisation_steps,
+            epochs,
             metrics,
+            dim_output,
         )
 
-    show_training_results(metrics)
+    results.show_training_results(metrics)
 
 
 def main():

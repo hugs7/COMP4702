@@ -3,9 +3,19 @@ from typing import List
 import torch
 
 
-def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, batch_size: int,
-             sequential_model: torch.nn.Sequential, criterion: torch.nn.CrossEntropyLoss,
-             optimiser: torch.optim.SGD, optimisation_steps: int, metrics: List[float], log: bool = False) -> List:
+def nn_train(
+    epoch: int,
+    train_data: torch.Tensor,
+    train_labels: torch.Tensor,
+    batch_size: int,
+    sequential_model: torch.nn.Sequential,
+    criterion: torch.nn.CrossEntropyLoss,
+    optimiser: torch.optim.SGD,
+    optimisation_steps: int,
+    metrics: List[float],
+    dim_output: int,
+    log: bool = False,
+) -> List:
     """
     One epoch of training
 
@@ -18,6 +28,7 @@ def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, b
         criterion: Loss function
         optimiser: Optimiser
         optimisation_steps: Number of steps to train
+        dim_output: Dimension of the output
         metrics: List of metrics
 
     Returns:
@@ -72,8 +83,13 @@ def nn_train(epoch: int, train_data: torch.Tensor, train_labels: torch.Tensor, b
         if log:
             print(f"Epoch: {epoch} / {optimisation_steps}")
             print("Loss: ", loss.item())
+        print("y pred: ", y_pred)
+        argmax = y_pred.argmax(dim=dim_output)
+        print("Argmax: ", argmax)
+        print("Shape of argmax: ", argmax.shape)
+        print("Y true: ", y_true)
 
-        train_accuracy = torch.mean((y_pred.argmax(dim=1) == y_true).float())
+        train_accuracy = torch.mean((argmax == y_true).float())
 
         metrics.append([epoch, loss.item(), train_accuracy.cpu().numpy()])
 
