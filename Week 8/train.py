@@ -65,7 +65,17 @@ def train(
 
         # Validation
         print_title("Validation")
-        model.eval()
+        total = len(val_loader.dataset)
+        correct = 0
+        for i, (images, labels) in enumerate(tqdm(val_loader, desc=f"Epoch {epoch+1}")):
+            # Move the data to device
+            images, labels = images.to(device), labels.to(device)
+
+            # Forward pass
+            with torch.no_grad():
+                out = model(images)
+                preds = torch.argmax(out, dim=1)
+                correct = torch.sum((preds == labels), dim=0)
 
         # Softmax to recover probabilities from logits
         # if using cross entropy loss, this step is is built-in by pytorch
