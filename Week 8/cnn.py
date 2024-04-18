@@ -4,6 +4,7 @@ CNN Model class
 
 import torch.nn as nn
 from typing import List
+from colorama import Fore, Style
 
 
 class CNN(nn.Module):
@@ -86,12 +87,21 @@ class CNN(nn.Module):
         # self.conv = nn.Sequential(*conv_layers)
 
     def forward(self, x):
-
         x_conv = []
-        for layer in self.conv_layers:
-            conv_output = layer(x)
-            x_conv.append(conv_output)
 
+        print(f"{Fore.LIGHTBLUE_EX}Input shape: {x.shape}{Style.RESET_ALL}")
+
+        for i, layer in enumerate(self.conv_layers):
+            print(f"{Fore.LIGHTMAGENTA_EX}Layer operation: {layer}{Style.RESET_ALL}")
+            conv_output = layer(x)
+            print(
+                f"{Fore.LIGHTGREEN_EX}Layer {i} output shape: {conv_output.shape}{Style.RESET_ALL}"
+            )
+
+            x_conv.append(conv_output)
+            x = conv_output
+
+        print("Convolutional layers output shape", x_conv[-1].shape)
         x = self.flatten(x_conv[-1])
 
         print("Flattened shape", x.shape)
