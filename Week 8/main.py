@@ -69,12 +69,12 @@ def main():
     # --- CNN Model ---
 
     model = cnn.CNN(
-        num_conv_layers=5,
+        num_conv_layers=2,
         num_in_channels=1,
-        hidden_channels=[32, 64, 64, 64, 32],
+        hidden_channels=[4, 4],
         num_out_channels=10,
-        kernel_sizes=[4, 4, 4, 4, 4],
-        pooling_kernel_sizes=[2, 2, 2, 2, 2],
+        kernel_sizes=[4, 4],
+        pooling_kernel_sizes=[1, 1],
         stride=1,
         padding=2,
         num_fc_layers=2,
