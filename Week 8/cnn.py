@@ -5,20 +5,23 @@ CNN Model class
 import torch.nn as nn
 from typing import List
 from colorama import Fore, Style
+from utils import prod
 
 
 class CNN(nn.Module):
     def __init__(
         self,
         num_conv_layers: int,
+        input_dimension_x: int,
+        input_dimension_y: int,
         num_in_channels: int,
         hidden_channels: List[int],
-        num_out_channels: int,
         kernel_sizes: List[int],
         pooling_kernel_sizes: List[int],
         stride: int,
         padding: int,
         num_fc_layers: int,
+        fc_channels: List[int],
         num_classes: int,
     ):
         super(CNN, self).__init__()
@@ -66,25 +69,49 @@ class CNN(nn.Module):
         self.flatten = nn.Flatten()
 
         # # Fully connected linear layers
-        # fc_layers = []
+        self.fc_layers = nn.ModuleList()
 
-        # for i in range(num_fc_layers):
-        #     if i == 0:
-        #         fc = nn.Linear(32 * 7 * 7, 64)
-        #     else:
-        #         fc = nn.Linear(64, num_classes)
+        if num_fc_layers != len(fc_channels):
+            raise ValueError(
+                "Number of fully connected layers must be the same as the number of channels"
+            )
 
-        #     fc_layers.append(fc)
+        for i in range(num_fc_layers):
+            out_channels = fc_channels[i]
 
-        #     # Activation function
-        #     activation_func = nn.GELU()
-        #     fc_layers.append(activation_func)
+            if i == 0:
+                final_conv_layer_channels = hidden_channels[-1]
+                final_conv_layer_x = int(
+                    (input_dimension_x * input_dimension_y)
+                    / (prod(pooling_kernel_sizes) * num_conv_layers * stride)
+                )
+                print(
+                    f"{Fore.LIGHTYELLOW_EX}Final conv layer x: {final_conv_layer_x}{Style.RESET_ALL}"
+                )
+                print(
+                    f"{Fore.LIGHTYELLOW_EX}Final conv layer channels: {final_conv_layer_channels}{Style.RESET_ALL}"
+                )
+                in_channels = int(final_conv_layer_channels * final_conv_layer_x)
+                in_channels = 392
+                print(
+                    f"{Fore.LIGHTYELLOW_EX}In channels: {in_channels}{Style.RESET_ALL}"
+                )
+                print(
+                    f"{Fore.LIGHTYELLOW_EX}Out channels: {out_channels}{Style.RESET_ALL}"
+                )
+                fc = nn.Linear(in_channels, out_channels)
+            else:
+                in_channels = fc_channels[i - 1]
+                fc = nn.Linear(in_channels, out_channels)
 
-        # self.fc1 = nn.Linear(32 * 7 * 7, 64)
-        # self.relu3 = nn.ReLU()
-        # self.fc2 = nn.Linear(64, 10)
+            self.fc_layers.append(fc)
 
-        # self.conv = nn.Sequential(*conv_layers)
+            # Activation function
+            activation_func = nn.GELU()
+            self.fc_layers.append(activation_func)
+
+        # Final output layer
+        self.output_layer = nn.Linear(fc_channels[-1], num_classes)
 
     def forward(self, x):
         x_conv = []
@@ -93,18 +120,36 @@ class CNN(nn.Module):
 
         for i, layer in enumerate(self.conv_layers):
             print(f"{Fore.LIGHTMAGENTA_EX}Layer operation: {layer}{Style.RESET_ALL}")
-            conv_output = layer(x)
+            x = layer(x)
             print(
-                f"{Fore.LIGHTGREEN_EX}Layer {i} output shape: {conv_output.shape}{Style.RESET_ALL}"
+                f"{Fore.LIGHTGREEN_EX}Layer {i} output shape: {x.shape}{Style.RESET_ALL}"
             )
-
-            x_conv.append(conv_output)
-            x = conv_output
+            x_conv.append(x)
 
         print("Convolutional layers output shape", x_conv[-1].shape)
+
+        # Flatten the output of the convolutional layers
         x = self.flatten(x_conv[-1])
 
         print("Flattened shape", x.shape)
+
+        # Fully connected linear layers
+        x_linear = []
+        for i, layer in enumerate(self.fc_layers):
+            print(
+                f"{Fore.LIGHTGREEN_EX}Fully connected layer {i} operation: {layer}{Style.RESET_ALL}"
+            )
+            x = layer(x)
+            print(
+                f"{Fore.LIGHTGREEN_EX}Fully connected layer {i} output shape: {x.shape}{Style.RESET_ALL}"
+            )
+
+            x_linear.append(x)
+
+        # Output layer
+        x = self.output_layer(x_linear[-1])
+
+        print(f"{Fore.LIGHTRED_EX}Output shape: {x.shape}{Style.RESET_ALL}")
 
         return x
 

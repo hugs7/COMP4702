@@ -15,6 +15,7 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, random_split
 from tqdm import tqdm
 import os
+from colorama import Fore, Style
 
 
 def main():
@@ -70,22 +71,24 @@ def main():
 
     model = cnn.CNN(
         num_conv_layers=2,
+        input_dimension_x=28,
+        input_dimension_y=28,
         num_in_channels=1,
-        hidden_channels=[4, 4],
-        num_out_channels=10,
+        hidden_channels=[4, 8],
         kernel_sizes=[4, 4],
-        pooling_kernel_sizes=[1, 1],
+        pooling_kernel_sizes=[2, 2],
         stride=1,
         padding=2,
-        num_fc_layers=2,
+        num_fc_layers=1,
+        fc_channels=[10],
         num_classes=10,
     )
 
     # Test the model
 
+    print(f"{Fore.LIGHTYELLOW_EX}Model Architecture{Style.RESET_ALL}")
     print(model)
-    print("---")
-    print(model.parameters)
+    print(f"{Fore.LIGHTYELLOW_EX}{'-'*50}{Style.RESET_ALL}")
 
     criterion = nn.CrossEntropyLoss()
     optimiser = optim.Adam(model.parameters(), lr=learning_rate)
