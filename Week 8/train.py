@@ -57,6 +57,12 @@ def train(
             print_title("Backward pass")
             optimizer.zero_grad()
 
+            # Compute the gradient
+            loss.backward()
+
+            # Step the optimizer to update the weights
+            optimizer.step()
+
         # Validation
         print_title("Validation")
         model.eval()
