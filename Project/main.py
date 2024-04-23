@@ -4,20 +4,20 @@ Main Driver file for project
 
 from tqdm import tqdm
 from welcome import welcome
-import train
-import model
+import nn.train as train
+import nn.nn_model as nn_model
 import torch
 import os
 from colorama import Fore, Style
 import process_data
 import results
+import sys
 from dataset import DATASET_MAPPING
 
 
-def run_model(dataset_name: str) -> None:
+def run_nn_model(dataset_name: str) -> None:
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(
-            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
@@ -64,7 +64,7 @@ def run_model(dataset_name: str) -> None:
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1e5)
+    epochs = int(1e3)
     batch_size = 1000
     learning_rate = 1e-4
 
@@ -93,7 +93,7 @@ def run_model(dataset_name: str) -> None:
 
     print(f"{Fore.GREEN}Creating model for {dataset_name} dataset{Style.RESET_ALL}")
     # Instantiate the model and move it to the specified device
-    sequential_model = model.create_sequential_model(
+    sequential_model = nn_model.create_sequential_model(
         dim_input, dim_output, hidden_layer_dims
     ).to(device)
 
@@ -120,8 +120,7 @@ def run_model(dataset_name: str) -> None:
 
     criterion = torch.nn.CrossEntropyLoss(reduction="mean")
 
-    optimiser = torch.optim.SGD(
-        sequential_model.parameters(), lr=learning_rate)
+    optimiser = torch.optim.SGD(sequential_model.parameters(), lr=learning_rate)
 
     # --- Training Loop ---
 
@@ -138,10 +137,17 @@ def run_model(dataset_name: str) -> None:
             optimiser,
             epochs,
             metrics,
-            classes_in_output_vars
+            classes_in_output_vars,
         )
 
     results.show_training_results(metrics)
+
+
+def available_items(collective_name: str, items: list[str]) -> None:
+    print(f"{Fore.LIGHTGREEN_EX}Available {collective_name}:{Style.RESET_ALL}")
+    for item in items:
+        print(f"  - {item}")
+    print()
 
 
 def main():
@@ -149,7 +155,38 @@ def main():
 
     dataset_name = "Thorax"
 
-    run_model(dataset_name)
+    models = ["knn", "decision tree", "neural network"]
+
+    if len(sys.argv) < 3:
+        print(
+            f"{Fore.LIGHTRED_EX}Usage: {Fore.LIGHTCYAN_EX}python main.py {Fore.LIGHTMAGENTA_EX}<model_name> <dataset_name>{Style.RESET_ALL}\n"
+        )
+        available_items("datasets", DATASET_MAPPING.keys())
+
+        available_items("models", models)
+
+        sys.exit(1)
+
+    # Check dataset
+    dataset_name = sys.argv[2]
+    if dataset_name not in DATASET_MAPPING:
+        print(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        available_items("datasets", DATASET_MAPPING.keys())
+        sys.exit(1)
+
+    # Check model
+    model_name = sys.argv[1]
+    if model_name not in models:
+        print(f"{Fore.RED}Model {model_name} not found{Style.RESET_ALL}")
+        available_items("models", models)
+        sys.exit(1)
+
+    if model_name == "knn":
+        raise NotImplementedError("KNN not implemented")
+    elif model_name == "decision tree":
+        raise NotImplementedError("Decision tree not implemented")
+    elif model_name == "neural network":
+        run_nn_model(dataset_name)
 
 
 if __name__ == "__main__":
