@@ -1,34 +1,14 @@
 from typing import List, Tuple
-import model
+import Project.nn.nn_model as nn_model
 from colorama import Fore, Style
 import os
 import numpy as np
 import torch
 import torchvision
-import train
+from Project.process_data import preprocess_data
+import Project.nn.train as train
 from results import show_training_results
 from tqdm import tqdm
-
-
-def preprocess_data(
-    train_data: np.ndarray,
-    validation_data: np.ndarray,
-    dim_input: int,
-    normalising_factor: float,
-) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-
-    return_data = []
-
-    for data in [train_data, validation_data]:
-        new_data = torch.as_tensor(
-            data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32
-        )
-        labels = torch.as_tensor(data.targets)
-
-        return_data.append(new_data)
-        return_data.append(labels)
-
-    return return_data
 
 
 def classification_model(
@@ -47,7 +27,7 @@ def classification_model(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Instantiate the model and move it to the specified device
-    sequential_model = model.create_sequential_model(
+    sequential_model = nn_model.create_sequential_model(
         dim_input, dim_output, hidden_layer_dims
     ).to(device)
 

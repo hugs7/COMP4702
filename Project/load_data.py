@@ -5,6 +5,7 @@ Helper file to load data using pandas
 import pandas as pd
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
+import os
 
 
 def load_data(file_path: str) -> pd.DataFrame:
@@ -43,3 +44,17 @@ def shuffle_data(data: DataFrame) -> DataFrame:
     """
 
     return data.sample(frac=1).reset_index(drop=True)
+
+
+def file_exists(file_path: str) -> bool:
+    """
+    Check if a file exists.
+
+    Parameters:
+    - file_path (str): The file path.
+
+    Returns:
+    - bool: True if the file exists, False otherwise.
+    """
+
+    return os.path.exists(file_path)

@@ -5,23 +5,9 @@ Processing data helper
 from sklearn.model_selection import train_test_split
 from typing import List, Tuple
 import load_data
-import os
 import numpy as np
 import encode_data
-
-
-def file_exists(file_path: str) -> bool:
-    """
-    Check if a file exists.
-
-    Parameters:
-    - file_path (str): The file path.
-
-    Returns:
-    - bool: True if the file exists, False otherwise.
-    """
-
-    return os.path.exists(file_path)
+import torch
 
 
 def process_classification_data(
@@ -31,7 +17,7 @@ def process_classification_data(
     test_train_split_ratio: float = 0.3,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List]:
     # Check if the file exists
-    if not file_exists(data_file_path):
+    if not load_data.file_exists(data_file_path):
         raise FileNotFoundError(f"File {data_file_path} not found.")
 
     # Load the data
@@ -104,3 +90,24 @@ def test_train_split(
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio)
 
     return X_train, y_train, X_test, y_test
+
+
+def preprocess_data(
+    train_data: np.ndarray,
+    validation_data: np.ndarray,
+    dim_input: int,
+    normalising_factor: float,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+
+    return_data = []
+
+    for data in [train_data, validation_data]:
+        new_data = torch.as_tensor(
+            data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32
+        )
+        labels = torch.as_tensor(data.targets)
+
+        return_data.append(new_data)
+        return_data.append(labels)
+
+    return return_data
