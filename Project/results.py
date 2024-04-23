@@ -1,4 +1,4 @@
-from plot import lineplot
+from plot.plot import lineplot
 import numpy as np
 
 
