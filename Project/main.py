@@ -2,6 +2,7 @@
 Main Driver file for project
 """
 
+from typing import List
 from tqdm import tqdm
 from welcome import welcome
 import nn.train as train
@@ -15,11 +16,7 @@ import sys
 from dataset import DATASET_MAPPING
 
 
-def run_nn_model(dataset_name: str) -> None:
-    if dataset_name not in DATASET_MAPPING:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
-
-    dataset_file_name, columns = DATASET_MAPPING[dataset_name]
+def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
 
     num_variables_predicting = 2
 
@@ -32,19 +29,10 @@ def run_nn_model(dataset_name: str) -> None:
 
     # --- Dataset ---
 
-    folder_of_script = os.path.dirname(__file__)
-    data_folder = os.path.join(folder_of_script, "data")
-
-    # Create data folder if it does not exist
-    if not os.path.exists(data_folder):
-        os.makedirs(data_folder)
-
-    model_data_path = os.path.join(data_folder, dataset_file_name)
-
     # Read the dataset
     dataset, X_train, y_train, X_test, y_test, y_classes = (
         process_data.process_classification_data(
-            model_data_path, X_labels, y_labels, 0.3
+            dataset_file_path, X_labels, y_labels, 0.3
         )
     )
 
@@ -91,7 +79,6 @@ def run_nn_model(dataset_name: str) -> None:
     print("Training data shape:", X_train.shape, "x", y_train.shape)
     print("Validation data shape:", X_test.shape, "x", y_test.shape)
 
-    print(f"{Fore.GREEN}Creating model for {dataset_name} dataset{Style.RESET_ALL}")
     # Instantiate the model and move it to the specified device
     sequential_model = nn_model.create_sequential_model(
         dim_input, dim_output, hidden_layer_dims
@@ -181,12 +168,30 @@ def main():
         available_items("models", models)
         sys.exit(1)
 
+    if dataset_name not in DATASET_MAPPING:
+        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+
+    dataset_file_name, columns = DATASET_MAPPING[dataset_name]
+
+    folder_of_script = os.path.dirname(__file__)
+    data_folder = os.path.join(folder_of_script, "data")
+
+    # Create data folder if it does not exist
+    if not os.path.exists(data_folder):
+        os.makedirs(data_folder)
+
+    dataset_file_path = os.path.join(data_folder, dataset_file_name)
+
+    print(
+        f"{Fore.GREEN}Creating {model_name} model for {dataset_name} dataset{Style.RESET_ALL}"
+    )
+
     if model_name == "knn":
         raise NotImplementedError("KNN not implemented")
     elif model_name == "decision tree":
         raise NotImplementedError("Decision tree not implemented")
     elif model_name == "neural network":
-        run_nn_model(dataset_name)
+        run_nn_model(dataset_file_path, columns)
 
 
 if __name__ == "__main__":
