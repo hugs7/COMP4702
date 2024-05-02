@@ -77,6 +77,10 @@ def q1(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFr
     - None
     """
 
+    max_tree_depth = 3
+
+    decision_tree_model = decision_tree.DTClassifier(
+        X_train, y_train, X_test, y_test, feature_names, max_tree_depth=max_tree_depth
     decision_tree_model = decision_tree.DTClassifier(
         X_train, y_train, X_test, y_test, feature_names
     )
