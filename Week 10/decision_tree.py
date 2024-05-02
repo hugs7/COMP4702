@@ -18,8 +18,9 @@ class DTClassifier(Classifier):
         X_test: DataFrame,
         y_test: DataFrame,
         feature_names: list[str],
+        max_tree_depth: int = None,
     ):
-        self.model = DecisionTreeClassifier()
+        self.model = DecisionTreeClassifier(max_depth=max_tree_depth)
 
         super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
 
