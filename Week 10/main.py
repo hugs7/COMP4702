@@ -99,8 +99,10 @@ def q2(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFr
     Forest algorighm. Calculate E_{train} and E_{hold-out} for the ensemble.
     """
 
+    n_trees = 100
+
     random_forest_model = random_forest.RFClassifier(
-        X_train, y_train, X_test, y_test, feature_names
+        X_train, y_train, X_test, y_test, feature_names, n_trees=n_trees
     )
 
     test_preds, train_accuracy, test_accuracy = random_forest_model.classify()

@@ -10,8 +10,8 @@ from classifier import Classifier
 
 
 class RFClassifier(Classifier):
-    def __init__(self, X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFrame, feature_names: list[str]) -> None:
-        self.model = RandomForestClassifier()
+    def __init__(self, X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFrame, feature_names: list[str], n_trees: int = 100) -> None:
+        self.model = RandomForestClassifier(n_trees)
 
         super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
 
