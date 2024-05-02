@@ -164,9 +164,6 @@ cython_debug/
 #.idea/
 
 
-# PDF Files
-*.pdf
-
 # XLSX Files
 *.xlsx
 
