@@ -11,6 +11,7 @@ from colorama import Fore, Style
 
 import load_data
 import decision_tree
+import random_forest
 
 def process_classification_data(
     data_folder, randomise: bool
@@ -87,10 +88,30 @@ def q1(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFr
 
     print_classify_results_error(train_error, test_error)
 
-    # Plot decision tree regions
+    # Plot decision boundaries
     decision_tree_model.plot_decision_regions(test_preds, resolution=0.02)
 
     
+def q2(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFrame, feature_names: List[str]) -> None:
+    """
+    Question 2
+    Fit a bagging ensemble method to the same training data using the Random 
+    Forest algorighm. Calculate E_{train} and E_{hold-out} for the ensemble.
+    """
+
+    random_forest_model = random_forest.RFClassifier(
+        X_train, y_train, X_test, y_test, feature_names
+    )
+
+    test_preds, train_accuracy, test_accuracy = random_forest_model.classify()
+
+    train_error = accuracy_to_error(train_accuracy)
+    test_error = accuracy_to_error(test_accuracy)
+
+    print_classify_results_error(train_error, test_error)
+
+    # Plot decision boundaries
+    random_forest_model.plot_decision_regions(test_preds, resolution=0.02)
 
 def main():
     current_folder = os.path.dirname(__file__)
@@ -99,8 +120,13 @@ def main():
     # Load Data
     data, X_train, y_train, X_test, y_test, feature_names = process_classification_data(data_folder, randomise=True)
 
-    # Question 1
+    # Question 1 - Decision Tree
     q1(X_train, y_train, X_test, y_test, feature_names)
+
+    # Question 2 - Random Forest
+    q2(X_train, y_train, X_test, y_test, feature_names)
+
+
 
 
 
