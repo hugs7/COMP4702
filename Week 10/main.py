@@ -161,8 +161,8 @@ def q3(
     - None
     """
 
-    n_trees_iterate = range(1, 200, 4)
-    max_tree_depth_iterate = range(1, 10, 1)
+    n_trees_iterate = range(1, 100, 1)
+    max_tree_depth_iterate = range(4, 5, 1)
 
     results = []
 
