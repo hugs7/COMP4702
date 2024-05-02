@@ -23,12 +23,13 @@ class Classifier(Model):
 
     def plot_decision_regions(
         self,
-        test_preds: np.ndarray,
         resolution=0.02,
         plot_title="Decision Regions",
     ) -> None:
         """
-        Plots the decision regions for a classifier.
+        Plots the decision regions for a classifier and overlays the test data.
+        Wrongly classified points are indicated by being positioned outside their 
+        respective decision region.
 
         Parameters:
         - X_test (DataFrame): The input data used for testing the classifier.
@@ -37,13 +38,6 @@ class Classifier(Model):
 
         Returns:
         - None
-
-        This function plots the decision regions for a classifier by creating a mesh grid based on the input data and
-        classifying each point in the grid. The decision regions are then visualized using a contour plot.
-
-        Note:
-        - The input data should have exactly two features for proper visualization.
-        - The classifier should have a `predict` method that takes a feature matrix as input and returns the predicted labels.
         """
 
         X1_test = self.X_test.iloc[:, 0]
@@ -84,8 +78,9 @@ class Classifier(Model):
         plt.pcolormesh(xx, yy, Z_preds, cmap=cmap_light, shading="auto")
 
         # Overlay the test points
-        cmap_bold = ListedColormap(["#FF0000", "#00FF00"])
-        plt.scatter(X1_test, X2_test, c=test_preds, cmap=cmap_bold)
+        cmap_bold = ListedColormap(["#FF0000", "#00FF00", "#0000FF"])
+        plt.scatter(X1_test, X2_test, c=self.y_test
+                    , cmap=cmap_bold)
 
         # Setup plot
         plt.xlim(xx.min(), xx.max())

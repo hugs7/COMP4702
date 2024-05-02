@@ -81,8 +81,6 @@ def q1(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFr
 
     decision_tree_model = decision_tree.DTClassifier(
         X_train, y_train, X_test, y_test, feature_names, max_tree_depth=max_tree_depth
-    decision_tree_model = decision_tree.DTClassifier(
-        X_train, y_train, X_test, y_test, feature_names
     )
 
     test_preds, train_accuracy, test_accuracy = decision_tree_model.classify()
@@ -93,7 +91,7 @@ def q1(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFr
     print_classify_results_error(train_error, test_error)
 
     # Plot decision boundaries
-    decision_tree_model.plot_decision_regions(test_preds, resolution=0.02)
+    decision_tree_model.plot_decision_regions(resolution=0.02)
 
     
 def q2(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFrame, feature_names: List[str]) -> None:
@@ -117,7 +115,7 @@ def q2(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame, y_test: DataFr
     print_classify_results_error(train_error, test_error)
 
     # Plot decision boundaries
-    random_forest_model.plot_decision_regions(test_preds, resolution=0.02)
+    random_forest_model.plot_decision_regions(resolution=0.02)
 
 def main():
     current_folder = os.path.dirname(__file__)
