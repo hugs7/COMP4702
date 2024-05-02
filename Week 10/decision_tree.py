@@ -27,9 +27,8 @@ class DTClassifier(Classifier):
         """
         Trains the decision tree model using the provided training data.
 
-        Returns a tuple containing the test predictions, train accuracy, and test accuracy.
-
-        :return: A tuple containing the test predictions, train accuracy, and test accuracy.
+        Returns:
+            - A tuple containing the test predictions, train accuracy, and test accuracy.
         """
 
         X = pd.DataFrame(self.X_train, columns=self.feature_names)
@@ -38,9 +37,10 @@ class DTClassifier(Classifier):
         # Fit model
         self.model.fit(X, y)
 
-        # Get results
+        # Results from training
         train_accuracy = self.model.score(X, y)
 
+        # Test predictions
         test_predictions = self.model.predict(self.X_test)
         test_accuracy = self.model.score(self.X_test, self.y_test)
 
