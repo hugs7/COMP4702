@@ -8,7 +8,7 @@ from utils import key_from_value
 
 LOG_LEVELS = {0: None, 1: "ERROR", 2: "WARNING", 3: "DEBUG", 4: "INFO", 5: "TRACE"}
 
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "TRACE"
 LOG_LEVEL_INDEX = key_from_value(LOG_LEVELS, LOG_LEVEL)
 
 
@@ -87,3 +87,14 @@ def log_colored(color: Any, *messages: str) -> None:
         return
 
     print(f"{color}{' '.join(map(str, messages))}{Style.RESET_ALL}")
+
+
+def log_line(num_hyphens: int = 50) -> None:
+    """
+    Prints a line of '-' characters.
+
+    Args:
+    - num_hyphens (int): The number of hyphens to print. Default is 50.
+    """
+
+    print("-" * num_hyphens)
