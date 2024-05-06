@@ -8,9 +8,11 @@ import sys
 
 from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
+import process_data
+from print_helper import *
 
 from nn.driver import run_nn_model
-
+from knn.driver import run_knn_model
 
 
 def main():
@@ -18,7 +20,7 @@ def main():
 
     dataset_name = "Thorax"
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         print(
@@ -33,14 +35,14 @@ def main():
     # Check dataset
     dataset_name = sys.argv[2]
     if dataset_name not in DATASET_MAPPING:
-        print(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        print_error(f"Dataset {dataset_name} not found")
         available_items("datasets", DATASET_MAPPING.keys())
         sys.exit(1)
 
     # Check model
     model_name = sys.argv[1].lower()
     if model_name not in models.keys():
-        print(f"{Fore.RED}Model {model_name} not found{Style.RESET_ALL}")
+        print_error(f"Model {model_name} not found")
         available_items("models", models)
         sys.exit(1)
 
@@ -58,16 +60,37 @@ def main():
 
     dataset_file_path = os.path.join(data_folder, dataset_file_name)
 
-    print(
-        f"{Fore.GREEN}Creating {model_name} model for {dataset_name} dataset{Style.RESET_ALL}"
-    )
+    print_info(f"Creating {model_name} model for {dataset_name} dataset...")
+
+    # Specify the indices of the columns that are the variables we are predicting
+    y_col_indices = [0, 1]
+
+    # Derive the indices of the x variables by removing the y indices
+    x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices]
+
+    # Obtain the labels of the x and y variables
+
+    X_labels = [columns[i] for i in x_col_indices]
+    y_labels = [columns[i] for i in y_col_indices]
+
+    print_info(f"X labels: {X_labels}")
+    print_info(f"y labels: {y_labels}")
+
+    # --- Dataset ---
+
+    # Load and pre-process the dataset
+    test_train_ratio = 0.3
+    X_train, y_train, X_test, y_test = process_data.process_classification_data(dataset_file_path, X_labels, y_labels, test_train_ratio)
 
     if model_name == "knn":
+        run_knn_model(dataset_file_path, columns)
         raise NotImplementedError("KNN not implemented")
     elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
+    elif model_name == "rf":
+        raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
-        run_nn_model(dataset_file_path, columns)
+        run_nn_model(X_train, y_train, X_test, y_test, X_labels, y_labels)
 
 
 if __name__ == "__main__":
