@@ -38,6 +38,7 @@ def nn_train(
     Returns:
     - List: List of metrics with the new metrics appended
     """
+
     # Select a random batch of data
     indices = np.random.randint(0, train_data.shape[0], size=batch_size)
 
@@ -64,7 +65,7 @@ def nn_train(
         reshaped_preds.append(reshaped_pred)
 
     log_trace("Predictions: ", y_pred)
-    log_debug("Shape of predictions: ", y_pred.shape)
+    log_trace("Shape of predictions: ", y_pred.shape)
 
     # True labels
 
@@ -73,7 +74,7 @@ def nn_train(
     train_labels_batch = train_labels[indices]
 
     log_trace(train_labels_batch)
-    log_debug("Shape of labels: ", train_labels_batch.shape)
+    log_trace("Shape of labels: ", train_labels_batch.shape)
 
     y_true = train_labels_batch
 
@@ -100,7 +101,7 @@ def nn_train(
         loss = criterion(recovered_var_dim, y_true_dim)
         losses.append(loss)
 
-    log_debug(loss)
+    log_trace(loss)
 
     # Loss is the sum of all losses
     loss = sum(losses)
@@ -115,10 +116,6 @@ def nn_train(
     optimiser.step()
 
     if epoch % 100 == 0 or epoch == optimisation_steps - 1:
-
-        log_debug(f"Epoch: {epoch} / {optimisation_steps}")
-        log_debug("Loss: ", loss.item())
-
         # Find argument which maximises the prediction value
         # Again we need to reshape the predictions and take argmax of each recovered variable
         accuracies = []
@@ -128,12 +125,12 @@ def nn_train(
             y_true_dim = y_true[:, dim].long()
             argmax = recovered_var_dim.argmax(dim=1)
 
-            log_debug("Argmax: ", argmax)
+            log_trace("Argmax: ", argmax)
 
             # Comparison
             comparison = argmax == y_true_dim
 
-            log_debug("Comparison: ", comparison)
+            log_trace("Comparison: ", comparison)
 
             train_accuracy = torch.mean((comparison).float())
             train_accuracy_value = train_accuracy.cpu().numpy()
