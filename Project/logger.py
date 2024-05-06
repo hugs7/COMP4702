@@ -102,12 +102,16 @@ def log_colored(color: Any, *messages: str, **kwargs: Any) -> None:
     print(Style.RESET_ALL, end="")
 
 
-def log_line(num_hyphens: int = 50) -> None:
+def log_line(num_hyphens: int = 50, level: str = "ERROR") -> None:
     """
     Prints a line of '-' characters.
 
     Args:
     - num_hyphens (int): The number of hyphens to print. Default is 50.
+    - level (str): The log level of the line. Default is "ERROR" (always print)
     """
+
+    if not check_log_level(level):
+        return
 
     print("-" * num_hyphens)
