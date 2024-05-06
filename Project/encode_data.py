@@ -3,7 +3,7 @@ Helper function to encode non-numeric data as numeric
 """
 
 import pandas as pd
-from Project.logger import *
+from logger import *
 
 
 def encode_non_numeric_data(data: pd.DataFrame) -> pd.DataFrame:

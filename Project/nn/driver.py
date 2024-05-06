@@ -9,7 +9,7 @@ import torch
 import numpy as np
 
 import results
-from Project.logger import *
+from logger import *
 
 from nn import train
 from nn import nn_model

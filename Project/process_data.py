@@ -10,7 +10,7 @@ import torch
 import load_data
 import numpy as np
 import encode_data
-from Project.logger import *
+from logger import *
 
 
 def process_classification_data(

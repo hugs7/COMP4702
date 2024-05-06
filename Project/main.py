@@ -9,7 +9,7 @@ import sys
 from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
 import process_data
-from Project.logger import *
+from logger import *
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
