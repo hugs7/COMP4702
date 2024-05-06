@@ -9,7 +9,7 @@ import sys
 from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
 import process_data
-from print_helper import *
+from Project.logger import *
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
@@ -35,14 +35,14 @@ def main():
     # Check dataset
     dataset_name = sys.argv[2]
     if dataset_name not in DATASET_MAPPING:
-        print_error(f"Dataset {dataset_name} not found")
+        log_error(f"Dataset {dataset_name} not found")
         available_items("datasets", DATASET_MAPPING.keys())
         sys.exit(1)
 
     # Check model
     model_name = sys.argv[1].lower()
     if model_name not in models.keys():
-        print_error(f"Model {model_name} not found")
+        log_error(f"Model {model_name} not found")
         available_items("models", models)
         sys.exit(1)
 
@@ -60,7 +60,7 @@ def main():
 
     dataset_file_path = os.path.join(data_folder, dataset_file_name)
 
-    print_info(f"Creating {model_name} model for {dataset_name} dataset...")
+    log_info(f"Creating {model_name} model for {dataset_name} dataset...")
 
     # Specify the indices of the columns that are the variables we are predicting
     y_col_indices = [0, 1]
@@ -73,8 +73,8 @@ def main():
     X_labels = [columns[i] for i in x_col_indices]
     y_labels = [columns[i] for i in y_col_indices]
 
-    print_info(f"X labels: {X_labels}")
-    print_info(f"y labels: {y_labels}")
+    log_info(f"X labels: {X_labels}")
+    log_info(f"y labels: {y_labels}")
 
     # --- Dataset ---
 

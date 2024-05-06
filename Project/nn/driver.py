@@ -9,7 +9,7 @@ import torch
 import numpy as np
 
 import results
-from print_helper import *
+from Project.logger import *
 
 from nn import train
 from nn import nn_model
@@ -45,17 +45,17 @@ def run_nn_model(
     - y_labels (List[str]): The names of the target variable.
     """
 
-    print_title("Computing output data transform...")
+    log_title("Computing output data transform...")
 
     # Get the classes in each output variable as a list of lists
     y_classes = [np.unique(y_train[:, i]) for i in range(y_train.shape[1])]
 
     classes_in_output_vars = [len(classes) for classes in y_classes]
-    print_info(f"Number of classes in each output variable: {classes_in_output_vars}")
+    log_info(f"Number of classes in each output variable: {classes_in_output_vars}")
 
     # Ouptut dimension is sum of classes in each output variable
     # because of one hot encoding. Flatten the list of classes
-    print_title("Flattening classes in output variables")
+    log_title("Flattening classes in output variables")
     dim_output = sum(classes_in_output_vars)
     # Although this is different from the number of output variables, we will need to
     # recover the true classification from the one-hot encoding by reshaping the output.
@@ -66,11 +66,11 @@ def run_nn_model(
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1e3)
+    epochs = int(1e4)
     batch_size = 1000
     learning_rate = 1e-4
 
-    print_title("Convert data to tensors...")
+    log_title("Convert data to tensors...")
 
     X_train = to_tensor(X_train)
     y_train = to_tensor(y_train)
@@ -78,7 +78,7 @@ def run_nn_model(
     X_test = to_tensor(X_test)
     y_test = to_tensor(y_test)
 
-    print_info("Data converted to tensors")
+    log_info("Data converted to tensors")
 
     # ----- Device ------
     # Move model to GPU if available
@@ -90,13 +90,13 @@ def run_nn_model(
     X_test = X_test.to(device)
     y_test = y_test.to(device)
 
-    print_info("Training data shape:", X_train.shape, "x", y_train.shape)
-    print_info("Validation data shape:", X_test.shape, "x", y_test.shape)
+    log_info("Training data shape:", X_train.shape, "x", y_train.shape)
+    log_info("Validation data shape:", X_test.shape, "x", y_test.shape)
 
     # Instantiate the model and move it to the specified device
     sequential_model = nn_model.create_sequential_model(dim_input, dim_output, hidden_layer_dims).to(device)
 
-    print_info(f"Model: \n{sequential_model}\n")
+    log_info(f"Model: \n{sequential_model}\n")
 
     # --- Loss Function ---
     # For classification problems, usually use cross entropy loss

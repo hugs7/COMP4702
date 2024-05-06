@@ -3,7 +3,7 @@ Helper function to encode non-numeric data as numeric
 """
 
 import pandas as pd
-from print_helper import *
+from Project.logger import *
 
 
 def encode_non_numeric_data(data: pd.DataFrame) -> pd.DataFrame:
@@ -12,7 +12,7 @@ def encode_non_numeric_data(data: pd.DataFrame) -> pd.DataFrame:
 
     for column in data.columns:
         sample_data_point = data[column].iloc[0]
-        print_trace(f"Column: {column}, Sample Data Point: {sample_data_point}, Data Type: {data[column].dtype}")
+        log_trace(f"Column: {column}, Sample Data Point: {sample_data_point}, Data Type: {data[column].dtype}")
         if data[column].dtype == str or data[column].dtype == object:
             # Replace with mode
             data[column] = data[column].astype("category")

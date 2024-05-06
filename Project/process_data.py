@@ -10,7 +10,7 @@ import torch
 import load_data
 import numpy as np
 import encode_data
-from print_helper import *
+from Project.logger import *
 
 
 def process_classification_data(
@@ -39,7 +39,7 @@ def process_classification_data(
     - y_test (np.ndarray): The testing data target variable.
     """
 
-    print_title(f"Pre-processing data...")
+    log_title(f"Pre-processing data...")
 
     # Check if the file exists
     if not load_data.file_exists(data_file_path):
@@ -56,18 +56,18 @@ def process_classification_data(
     X = data_randomised[X_feature_names]
     y = data_randomised[y_feature_names]
 
-    print_info(f"Data pre-processed")
+    log_info(f"Data pre-processed")
 
-    print_title(f"Encoding data...")
+    log_title(f"Encoding data...")
 
     X = encode_data.encode_non_numeric_data(X)
     y = encode_data.encode_non_numeric_data(y)
 
     print("-" * 50)
-    print_info(f"Data sample X:")
+    log_info(f"Data sample X:")
     print(X.head())
 
-    print_info(f"Data sample y:")
+    log_info(f"Data sample y:")
     print(y.head())
     print("-" * 50)
 
