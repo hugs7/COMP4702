@@ -4,10 +4,13 @@ Processing data helper
 
 from sklearn.model_selection import train_test_split
 from typing import List, Tuple
+from colorama import Fore, Style
+import torch
+
 import load_data
 import numpy as np
 import encode_data
-import torch
+from print_helper import *
 
 
 def process_classification_data(
@@ -15,63 +18,69 @@ def process_classification_data(
     X_feature_names: List[str],
     y_feature_names: List[str],
     test_train_split_ratio: float = 0.3,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Preprocesses data ready for supervised learning by picking the X and y columns as passed,
+    randomising the data, and encoding non-numeric data. Finally, the data is converted to
+    numpy arrays, with dtype float32, then split into training and testing sets.
+
+    This function assumes the data includes labels in the first row.
+
+    Args:
+    - data_file_path (str): The path to the data file.
+    - X_feature_names (List[str]): The names of the features.
+    - y_feature_names (List[str]): The names of the target variable.
+    - test_train_split_ratio (float): The ratio of the testing data.
+
+    Returns:
+    - X_train (np.ndarray): The training data features.
+    - y_train (np.ndarray): The training data target variable.
+    - X_test (np.ndarray): The testing data features.
+    - y_test (np.ndarray): The testing data target variable.
+    """
+
+    print_title(f"Pre-processing data...")
+
     # Check if the file exists
     if not load_data.file_exists(data_file_path):
         raise FileNotFoundError(f"File {data_file_path} not found.")
 
     # Load the data
     data = load_data.load_data(data_file_path)
-
-    all_feature_names = y_feature_names + X_feature_names
-
-    data = load_data.tag_data(data, all_feature_names)
-
-    # Get the values of the target variables
-    y_classes = []
-    for y_feature_name in y_feature_names:
-        y_values = data.loc[:, y_feature_name].values
-
-        # Get only the unique values
-
-        y_values = list(np.unique(y_values))
-
-        # Append the array to the y_classes array (2D array)
-        y_classes.append(y_values)
+    print(data.head())
 
     # Randomise the data
     data_randomised = load_data.shuffle_data(data)
 
     # Split the data into training and testing data
-    X = data_randomised.loc[:, X_feature_names]
-    y = data_randomised.loc[:, y_feature_names]
+    X = data_randomised[X_feature_names]
+    y = data_randomised[y_feature_names]
 
-    # X data is mostly numeric but in the case it isn't, encode it
+    print_info(f"Data pre-processed")
+
+    print_title(f"Encoding data...")
+
     X = encode_data.encode_non_numeric_data(X)
-
-    # y data is mostly categorical but in the case it isn't, encode it
     y = encode_data.encode_non_numeric_data(y)
 
-    print("X", X)
-
     print("-" * 50)
+    print_info(f"Data sample X:")
+    print(X.head())
 
-    print("y", y)
+    print_info(f"Data sample y:")
+    print(y.head())
+    print("-" * 50)
 
     # Convert data to numpy arrays
     X = X.to_numpy(dtype=np.float32)
     y = y.to_numpy(dtype=np.float32)
 
-    X_train, y_train, X_test, y_test = test_train_split(
-        X, y, ratio=test_train_split_ratio
-    )
+    X_train, y_train, X_test, y_test = test_train_split(X, y, ratio=test_train_split_ratio)
 
-    return data, X_train, y_train, X_test, y_test, y_classes
+    return X_train, y_train, X_test, y_test
 
 
-def test_train_split(
-    X: np.ndarray, y: np.ndarray, ratio: float = 0.3
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def test_train_split(X: np.ndarray, y: np.ndarray, ratio: float = 0.3) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Splits the data into training and testing data.
 
@@ -102,9 +111,7 @@ def preprocess_data(
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = torch.as_tensor(
-            data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32
-        )
+        new_data = torch.as_tensor(data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32)
         labels = torch.as_tensor(data.targets)
 
         return_data.append(new_data)
