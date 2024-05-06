@@ -4,25 +4,12 @@ Helper for printing messages in color
 
 from colorama import Fore, Style
 from typing import Any, Dict, Sequence
+from utils import key_from_value
 
 LOG_LEVELS = {0: None, 1: "ERROR", 2: "WARNING", 3: "DEBUG", 4: "INFO", 5: "TRACE"}
 
-LOG_LEVEL = LOG_LEVELS[5]
-
-
-def key_from_value(dict: Dict, value: str) -> int:
-    """
-    Get the key from a dictionary by the value. IF multiple
-    keys have the same value, the first key found will be returned.
-
-    Args:
-    - dict (Dict): The dictionary to search.
-    - value (str): The value to search for.
-
-    Returns:
-    - int: The key of the value.
-    """
-    return [k for k, v in dict.items() if v == value][0]
+LOG_LEVEL = "INFO"
+LOG_LEVEL_INDEX = key_from_value(LOG_LEVELS, LOG_LEVEL)
 
 
 def check_log_level(level: str) -> bool:
@@ -37,11 +24,11 @@ def check_log_level(level: str) -> bool:
     """
     # Find the key for the level from the values
     level = key_from_value(LOG_LEVELS, level)
-
-    if LOG_LEVEL is None:
+    print(level)
+    if LOG_LEVEL_INDEX is None:
         raise ValueError("LOG_LEVEL not found")
 
-    return LOG_LEVEL <= level
+    return LOG_LEVEL_INDEX <= level
 
 
 def log_title(*messages: str) -> None:
