@@ -9,8 +9,8 @@ from pandas import DataFrame
 import knn.knn
 
 
-def knn_driver(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame,
-                 y_test: DataFrame, feature_names: list[str], k: int = 5) \
+def run_knn_model(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame,
+                  y_test: DataFrame, feature_names: list[str], k: int = 5) \
         -> tuple[float, float]:
     """
     Classification task using knn
