@@ -50,9 +50,12 @@ def nn_train(
     log_line(level="TRACE")
     log_trace("Labels: ", train_labels[indices])
     log_debug("Shape of labels: ", train_labels[indices].shape)
+    ###### NEED TO FIX LABELS dimensionality
 
     # Make predictions
     y_pred = sequential_model(x)
+
+    # Compute the loss (with output still flattened). We will recover the original shape later
 
     # As we (potentially) have multidimensional output, we need to reshape the predictions
     # or unflatten them based on classes_in_output_vars
