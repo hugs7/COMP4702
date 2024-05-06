@@ -1,14 +1,16 @@
 """
-Implements a KNN Classification model
+KNN Classification model class
+Hugo Burton
 """
 
-from classifier import Classifier
 from colorama import Fore, Style
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
+
+from model.classifier import Classifier
 
 
 class KNNClassify(Classifier):

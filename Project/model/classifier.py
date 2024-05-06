@@ -1,4 +1,8 @@
-from base_model import Model
+"""
+Classification Model Class
+Hugo Burton
+"""
+
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import pandas as pd
@@ -6,6 +10,7 @@ from pandas import DataFrame
 import numpy as np
 from sklearn.base import BaseEstimator
 
+from base_model import Model
 
 class Classifier(Model):
     def __init__(
