@@ -6,6 +6,7 @@ Hugo Burton
 
 from typing import List
 import torch
+import torch.optim as optim
 import numpy as np
 
 import results
@@ -64,9 +65,11 @@ def run_nn_model(
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1e5)
+    epochs = int(1e4)
     batch_size = 1000
-    learning_rate = 1e-4
+    learning_rate = 2e-4
+    weight_decay = 0
+
     loss_weights = [1.2, 1.0]
 
     log_title("Convert data to tensors...")
@@ -119,8 +122,10 @@ def run_nn_model(
 
     criterion = torch.nn.CrossEntropyLoss(reduction="mean")
 
-    optimiser = torch.optim.SGD(
-        sequential_model.parameters(), lr=learning_rate)
+    # optimiser = torch.optim.SGD(
+    #     sequential_model.parameters(), lr=learning_rate)
+    optimiser = optim.Adam(
+        sequential_model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     # --- Training Loop ---
 
