@@ -28,3 +28,11 @@ def welcome():
     print(f"{Fore.LIGHTCYAN_EX}Seaborn version: {Style.RESET_ALL}{sb.__version__}")
 
     print("-" * 40)
+
+
+
+def available_items(collective_name: str, items: list[str]) -> None:
+    print(f"{Fore.LIGHTGREEN_EX}Available {collective_name}:{Style.RESET_ALL}")
+    for item in items:
+        print(f"  - {item}")
+    print()

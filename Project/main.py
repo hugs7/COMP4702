@@ -4,7 +4,7 @@ Main Driver file for project
 
 from typing import List
 from tqdm import tqdm
-from welcome import welcome
+from welcome import welcome, available_items
 import nn.train as train
 import nn.nn_model as nn_model
 import torch
@@ -129,12 +129,6 @@ def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
 
     results.show_training_results(metrics)
 
-
-def available_items(collective_name: str, items: list[str]) -> None:
-    print(f"{Fore.LIGHTGREEN_EX}Available {collective_name}:{Style.RESET_ALL}")
-    for item in items:
-        print(f"  - {item}")
-    print()
 
 
 def main():
