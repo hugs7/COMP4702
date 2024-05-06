@@ -3,7 +3,7 @@ Helper for printing messages in color
 """
 
 from colorama import Fore, Style
-from typing import Any, Dict, Sequence
+from typing import Any
 from utils import key_from_value
 
 LOG_LEVELS = {0: None, 1: "ERROR", 2: "WARNING", 3: "DEBUG", 4: "INFO", 5: "TRACE"}
