@@ -20,7 +20,8 @@ def main():
 
     dataset_name = "Thorax"
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "rf": "Random Forest", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
+              "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         print(
@@ -47,7 +48,8 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(
+            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
