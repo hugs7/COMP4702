@@ -71,21 +71,30 @@ def process_classification_data(
     print(y.head())
     log_line()
 
-    log_info(f"Data encoded")
-
-    log_title(f"Converting data to numpy arrays...")
     # Convert data to numpy arrays
+    log_title(f"Data converted to numpy arrays")
     X = X.to_numpy(dtype=np.float32)
     y = y.to_numpy(dtype=np.float32)
+    log_info(f"Converted data to numpy arrays")
 
-    log_info(f"Data converted to numpy arrays")
+    # One hot encode the data with padding
+    log_title(f"One-hot encoding target variables...")
+    y = encode_data.one_hot_encode_separate_output_vars(y)
+
+    log_info(f"Data sample y:")
+    log_debug(y[:5])
+    log_line()
+
+    log_info(f"Data encoded")
 
     log_title(f"Splitting data into training and testing data...")
 
-    X_train, y_train, X_test, y_test = test_train_split(X, y, ratio=test_train_split_ratio)
+    X_train, y_train, X_test, y_test = test_train_split(
+        X, y, ratio=test_train_split_ratio)
 
     log_info(f"Data split into training and testing data")
-    log_debug(f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}")
+    log_debug(
+        f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}")
 
     return X_train, y_train, X_test, y_test
 
@@ -121,7 +130,8 @@ def preprocess_data(
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = torch.as_tensor(data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32)
+        new_data = torch.as_tensor(data.data.reshape(
+            (-1, dim_input)) / normalising_factor, dtype=torch.float32)
         labels = torch.as_tensor(data.targets)
 
         return_data.append(new_data)
