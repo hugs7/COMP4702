@@ -25,7 +25,7 @@ def check_log_level(level: str) -> bool:
 
     # Find the key for the level from the values
     level = key_from_value(LOG_LEVELS, level)
-    print(level)
+
     if LOG_LEVEL_INDEX is None:
         raise ValueError("LOG_LEVEL not found")
 
