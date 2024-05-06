@@ -8,22 +8,35 @@ from logger import *
 
 
 def welcome():
-    print("Week 7: PyTorch")
+    log_title("Welcome to the Machine Learning Project")
 
-    print("Torch version: ", torch.__version__)
+    log_info("Torch version: ", torch.__version__)
 
     # Check if CUDA is available
     if torch.cuda.is_available():
-        print(f"{Fore.LIGHTGREEN_EX}CUDA is available{Style.RESET_ALL}")
-        print(f"{Fore.LIGHTMAGENTA_EX}Device count: {Style.RESET_ALL}{torch.cuda.device_count()}")
-        print(f"{Fore.LIGHTMAGENTA_EX}Current device: {Style.RESET_ALL}{torch.cuda.current_device()}")
-        print(f"{Fore.LIGHTMAGENTA_EX}Device name: {Style.RESET_ALL}{torch.cuda.get_device_name()}")
-    else:
-        print(f"{Fore.LIGHTRED_EX}CUDA is not available{Style.RESET_ALL}")
+        log_info("CUDA is available")
 
-    print(f"{Fore.LIGHTCYAN_EX}Python version: {Style.RESET_ALL}{sys.version}")
-    print(f"{Fore.LIGHTCYAN_EX}Numpy version: {Style.RESET_ALL}{np.__version__}")
-    print(f"{Fore.LIGHTCYAN_EX}Seaborn version: {Style.RESET_ALL}{sb.__version__}")
+        log_info("Device count: ", end="")
+        log(torch.cuda.device_count(), level="INFO")
+
+        log_info("Current device: ", end="")
+        log(torch.cuda.current_device(), level="INFO")
+
+        log_info("Device name: ", end="")
+        log(torch.cuda.get_device_name(), level="INFO")
+    else:
+        log_warning("CUDA is not available")
+
+    log_line()
+
+    log_info("Python version: ", end="")
+    log(sys.version, level="INFO")
+
+    log_info("Numpy version: ", end="")
+    log(np.__version__, level="INFO")
+
+    log_info("Seaborn version: ", end="")
+    log(sb.__version__, level="INFO")
 
     log_line()
 

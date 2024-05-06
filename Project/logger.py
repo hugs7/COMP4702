@@ -32,61 +32,74 @@ def check_log_level(level: str) -> bool:
     return level <= LOG_LEVEL_INDEX
 
 
-def log_title(*messages: str) -> None:
+def log_title(*messages: str, **kwargs: Any) -> None:
     """
     Prints a title message in green text.
     """
-    log_colored(Fore.LIGHTGREEN_EX, *messages)
+    log_colored(Fore.LIGHTGREEN_EX, *messages, **kwargs)
 
 
-def log_error(*messages: str) -> None:
+def log(*messages: str, level: str, **kwargs: Any) -> None:
+    """
+    Prints a message in white text.
+    """
+    if check_log_level(level):
+        log_colored(Fore.WHITE, *messages, **kwargs)
+
+
+def log_error(*messages: str, **kwargs: Any) -> None:
     """
     Prints an error message in red text.
     """
     if check_log_level("ERROR"):
-        log_colored(Fore.RED, *messages)
+        log_colored(Fore.RED, *messages, **kwargs)
 
 
-def log_warning(*messages: str) -> None:
+def log_warning(*messages: str, **kwargs: Any) -> None:
     """
     Prints a warning message in yellow text.
     """
     if check_log_level("WARNING"):
-        log_colored(Fore.YELLOW, *messages)
+        log_colored(Fore.YELLOW, *messages, **kwargs)
 
 
-def log_debug(*messages: str) -> None:
+def log_debug(*messages: str, **kwargs: Any) -> None:
     """
     Prints a debug message in magenta text.
     """
     if check_log_level("DEBUG"):
-        log_colored(Fore.LIGHTMAGENTA_EX, *messages)
+        log_colored(Fore.LIGHTMAGENTA_EX, *messages, **kwargs)
 
 
-def log_info(*messages: str) -> None:
+def log_info(*messages: str, **kwargs: Any) -> None:
     """
     Prints an info message in blue text.
     """
     if check_log_level("INFO"):
-        log_colored(Fore.LIGHTCYAN_EX, *messages)
+        log_colored(Fore.LIGHTCYAN_EX, *messages, **kwargs)
 
 
-def log_trace(*messages: str) -> None:
+def log_trace(*messages: str, **kwargs: Any) -> None:
     """
     Prints a trace message in cyan text.
     """
     if check_log_level("TRACE"):
-        log_colored(Fore.LIGHTBLACK_EX, *messages)
+        log_colored(Fore.LIGHTBLACK_EX, *messages, **kwargs)
 
 
-def log_colored(color: Any, *messages: str) -> None:
+def log_colored(color: Any, *messages: str, **kwargs: Any) -> None:
     """
     Prints messages in the specified color.
     """
     if not messages:
         return
 
-    print(f"{color}{' '.join(map(str, messages))}{Style.RESET_ALL}")
+    end = kwargs.get("end", "\n")
+    sep = kwargs.get("sep", " ")
+
+    print(color, end="")
+    print(*messages, sep=sep, end=end)
+    print(Style.RESET_ALL, end="")
 
 
 def log_line(num_hyphens: int = 50) -> None:
