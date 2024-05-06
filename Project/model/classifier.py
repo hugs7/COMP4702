@@ -10,7 +10,7 @@ from pandas import DataFrame
 import numpy as np
 from sklearn.base import BaseEstimator
 
-from base_model import Model
+from model.base_model import Model
 
 class Classifier(Model):
     def __init__(
