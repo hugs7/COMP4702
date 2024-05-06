@@ -18,7 +18,7 @@ def process_classification_data(
     X_feature_names: List[str],
     y_feature_names: List[str],
     test_train_split_ratio: float = 0.3,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
     """
     Preprocesses data ready for supervised learning by picking the X and y columns as passed,
     randomising the data, and encoding non-numeric data. Finally, the data is converted to
@@ -37,6 +37,7 @@ def process_classification_data(
     - y_train (np.ndarray): The training data target variable.
     - X_test (np.ndarray): The testing data features.
     - y_test (np.ndarray): The testing data target variable.
+    - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
     log_title(f"Pre-processing data...")
@@ -77,6 +78,11 @@ def process_classification_data(
     y = y.to_numpy(dtype=np.float32)
     log_info(f"Converted data to numpy arrays")
 
+    # Calculate number of classes in each target variable
+    num_output_vars = y.shape[1]
+    num_classes_in_vars = [len(np.unique(y[:, col]))
+                           for col in range(num_output_vars)]
+
     # One hot encode the data with padding
     log_title(f"One-hot encoding target variables...")
     y = encode_data.one_hot_encode_separate_output_vars(y)
@@ -94,9 +100,13 @@ def process_classification_data(
 
     log_info(f"Data split into training and testing data")
     log_debug(
-        f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}")
+        f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
+    log_debug(
+        f"X_test shape: {X_test.shape},\ny_test shape: {y_test.shape}")
 
-    return X_train, y_train, X_test, y_test
+    log_line()
+
+    return X_train, y_train, X_test, y_test, num_classes_in_vars
 
 
 def test_train_split(X: np.ndarray, y: np.ndarray, ratio: float = 0.3) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
@@ -125,6 +135,8 @@ def preprocess_data(
     validation_data: np.ndarray,
     dim_input: int,
     normalising_factor: float,
+
+
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
     return_data = []

@@ -82,7 +82,8 @@ def main():
 
     # Load and pre-process the dataset
     test_train_ratio = 0.3
-    X_train, y_train, X_test, y_test = process_data.process_classification_data(dataset_file_path, X_labels, y_labels, test_train_ratio)
+    X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
+        dataset_file_path, X_labels, y_labels, test_train_ratio)
 
     if model_name == "knn":
         run_knn_model(dataset_file_path, columns)
