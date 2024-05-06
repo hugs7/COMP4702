@@ -142,7 +142,7 @@ def main():
 
     dataset_name = "Thorax"
 
-    models = ["knn", "decision tree", "neural network"]
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         print(
@@ -162,8 +162,8 @@ def main():
         sys.exit(1)
 
     # Check model
-    model_name = sys.argv[1]
-    if model_name not in models:
+    model_name = sys.argv[1].lower()
+    if model_name not in models.keys():
         print(f"{Fore.RED}Model {model_name} not found{Style.RESET_ALL}")
         available_items("models", models)
         sys.exit(1)
@@ -188,9 +188,9 @@ def main():
 
     if model_name == "knn":
         raise NotImplementedError("KNN not implemented")
-    elif model_name == "decision tree":
+    elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
-    elif model_name == "neural network":
+    elif model_name == "nn":
         run_nn_model(dataset_file_path, columns)
 
 
