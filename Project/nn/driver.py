@@ -30,7 +30,8 @@ def to_tensor(data: np.ndarray) -> torch.Tensor:
 
 
 def run_nn_model(
-    X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, X_labels: List[str], y_labels: List[str]
+    X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, X_labels: List[str], y_labels: List[List[str]],
+    num_classes_in_vars: List[int]
 ) -> None:
     """
     Driver script for Neural Network model. Takes in training, test data along with labels and trains
@@ -41,22 +42,19 @@ def run_nn_model(
     - y_train (np.ndarray): Training data target variable.
     - X_test (np.ndarray): Testing data features.
     - y_test (np.ndarray): Testing data target variable.
-    - X_labels (List[str]): The names of the features.
-    - y_labels (List[str]): The names of the target variable.
+    - X_labels (List[str]): The names of the (input) features.
+    - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
+    - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
-    log_title("Computing output data transform...")
+    log_title("Start of nn model driver...")
 
-    # Get the classes in each output variable as a list of lists
-    y_classes = [np.unique(y_train[:, i]) for i in range(y_train.shape[1])]
-
-    classes_in_output_vars = [len(classes) for classes in y_classes]
-    log_info(f"Number of classes in each output variable: {classes_in_output_vars}")
+    log_info(
+        f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # Ouptut dimension is sum of classes in each output variable
     # because of one hot encoding. Flatten the list of classes
-    log_title("Flattening classes in output variables")
-    dim_output = sum(classes_in_output_vars)
+    dim_output_flattened = sum(num_classes_in_vars)
     # Although this is different from the number of output variables, we will need to
     # recover the true classification from the one-hot encoding by reshaping the output.
 
@@ -119,7 +117,8 @@ def run_nn_model(
 
     criterion = torch.nn.CrossEntropyLoss(reduction="mean")
 
-    optimiser = torch.optim.SGD(sequential_model.parameters(), lr=learning_rate)
+    optimiser = torch.optim.SGD(
+        sequential_model.parameters(), lr=learning_rate)
 
     # --- Training Loop ---
 
