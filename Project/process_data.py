@@ -47,7 +47,7 @@ def process_classification_data(
 
     # Load the data
     data = load_data.load_data(data_file_path)
-    print(data.head())
+    log_debug(f"Data sample\n{data.head()}")
 
     # Randomise the data
     data_randomised = load_data.shuffle_data(data)
@@ -63,19 +63,29 @@ def process_classification_data(
     X = encode_data.encode_non_numeric_data(X)
     y = encode_data.encode_non_numeric_data(y)
 
-    print("-" * 50)
+    log_line()
     log_info(f"Data sample X:")
     print(X.head())
 
     log_info(f"Data sample y:")
     print(y.head())
-    print("-" * 50)
+    log_line()
 
+    log_info(f"Data encoded")
+
+    log_title(f"Converting data to numpy arrays...")
     # Convert data to numpy arrays
     X = X.to_numpy(dtype=np.float32)
     y = y.to_numpy(dtype=np.float32)
 
+    log_info(f"Data converted to numpy arrays")
+
+    log_title(f"Splitting data into training and testing data...")
+
     X_train, y_train, X_test, y_test = test_train_split(X, y, ratio=test_train_split_ratio)
+
+    log_info(f"Data split into training and testing data")
+    log_debug(f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}")
 
     return X_train, y_train, X_test, y_test
 
