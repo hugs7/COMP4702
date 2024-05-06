@@ -64,9 +64,10 @@ def run_nn_model(
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1)
+    epochs = int(1e5)
     batch_size = 1000
     learning_rate = 1e-4
+    loss_weights = [1.2, 1.0]
 
     log_title("Convert data to tensors...")
 
@@ -92,7 +93,8 @@ def run_nn_model(
     log_info("Validation data shape:", X_test.shape, "x", y_test.shape)
 
     # Instantiate the model and move it to the specified device
-    sequential_model = nn_model.create_sequential_model(dim_input, dim_output, hidden_layer_dims).to(device)
+    sequential_model = nn_model.create_sequential_model(
+        dim_input, dim_output_flattened, hidden_layer_dims).to(device)
 
     log_info(f"Model: \n{sequential_model}\n")
 
@@ -135,7 +137,8 @@ def run_nn_model(
             optimiser,
             epochs,
             metrics,
-            classes_in_output_vars,
+            num_classes_in_vars,
+            loss_weights
         )
 
     results.show_training_results(metrics)

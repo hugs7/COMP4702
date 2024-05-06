@@ -18,7 +18,8 @@ def nn_train(
     optimiser: torch.optim.SGD,
     optimisation_steps: int,
     metrics: List[float],
-    classes_in_output_vars: int,
+    num_classes_in_vars: int,
+    loss_weights: List[float] = None,
 ) -> List:
     """
     One epoch of training
@@ -26,14 +27,15 @@ def nn_train(
     Args:
     - epoch (int): Current epoch
     - train_data (torch.Tensor): Training data
-    - train_labels (torch.Tensor): Training labels
+    - train_labels (torch.Tensor): Training labels. These should already be flattened into [batch size, num_variables, num_classes for each variable]
     - batch_size (int): Batch size
     - sequential_model (torch.nn.Sequential): Model object
     - criterion (torch.nn.CrossEntropyLoss): Loss function
     - optimiser (torch.optim.SGD): Optimiser
     - optimisation_steps (int): Number of steps to train
-    - classes_in_output_vars (List[float]): number of classes in each output variable - used for reshaping the output
+    - num_classes_in_vars (List[int]): The number of classes in each output variable - used for recovering the true classification from the flattened output of the model
     - metrics (int): List of metrics
+    - loss_weights (List[float]): Weights for the loss function. If not provided, defaults to 1.0 for each variable
 
     Returns:
     - List: List of metrics with the new metrics appended
@@ -50,103 +52,135 @@ def nn_train(
     log_line(level="TRACE")
     log_trace("Labels: ", train_labels[indices])
     log_debug("Shape of labels: ", train_labels[indices].shape)
-    ###### NEED TO FIX LABELS dimensionality
+    # NEED TO FIX LABELS dimensionality
 
     # Make predictions
     y_pred = sequential_model(x)
 
-    # Compute the loss (with output still flattened). We will recover the original shape later
+    log_trace("Predictions: ", y_pred)
+    log_debug("Shape of predictions: ", y_pred.shape)
 
-    # As we (potentially) have multidimensional output, we need to reshape the predictions
-    # or unflatten them based on classes_in_output_vars
+    # As we (potentially) have multidimensional output, we need to split
+    # the output of the model into (still one-hot encoded) predictions for EACH variable
 
     reshaped_preds = []
-    sample = 5
-    cum = 0
-    for i, recovered_var_dim in enumerate(classes_in_output_vars):
-        log_debug(f"i: {i}, recovered_var_dim: {recovered_var_dim}")
-        previous = classes_in_output_vars[i - 1] if i > 0 else 0
-        cum += previous
+    num_output_vars = len(num_classes_in_vars)
+    max_classes = max(num_classes_in_vars)
+    cum_index_offset = 0
+    for i, num_classes in enumerate(num_classes_in_vars):
+        log_debug(f"Variable Index: {i}, recovered_var_dim: {num_classes}")
 
-        reshaped_pred = y_pred[:, previous : cum + recovered_var_dim]
+        reshaped_pred = y_pred[:,
+                               cum_index_offset: cum_index_offset + num_classes]
 
+        # Pad the reshaped prediction with zeros to match the maximum number of classes
+        reshaped_pred = torch.nn.functional.pad(
+            reshaped_pred, (0, max_classes - num_classes))
+
+        log_trace(f"Reshaped prediction: ", reshaped_pred)
         reshaped_preds.append(reshaped_pred)
 
-        log_line(level="DEBUG")
+        cum_index_offset += num_classes
 
-    for output_var, output_var_preds in enumerate(reshaped_preds):
-        log_debug(f"Output variable {output_var} predictions: ", output_var_preds[:sample])
-        log_debug(f"Output variable {output_var} true labels: ", train_labels[indices][:sample, output_var])
+    # Convert reshaped_preds to a tensor
+    reshaped_preds = torch.stack(reshaped_preds, dim=1)
 
-        log_info(f"Output variable {output_var} predictions shape: ", output_var_preds.shape)
-
-    log_trace("Predictions: ", y_pred)
-    log_trace("Shape of predictions: ", y_pred.shape)
+    log_line(level="DEBUG")
+    log_trace("Reshaped predictions: ", reshaped_preds)
+    log_debug("Shape of reshaped predictions: ", reshaped_preds.shape)
 
     # True labels
+    y_true = train_labels[indices]
 
-    log_trace("True labels:")
-
-    train_labels_batch = train_labels[indices]
-
-    log_trace(train_labels_batch)
-    log_trace("Shape of labels: ", train_labels_batch.shape)
-
-    y_true = train_labels_batch
-
-    # Convert to long tensor
-    # y_true = y_true.long()
-
-    log_trace("True labels tensor: ", y_true)
-    log_trace("Shape of true labels tensor: ", y_true.shape)
+    log_trace("Y True Labels: ", y_true)
+    log_debug("Y True shape: ", y_true.shape)
 
     # Compute the loss
-
-    # log_trace("y_pred: ", y_pred)
-    log_trace("y_resh: ", reshaped_preds)
-    log_trace("y_true: ", y_true)
+    log_debug("Computing loss...")
 
     # Compute the loss for each recovered variable
     losses = []
-    for dim, recovered_var_dim in enumerate(reshaped_preds):
-        y_true_dim = y_true[:, dim].long()  # convert to int64
+    if loss_weights is None:
+        loss_weights = [1.0 for _ in range(num_output_vars)]
+    else:
+        assert len(loss_weights) == num_output_vars, ("Loss weights must be provided for each variable. Received: ", len(
+            loss_weights), "Expected: ", num_output_vars)
 
-        log_trace("dim: ", dim, "recov: ", recovered_var_dim, "true: ", y_true_dim)
-        log_trace(recovered_var_dim.shape, y_true_dim.shape)
-        log_trace(recovered_var_dim.dtype, y_true_dim.dtype)
-        loss = criterion(recovered_var_dim, y_true_dim)
-        losses.append(loss)
+    # Compute the loss for each variable
+    for var in range(num_output_vars):
+        log_debug(f"Variable: {var}")
+        y_true_var = y_true[:, var]
+        y_pred_var = reshaped_preds[:, var]
 
-    log_trace(loss)
+        log_trace("Y True Var: ", y_true_var)
+        log_trace("Y Pred Var: ", y_pred_var)
+
+        log_debug("Y True Var shape: ", y_true_var.shape)
+        log_debug("Y Pred Var shape: ", y_pred_var.shape)
+
+        log_debug("Y True Var dtype: ", y_true_var.dtype)
+        log_debug("Y Pred Var dtype: ", y_pred_var.dtype)
+
+        loss_var = criterion(y_pred_var, y_true_var)
+
+        log_debug("Loss: ", loss_var)
+        log_debug("Loss shape: ", loss_var.shape)
+        log_debug("Loss dtype: ", loss_var.dtype)
+
+        loss_weighted = loss_var * loss_weights[var]
+        losses.append(loss_weighted)
+
+    log_line(level="DEBUG")
+
+    log_debug("Losses:", losses)
 
     # Loss is the sum of all losses
-    loss = sum(losses)
+    total_loss_tensor = sum(losses)
+    log_debug("Total Loss: ", total_loss_tensor)
 
     # Zero the gradients
+    log_debug("Zeroing gradients...")
     optimiser.zero_grad()
 
     # Compute the gradients
-    loss.backward()
+    log_trace("Computing gradients...")
+    total_loss_tensor.backward()
 
     # Update the weights
+    log_trace("Optimising...")
     optimiser.step()
+
+    log_line(level="DEBUG")
 
     if epoch % 100 == 0 or epoch == optimisation_steps - 1:
         # Find argument which maximises the prediction value
         # Again we need to reshape the predictions and take argmax of each recovered variable
         accuracies = []
-        for dim, recovered_var_dim in enumerate(reshaped_preds):
+        for var in range(num_output_vars):
+            log_debug(f"Output Variable: {var}")
 
-            log_debug(f"Dim {dim}, Reshaped prefs: ", recovered_var_dim, recovered_var_dim.shape, recovered_var_dim.dtype)
-            y_true_dim = y_true[:, dim].long()
-            argmax = recovered_var_dim.argmax(dim=1)
+            y_true_var = y_true[:, var]
+            y_pred_var = reshaped_preds[:, var]
 
-            log_trace("Argmax: ", argmax)
+            log_trace("Y True Var: ", y_true_var)
+            log_trace("Y Pred Var: ", y_pred_var)
+
+            log_debug("Y True Var shape: ", y_true_var.shape)
+            log_debug("Y Pred Var shape: ", y_pred_var.shape)
+
+            # Compute the argmax of the predictions
+            argmax = y_pred_var.argmax(dim=1)
+
+            # Recover the true class from the one-hot encoding of y_true_var to obtain the index of the true class
+            y_true_var = y_true_var.argmax(dim=1)
+
+            log_debug("Argmax (predictions): ", argmax)
+            log_debug("True class: ", y_true_var)
 
             # Comparison
-            comparison = argmax == y_true_dim
+            comparison = argmax == y_true_var
 
-            log_trace("Comparison: ", comparison)
+            log_debug("Comparison: ", comparison)
 
             train_accuracy = torch.mean((comparison).float())
             train_accuracy_value = train_accuracy.cpu().numpy()
@@ -154,8 +188,9 @@ def nn_train(
 
         # Take average of all accuracies
         train_accuracy = sum(accuracies) / len(accuracies)
-        log_info(f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss.item()}")
+        log_info(
+            f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss_var.item()}")
 
-        metrics.append([epoch, loss.item(), train_accuracy])
+        metrics.append([epoch, loss_var.item(), train_accuracy])
 
     return metrics

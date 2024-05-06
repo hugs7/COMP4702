@@ -93,7 +93,8 @@ def main():
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
-        run_nn_model(X_train, y_train, X_test, y_test, X_labels, y_labels)
+        run_nn_model(X_train, y_train, X_test, y_test,
+                     X_labels, y_labels, num_classes_in_vars)
 
 
 if __name__ == "__main__":
