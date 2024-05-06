@@ -148,9 +148,9 @@ def main():
         print(
             f"{Fore.LIGHTRED_EX}Usage: {Fore.LIGHTCYAN_EX}python main.py {Fore.LIGHTMAGENTA_EX}<model_name> <dataset_name>{Style.RESET_ALL}\n"
         )
-        available_items("datasets", DATASET_MAPPING.keys())
-
         available_items("models", models)
+
+        available_items("datasets", DATASET_MAPPING.keys())
 
         sys.exit(1)
 
