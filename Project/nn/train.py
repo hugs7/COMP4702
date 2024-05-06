@@ -45,7 +45,7 @@ def nn_train(
     # Obtain the data and labels for the batch
     x = train_data[indices, :]
 
-    log_trace("Shape of x: ", x.shape)
+    log_debug("Shape of x: ", x.shape)
 
     # Make predictions
     y_pred = sequential_model(x)
