@@ -45,7 +45,11 @@ def nn_train(
     # Obtain the data and labels for the batch
     x = train_data[indices, :]
 
+    log_trace("Data: ", x)
     log_debug("Shape of x: ", x.shape)
+    log_line(level="TRACE")
+    log_trace("Labels: ", train_labels[indices])
+    log_debug("Shape of labels: ", train_labels[indices].shape)
 
     # Make predictions
     y_pred = sequential_model(x)
@@ -57,12 +61,21 @@ def nn_train(
     sample = 5
     cum = 0
     for i, recovered_var_dim in enumerate(classes_in_output_vars):
+        log_debug(f"i: {i}, recovered_var_dim: {recovered_var_dim}")
         previous = classes_in_output_vars[i - 1] if i > 0 else 0
         cum += previous
 
         reshaped_pred = y_pred[:, previous : cum + recovered_var_dim]
 
         reshaped_preds.append(reshaped_pred)
+
+        log_line(level="DEBUG")
+
+    for output_var, output_var_preds in enumerate(reshaped_preds):
+        log_debug(f"Output variable {output_var} predictions: ", output_var_preds[:sample])
+        log_debug(f"Output variable {output_var} true labels: ", train_labels[indices][:sample, output_var])
+
+        log_info(f"Output variable {output_var} predictions shape: ", output_var_preds.shape)
 
     log_trace("Predictions: ", y_pred)
     log_trace("Shape of predictions: ", y_pred.shape)
