@@ -36,7 +36,7 @@ def log_title(*messages: str) -> None:
     """
     Prints a title message in green text.
     """
-    log_colored(Fore.GREEN, *messages)
+    log_colored(Fore.LIGHTGREEN_EX, *messages)
 
 
 def log_error(*messages: str) -> None:
@@ -60,7 +60,7 @@ def log_debug(*messages: str) -> None:
     Prints a debug message in magenta text.
     """
     if check_log_level("DEBUG"):
-        log_colored(Fore.MAGENTA, *messages)
+        log_colored(Fore.LIGHTMAGENTA_EX, *messages)
 
 
 def log_info(*messages: str) -> None:
@@ -68,7 +68,7 @@ def log_info(*messages: str) -> None:
     Prints an info message in blue text.
     """
     if check_log_level("INFO"):
-        log_colored(Fore.LIGHTBLUE_EX, *messages)
+        log_colored(Fore.LIGHTCYAN_EX, *messages)
 
 
 def log_trace(*messages: str) -> None:
