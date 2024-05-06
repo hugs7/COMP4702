@@ -95,15 +95,15 @@ def test_train_split(X: np.ndarray, y: np.ndarray, ratio: float = 0.3) -> tuple[
     Splits the data into training and testing data.
 
     Parameters:
-    - X (DataFrame): The input features.
-    - y (DataFrame): The target variable.
+    - X (np.ndarray): The input features.
+    - y (np.ndarray): The target variable.
     - ratio (float): The ratio of the testing data.
 
     Returns:
-    - X_train (DataFrame): The training data features.
-    - y_train (DataFrame): The training data target variable.
-    - X_test (DataFrame): The testing data features.
-    - y_test (DataFrame): The testing data target variable.
+    - X_train (np.ndarray): The training data features.
+    - y_train (np.ndarray): The training data target variable.
+    - X_test (np.ndarray): The testing data features.
+    - y_test (np.ndarray): The testing data target variable.
     """
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio)
