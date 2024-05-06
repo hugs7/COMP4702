@@ -3,6 +3,10 @@ from typing import List
 import torch
 
 
+CUDA = "cuda"
+CPU = "cpu"
+
+
 def nn_train(
     epoch: int,
     train_data: torch.Tensor,
@@ -57,7 +61,7 @@ def nn_train(
         previous = classes_in_output_vars[i - 1] if i > 0 else 0
         cum += previous
 
-        reshaped_pred = y_pred[:, previous:cum+recovered_var_dim]
+        reshaped_pred = y_pred[:, previous : cum + recovered_var_dim]
 
         reshaped_preds.append(reshaped_pred)
 
@@ -97,8 +101,7 @@ def nn_train(
     for dim, recovered_var_dim in enumerate(reshaped_preds):
         y_true_dim = y_true[:, dim].long()  # convert to int64
         if log:
-            print("dim: ", dim, "recov: ",
-                  recovered_var_dim, "true: ", y_true_dim)
+            print("dim: ", dim, "recov: ", recovered_var_dim, "true: ", y_true_dim)
             print(recovered_var_dim.shape, y_true_dim.shape)
             print(recovered_var_dim.dtype, y_true_dim.dtype)
         loss = criterion(recovered_var_dim, y_true_dim)
@@ -128,8 +131,7 @@ def nn_train(
         accuracies = []
         for dim, recovered_var_dim in enumerate(reshaped_preds):
             if log:
-                print(f"Dim {dim}, Reshaped prefs: ",
-                      recovered_var_dim, recovered_var_dim.shape, recovered_var_dim.dtype)
+                print(f"Dim {dim}, Reshaped prefs: ", recovered_var_dim, recovered_var_dim.shape, recovered_var_dim.dtype)
             y_true_dim = y_true[:, dim].long()
             argmax = recovered_var_dim.argmax(dim=1)
             if log:
@@ -146,8 +148,7 @@ def nn_train(
 
         # Take average of all accuracies
         train_accuracy = sum(accuracies) / len(accuracies)
-        print(
-            f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss.item()}")
+        print(f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss.item()}")
 
         metrics.append([epoch, loss.item(), train_accuracy])
 
