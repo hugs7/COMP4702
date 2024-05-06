@@ -6,46 +6,62 @@ Hugo Burton
 
 from typing import List
 import torch
-from colorama import Fore, Style
+import numpy as np
 
-import process_data
 import results
+from print_helper import *
 
 from nn import train
 from nn import nn_model
+from nn.train import CUDA, CPU
 
-def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
 
-    num_variables_predicting = 2
+def to_tensor(data: np.ndarray) -> torch.Tensor:
+    """
+    Convert numpy array to tensor with float32 data type.
 
-    # First num_variables_predicting columns are the variables we are predicting
-    # These will be string labels which need to be flattened into a 1D array.
-    # So the output dimension is sum of num classes over the num_variables_predicting
-    # we are predicting
-    y_labels = columns[0:num_variables_predicting]
-    X_labels = columns[num_variables_predicting:]
+    Args:
+    - data (np.ndarray): The numpy array to convert.
 
-    # --- Dataset ---
+    Returns:
+    - torch.Tensor: The converted tensor.
+    """
+    return torch.tensor(data, dtype=torch.float32)
 
-    # Read the dataset
-    dataset, X_train, y_train, X_test, y_test, y_classes = (
-        process_data.process_classification_data(
-            dataset_file_path, X_labels, y_labels, 0.3
-        )
-    )
 
-    print("Training data stats")
-    print("Shape:", X_train.shape)
-    print("Classes:", y_classes)
+def run_nn_model(
+    X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, X_labels: List[str], y_labels: List[str]
+) -> None:
+    """
+    Driver script for Neural Network model. Takes in training, test data along with labels and trains
+    a neural network model on the data.
 
-    #################
+    Args:
+    - X_train (np.ndarray): Training data features.
+    - y_train (np.ndarray): Training data target variable.
+    - X_test (np.ndarray): Testing data features.
+    - y_test (np.ndarray): Testing data target variable.
+    - X_labels (List[str]): The names of the features.
+    - y_labels (List[str]): The names of the target variable.
+    """
+
+    print_title("Computing output data transform...")
+
+    # Get the classes in each output variable as a list of lists
+    y_classes = [np.unique(y_train[:, i]) for i in range(y_train.shape[1])]
 
     classes_in_output_vars = [len(classes) for classes in y_classes]
+    print_info(f"Number of classes in each output variable: {classes_in_output_vars}")
 
     # Ouptut dimension is sum of classes in each output variable
-    # because of one hot encoding
+    # because of one hot encoding. Flatten the list of classes
+    print_title("Flattening classes in output variables")
     dim_output = sum(classes_in_output_vars)
-    dim_input = dataset.shape[1] - num_variables_predicting
+    # Although this is different from the number of output variables, we will need to
+    # recover the true classification from the one-hot encoding by reshaping the output.
+
+    # Assume the train and test data have the same dimension along axis 1
+    dim_input = X_train.shape[1]
     normalising_factor = 1.0
     hidden_layer_dims = [100, 150, 100]
 
@@ -54,9 +70,7 @@ def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
     batch_size = 1000
     learning_rate = 1e-4
 
-    # Convert to tensor
-    def to_tensor(data):
-        return torch.tensor(data, dtype=torch.float32)
+    print_title("Convert data to tensors...")
 
     X_train = to_tensor(X_train)
     y_train = to_tensor(y_train)
@@ -64,9 +78,11 @@ def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
     X_test = to_tensor(X_test)
     y_test = to_tensor(y_test)
 
+    print_info("Data converted to tensors")
+
     # ----- Device ------
     # Move model to GPU if available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device(CUDA if torch.cuda.is_available() else CPU)
 
     # Move data to device
     X_train = X_train.to(device)
@@ -74,15 +90,13 @@ def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
     X_test = X_test.to(device)
     y_test = y_test.to(device)
 
-    print("Training data shape:", X_train.shape, "x", y_train.shape)
-    print("Validation data shape:", X_test.shape, "x", y_test.shape)
+    print_info("Training data shape:", X_train.shape, "x", y_train.shape)
+    print_info("Validation data shape:", X_test.shape, "x", y_test.shape)
 
     # Instantiate the model and move it to the specified device
-    sequential_model = nn_model.create_sequential_model(
-        dim_input, dim_output, hidden_layer_dims
-    ).to(device)
+    sequential_model = nn_model.create_sequential_model(dim_input, dim_output, hidden_layer_dims).to(device)
 
-    print(f"{Fore.LIGHTCYAN_EX}Model: \n{Style.RESET_ALL}{sequential_model}\n")
+    print_info(f"Model: \n{sequential_model}\n")
 
     # --- Loss Function ---
     # For classification problems, usually use cross entropy loss
@@ -126,4 +140,3 @@ def run_nn_model(dataset_file_path: str, columns: List[str]) -> None:
         )
 
     results.show_training_results(metrics)
-
