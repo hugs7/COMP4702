@@ -14,8 +14,7 @@ def encode_non_numeric_data(data: pd.DataFrame) -> pd.DataFrame:
 
     for column in data.columns:
         sample_data_point = data[column].iloc[0]
-        log_trace(
-            f"Column: {column}, Sample Data Point: {sample_data_point}, Data Type: {data[column].dtype}")
+        log_trace(f"Column: {column}, Sample Data Point: {sample_data_point}, Data Type: {data[column].dtype}")
         if data[column].dtype == str or data[column].dtype == object:
             # Replace with mode
             data[column] = data[column].astype("category")
@@ -71,7 +70,7 @@ def one_hot_encode_separate_output_vars(y: np.ndarray) -> np.ndarray:
     - y (np.ndarray): The target variable where each column contains classes for a single variable.
 
     Returns:
-    - y_encoded (np.ndarray): The one-hot encoded target variable with each variable's one-hot encoding 
+    - y_encoded (np.ndarray): The one-hot encoded target variable with each variable's one-hot encoding
                               represented on a separate axis.
     """
 
@@ -95,17 +94,14 @@ def one_hot_encode_separate_output_vars(y: np.ndarray) -> np.ndarray:
         log_debug(f"Unique Values: {unique_values}")
 
         # Initialize an empty array to store the encoded values for the current variable
-        padded_encoded_array = np.zeros(
-            (num_samples, max_num_classes), dtype=int)
+        padded_encoded_array = np.zeros((num_samples, max_num_classes), dtype=int)
 
         # For the current column, one-hot encode the values
         for i, value in enumerate(y[:, col]):
             one_hot = (unique_values == value).astype(int)
-            log_trace(f"Value: {value}, One-hot: {one_hot}")
-            padded_encoded_array[i, :len(one_hot)] = one_hot
+            padded_encoded_array[i, : len(one_hot)] = one_hot
 
-        log_debug(
-            f"Padded Encoded Array Sample: \n{padded_encoded_array[:sample]}")
+        log_debug(f"Padded Encoded Array Sample: \n{padded_encoded_array[:sample]}")
         log_debug("")
         log_info(f"Padded Encoded Array Shape: {padded_encoded_array.shape}")
 
