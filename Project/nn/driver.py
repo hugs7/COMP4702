@@ -12,8 +12,7 @@ import numpy as np
 import results
 from logger import *
 
-from nn import train
-from nn import nn_model
+from nn import train, nn_model
 from nn.train import CUDA, CPU
 
 
