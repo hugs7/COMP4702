@@ -20,8 +20,7 @@ def main():
 
     dataset_name = "Thorax"
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
-              "rf": "Random Forest", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         print(
@@ -48,8 +47,7 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(
-            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
@@ -82,19 +80,21 @@ def main():
 
     # Load and pre-process the dataset
     test_train_ratio = 0.3
-    X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
-        dataset_file_path, X_labels, y_labels, test_train_ratio)
 
     if model_name == "knn":
-        run_knn_model(X_train, y_train, X_test, y_test,
-                      X_labels, y_labels, num_classes_in_vars)
+        X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
+            dataset_file_path, X_labels, y_labels, False, test_train_ratio
+        )
+        run_knn_model(X_train, y_train, X_test, y_test, X_labels, y_labels, num_classes_in_vars)
     elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
-        run_nn_model(X_train, y_train, X_test, y_test,
-                     X_labels, y_labels, num_classes_in_vars)
+        X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
+            dataset_file_path, X_labels, y_labels, True, test_train_ratio
+        )
+        run_nn_model(X_train, y_train, X_test, y_test, X_labels, y_labels, num_classes_in_vars)
 
 
 if __name__ == "__main__":

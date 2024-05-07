@@ -13,10 +13,14 @@ import encode_data
 from logger import *
 
 
+SAMPLE_SIZE = 5
+
+
 def process_classification_data(
     data_file_path: str,
     X_feature_names: List[str],
     y_feature_names: List[str],
+    one_hot_encode: bool,
     test_train_split_ratio: float = 0.3,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
     """
@@ -30,6 +34,7 @@ def process_classification_data(
     - data_file_path (str): The path to the data file.
     - X_feature_names (List[str]): The names of the features.
     - y_feature_names (List[str]): The names of the target variable.
+    - one_hot_encode (bool): Whether to one-hot encode the target variable.
     - test_train_split_ratio (float): The ratio of the testing data.
 
     Returns:
@@ -80,29 +85,27 @@ def process_classification_data(
 
     # Calculate number of classes in each target variable
     num_output_vars = y.shape[1]
-    num_classes_in_vars = [len(np.unique(y[:, col]))
-                           for col in range(num_output_vars)]
+    num_classes_in_vars = [len(np.unique(y[:, col])) for col in range(num_output_vars)]
 
-    # One hot encode the data with padding
-    log_title(f"One-hot encoding target variables...")
-    y = encode_data.one_hot_encode_separate_output_vars(y)
+    if one_hot_encode:
+        log_title(f"One-hot encoding target variables...")
 
-    log_info(f"Data sample y:")
-    log_debug(y[:5])
-    log_line()
+        # One hot encode the data with padding
+        y = encode_data.one_hot_encode_separate_output_vars(y)
+
+        log_info(f"Data sample y:")
+        log_debug(y[:SAMPLE_SIZE])
+        log_line()
 
     log_info(f"Data encoded")
 
     log_title(f"Splitting data into training and testing data...")
 
-    X_train, y_train, X_test, y_test = test_train_split(
-        X, y, ratio=test_train_split_ratio)
+    X_train, y_train, X_test, y_test = test_train_split(X, y, ratio=test_train_split_ratio)
 
     log_info(f"Data split into training and testing data")
-    log_debug(
-        f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
-    log_debug(
-        f"X_test shape: {X_test.shape},\ny_test shape: {y_test.shape}")
+    log_debug(f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
+    log_debug(f"X_test shape: {X_test.shape},\ny_test shape: {y_test.shape}")
 
     log_line()
 
@@ -135,15 +138,12 @@ def preprocess_data(
     validation_data: np.ndarray,
     dim_input: int,
     normalising_factor: float,
-
-
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
 
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = torch.as_tensor(data.data.reshape(
-            (-1, dim_input)) / normalising_factor, dtype=torch.float32)
+        new_data = torch.as_tensor(data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32)
         labels = torch.as_tensor(data.targets)
 
         return_data.append(new_data)
