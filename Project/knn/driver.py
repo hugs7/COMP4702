@@ -27,9 +27,9 @@ def run_knn_model(
 
     Args:
     - X_train (np.ndarray): Training data features.
-    - y_train (np.ndarray): Training data target variable.
+    - y_train (np.ndarray): Training data target variable (not one-hot-encoded).
     - X_test (np.ndarray): Testing data features.
-    - y_test (np.ndarray): Testing data target variable.
+    - y_test (np.ndarray): Testing data target variable (not one-hot-encoded).
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
@@ -50,7 +50,7 @@ def run_knn_model(
     results = {}
 
     for i, var_y_labels in enumerate(y_labels):
-        log_debug(f"Output variable {i} classes: {var_y_labels}")
+        log_title(f"Output variable {i} classes: {var_y_labels}")
 
         # Get slice of y_train and y_test for this output variable
         var_y_train = y_train[:, i]
@@ -58,6 +58,10 @@ def run_knn_model(
 
         log_trace(f"y_train_var:\n{var_y_train}")
         log_trace(f"y_test_var:\n{var_y_test}")
+
+        log_debug(f"y_train_var shape: {var_y_train.shape}")
+        log_debug(f"y_test_var shape: {var_y_test.shape}")
+        log_line(level="DEBUG")
 
         knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k)
 
@@ -68,7 +72,7 @@ def run_knn_model(
 
         log_info(f"Training KNN classifier for output variable {i}...")
 
-        test_preds, train_accuracy, test_accuracy = knn_classifier.classify(i)
+        test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
 
         log_info(f"KNN classifier for output variable {i} trained")
 

@@ -32,13 +32,10 @@ class KNNClassify(Classifier):
     def get_k(self) -> int:
         return self.k
 
-    def classify(self, variable_index: int) -> tuple[np.ndarray, float, float]:
+    def classify(self) -> tuple[np.ndarray, float, float]:
         """
         Performs k-nearest neighbors classification on the given training and test data
         for the specified output variable.
-
-        Args:
-            variable_index (int): The index of the output variable to train the classifier on.
 
         Returns:
             tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
@@ -46,21 +43,18 @@ class KNNClassify(Classifier):
 
         log_info(f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}")
 
-        y_train_var = self.y_train[:, variable_index]
-        y_test_var = self.y_test[:, variable_index]
-
         log_title("Training KNN model...")
 
-        self.model.fit(self.X_train, y_train_var)
+        self.model.fit(self.X_train, self.y_train)
 
         log_info("KNN model trained")
 
         log_title("Getting results...")
         # Get results
-        train_accuracy = self.model.score(self.X_train, y_train_var)
+        train_accuracy = self.model.score(self.X_train, self.y_train)
 
         test_predictions = self.model.predict(self.X_test)
-        test_accuracy = accuracy_score(y_test_var, test_predictions)
+        test_accuracy = accuracy_score(self.y_test, test_predictions)
 
         log_info("Results obtained")
 
