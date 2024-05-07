@@ -78,7 +78,7 @@ def run_knn_model(
 
         results[i] = (test_preds, train_accuracy, test_accuracy)
 
-        log_debug(f"Output variable {i} results: {results[i]}")
+        log_trace(f"Output variable {i} results: {results[i]}")
 
         log_line(level="DEBUG")
 
