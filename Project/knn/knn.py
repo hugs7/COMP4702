@@ -3,7 +3,6 @@ KNN Classification model class
 Hugo Burton
 """
 
-from colorama import Fore, Style
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -11,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
 from model.classifier import Classifier
+from logger import *
 
 
 class KNNClassify(Classifier):
@@ -20,14 +20,15 @@ class KNNClassify(Classifier):
         y_train: DataFrame,
         X_test: DataFrame,
         y_test: DataFrame,
-        feature_names: list[str],
+        X_labels: list[str],
+        y_labels: list[list[str]],
         k: int = 3,
     ):
         self.k = k
         # Define Model
         self.model = KNeighborsClassifier(n_neighbors=self.k)
 
-        super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
+        super().__init__(self.model, X_train, y_train, X_test, y_test, X_labels, y_labels)
 
     def get_k(self) -> int:
         return self.k
@@ -42,12 +43,12 @@ class KNNClassify(Classifier):
             tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
         """
 
-        print(
-            f"{Fore.RED}X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}{Style.RESET_ALL}"
+        log_info(
+            f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}"
         )
 
-        X_train_df = pd.DataFrame(self.X_train, columns=self.feature_names)
-        X_test_df = pd.DataFrame(self.X_test, columns=self.feature_names)
+        X_train_df = pd.DataFrame(self.X_train, columns=self.X_labels)
+        X_test_df = pd.DataFrame(self.X_test, columns=self.X_labels)
 
         self.model.fit(X_train_df, self.y_train)
 

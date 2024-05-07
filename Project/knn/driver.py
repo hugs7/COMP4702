@@ -4,23 +4,74 @@ Hugo Burton
 06/05/2024
 """
 
-from pandas import DataFrame
+from typing import List
+import numpy as np
 
 import knn.knn
+from logger import *
 
 
-def run_knn_model(X_train: DataFrame, y_train: DataFrame, X_test: DataFrame,
-                  y_test: DataFrame, feature_names: list[str], k: int = 5) \
-        -> tuple[float, float]:
+def run_knn_model(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, X_labels: List[str], y_labels: List[List[str]],
+                  num_classes_in_vars: List[int], k: int = 5) -> None:
     """
-    Classification task using knn
+    Driver script for k-nearest neighbours classification model. Takes in training, test data along with labels and trains
+    a k-nearest neighbours model on the data.
+
+    Args:
+    - X_train (np.ndarray): Training data features.
+    - y_train (np.ndarray): Training data target variable.
+    - X_test (np.ndarray): Testing data features.
+    - y_test (np.ndarray): Testing data target variable.
+    - X_labels (List[str]): The names of the (input) features.
+    - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
+    - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
-    # Apply the knn classifier
-    knn_classifier = knn.KNNClassify(
-        X_train, y_train, X_test, y_test, feature_names, k=k
-    )
+    log_title("Start of knn model driver...")
 
-    test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+    log_info(
+        f"Number of classes in each output variable: {num_classes_in_vars}")
 
-    return test_preds, train_accuracy, test_accuracy
+    # For multi-variable classification, we need to create a knn classifier for each output variable
+    # These are independent of each other.
+
+    log_debug(
+        f"Creating a knn classifier for each of the {len(y_labels)} output variables")
+
+    knn_classifiers = []
+
+    # Dictionary of output variable: (predictions, train_accuracy, test_accuracy)
+    results = {}
+
+    for i, var_y_labels in enumerate(y_labels):
+        log_debug(f"Output variable {i} classes: {var_y_labels}")
+
+        # Get slice of y_train and y_test for this output variable
+        var_y_train = y_train[:, i]
+        var_y_test = y_test[:, i]
+
+        log_trace(f"y_train_var:\n{var_y_train}")
+        log_trace(f"y_test_var:\n{var_y_test}")
+
+        knn_classifier = knn.KNNClassify(
+            X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k
+        )
+
+        # Add the classifier to the list
+        knn_classifiers.append(knn_classifier)
+
+        log_debug(f"KNN classifier for output variable {i} created")
+
+        log_info(f"Training KNN classifier for output variable {i}...")
+
+        test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+
+        log_info(f"KNN classifier for output variable {i} trained")
+
+        results[i] = (test_preds, train_accuracy, test_accuracy)
+
+        log_debug(f"Output variable {i} results: {results[i]}")
+
+        log_line(level="DEBUG")
+
+    return results

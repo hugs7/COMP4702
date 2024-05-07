@@ -12,17 +12,19 @@ from sklearn.base import BaseEstimator
 
 from model.base_model import Model
 
+
 class Classifier(Model):
     def __init__(
         self,
+        model: BaseEstimator,
         X_train: DataFrame,
         y_train: DataFrame,
         X_test: DataFrame,
         y_test: DataFrame,
-        feature_names: list[str],
-        model: BaseEstimator,
+        X_labels: list[str],
+        y_labels: list[list[str]],
     ) -> None:
-        super().__init__(X_train, y_train, X_test, y_test, feature_names)
+        super().__init__(X_train, y_train, X_test, y_test, X_labels, y_labels)
 
         self.model = model
 
@@ -68,7 +70,8 @@ class Classifier(Model):
         print(x_min, x_max, y_min, y_max)
 
         xx, yy = np.meshgrid(
-            np.arange(x_min, x_max, resolution), np.arange(y_min, y_max, resolution)
+            np.arange(x_min, x_max, resolution), np.arange(
+                y_min, y_max, resolution)
         )
 
         print(xx.shape, "|", yy.shape)

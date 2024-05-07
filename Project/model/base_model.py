@@ -8,7 +8,8 @@ class Model:
         y_train: DataFrame,
         X_test: DataFrame,
         y_test: DataFrame,
-        feature_names: list[str],
+        X_labels: list[str],
+        y_labels: list[list[str]],
     ):
         self.X_train = X_train
         self.y_train = y_train
@@ -16,7 +17,8 @@ class Model:
         self.X_test = X_test
         self.y_test = y_test
 
-        self.feature_names = feature_names
+        self.X_labels = X_labels
+        self.y_labels = y_labels
 
     def get_X_train(self) -> DataFrame:
         return self.X_train
@@ -30,5 +32,8 @@ class Model:
     def get_y_test(self) -> DataFrame:
         return self.y_test
 
-    def get_feature_names(self) -> list[str]:
-        return self.feature_names
+    def get_X_labels(self) -> list[str]:
+        return self.X_labels
+
+    def get_y_labels(self) -> list[list[str]]:
+        return self.y_labels
