@@ -61,7 +61,6 @@ def run_knn_model(
 
         log_debug(f"y_train_var shape: {var_y_train.shape}")
         log_debug(f"y_test_var shape: {var_y_test.shape}")
-        log_line(level="DEBUG")
 
         knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k)
 
