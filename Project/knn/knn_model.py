@@ -5,7 +5,6 @@ Hugo Burton
 
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import accuracy_score
 
@@ -16,10 +15,10 @@ from logger import *
 class KNNClassify(Classifier):
     def __init__(
         self,
-        X_train: DataFrame,
-        y_train: DataFrame,
-        X_test: DataFrame,
-        y_test: DataFrame,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
         X_labels: list[str],
         y_labels: list[list[str]],
         k: int = 3,
@@ -33,29 +32,42 @@ class KNNClassify(Classifier):
     def get_k(self) -> int:
         return self.k
 
-    def classify(
-        self,
-    ) -> tuple[np.ndarray, float, float]:
+    def classify(self, variable_index: int) -> tuple[np.ndarray, float, float]:
         """
-        Performs k-nearest neighbors classification on the given training and test data.
+        Performs k-nearest neighbors classification on the given training and test data
+        for the specified output variable.
+
+        Args:
+            variable_index (int): The index of the output variable to train the classifier on.
 
         Returns:
             tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
         """
 
-        log_info(
-            f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}"
-        )
+        log_info(f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}")
 
-        X_train_df = pd.DataFrame(self.X_train, columns=self.X_labels)
-        X_test_df = pd.DataFrame(self.X_test, columns=self.X_labels)
+        y_train_var = self.y_train[:, variable_index]
+        y_test_var = self.y_test[:, variable_index]
 
-        self.model.fit(X_train_df, self.y_train)
+        log_title("Training KNN model...")
 
+        self.model.fit(self.X_train, y_train_var)
+
+        log_info("KNN model trained")
+
+        log_title("Getting results...")
         # Get results
-        train_accuracy = self.model.score(self.X_train, self.y_train)
+        train_accuracy = self.model.score(self.X_train, y_train_var)
 
         test_predictions = self.model.predict(self.X_test)
-        test_accuracy = accuracy_score(self.y_test, test_predictions)
+        test_accuracy = accuracy_score(y_test_var, test_predictions)
+
+        log_info("Results obtained")
+
+        log_debug(f"Test predictions:\n{test_predictions}")
+        log_debug(f"Train accuracy: {train_accuracy}")
+        log_debug(f"Test accuracy: {test_accuracy}")
+
+        log_line(level="DEBUG")
 
         return test_predictions, train_accuracy, test_accuracy

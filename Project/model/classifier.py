@@ -6,7 +6,6 @@ Hugo Burton
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import pandas as pd
-from pandas import DataFrame
 import numpy as np
 from sklearn.base import BaseEstimator
 
@@ -17,10 +16,10 @@ class Classifier(Model):
     def __init__(
         self,
         model: BaseEstimator,
-        X_train: DataFrame,
-        y_train: DataFrame,
-        X_test: DataFrame,
-        y_test: DataFrame,
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
         X_labels: list[str],
         y_labels: list[list[str]],
     ) -> None:
@@ -34,16 +33,14 @@ class Classifier(Model):
         resolution=0.02,
         plot_title="Decision Regions",
     ) -> None:
+        # TODO Fix this method to work with many features (more than 2)
         """
         Plots the decision regions for a classifier.
 
         Parameters:
-        - X_test (DataFrame): The input data used for testing the classifier.
+        - X_test (ndarray): The input data used for testing the classifier.
         - test_preds (ndarray): The predicted labels for the test data.
         - resolution (float): The step size of the mesh grid used for plotting the decision regions. Default is 0.02.
-
-        Returns:
-        - None
 
         This function plots the decision regions for a classifier by creating a mesh grid based on the input data and
         classifying each point in the grid. The decision regions are then visualized using a contour plot.
@@ -69,10 +66,7 @@ class Classifier(Model):
 
         print(x_min, x_max, y_min, y_max)
 
-        xx, yy = np.meshgrid(
-            np.arange(x_min, x_max, resolution), np.arange(
-                y_min, y_max, resolution)
-        )
+        xx, yy = np.meshgrid(np.arange(x_min, x_max, resolution), np.arange(y_min, y_max, resolution))
 
         print(xx.shape, "|", yy.shape)
 
