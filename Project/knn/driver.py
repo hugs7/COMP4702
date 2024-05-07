@@ -7,7 +7,7 @@ Hugo Burton
 from typing import List
 import numpy as np
 
-from knn import knn
+from knn import knn_model
 from logger import *
 
 
@@ -53,7 +53,7 @@ def run_knn_model(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, 
         log_trace(f"y_train_var:\n{var_y_train}")
         log_trace(f"y_test_var:\n{var_y_test}")
 
-        knn_classifier = knn.KNNClassify(
+        knn_classifier = knn_model.KNNClassify(
             X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k
         )
 
