@@ -62,6 +62,4 @@ class KNNClassify(Classifier):
         log_debug(f"Train accuracy: {train_accuracy}")
         log_debug(f"Test accuracy: {test_accuracy}")
 
-        log_line(level="DEBUG")
-
         return test_predictions, train_accuracy, test_accuracy
