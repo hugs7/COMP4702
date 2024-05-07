@@ -33,7 +33,7 @@ class DTClassifier(Classifier):
             - A tuple containing the test predictions, train accuracy, and test accuracy.
         """
 
-        X = pd.DataFrame(self.X_train, columns=self.feature_names)
+        X = pd.DataFrame(self.X_train, columns=self.X_labels)
         y = self.y_train
 
         # Fit model
@@ -47,4 +47,3 @@ class DTClassifier(Classifier):
         test_accuracy = self.model.score(self.X_test, self.y_test)
 
         return test_predictions, train_accuracy, test_accuracy
-
