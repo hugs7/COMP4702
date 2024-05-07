@@ -28,10 +28,10 @@ def one_hot_encode(y: np.ndarray) -> np.ndarray:
     One-hot encodes the target variable.
 
     Parameters:
-    - y (np.ndarray): The target variable.
+    - y (ndarray): The target variable.
 
     Returns:
-    - y_encoded (np.ndarray): The one-hot encoded target variable.
+    - y_encoded (ndarray): The one-hot encoded target variable.
     """
 
     # Initialize an empty list to store the encoded arrays for each variable
@@ -67,10 +67,10 @@ def one_hot_encode_separate_output_vars(y: np.ndarray) -> np.ndarray:
     In the output, each variable's one-hot encoding is represented on a separate axis.
 
     Parameters:
-    - y (np.ndarray): The target variable where each column contains classes for a single variable.
+    - y (ndarray): The target variable where each column contains classes for a single variable.
 
     Returns:
-    - y_encoded (np.ndarray): The one-hot encoded target variable with each variable's one-hot encoding
+    - y_encoded (ndarray): The one-hot encoded target variable with each variable's one-hot encoding
                               represented on a separate axis.
     """
 

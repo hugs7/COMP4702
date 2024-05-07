@@ -21,7 +21,7 @@ def to_tensor(data: np.ndarray) -> torch.Tensor:
     Convert numpy array to tensor with float32 data type.
 
     Args:
-    - data (np.ndarray): The numpy array to convert.
+    - data (ndarray): The numpy array to convert.
 
     Returns:
     - torch.Tensor: The converted tensor.
@@ -30,18 +30,23 @@ def to_tensor(data: np.ndarray) -> torch.Tensor:
 
 
 def run_nn_model(
-    X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, X_labels: List[str], y_labels: List[List[str]],
-    num_classes_in_vars: List[int]
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    X_labels: List[str],
+    y_labels: List[List[str]],
+    num_classes_in_vars: List[int],
 ) -> None:
     """
     Driver script for Neural Network model. Takes in training, test data along with labels and trains
     a neural network model on the data.
 
     Args:
-    - X_train (np.ndarray): Training data features.
-    - y_train (np.ndarray): Training data target variable.
-    - X_test (np.ndarray): Testing data features.
-    - y_test (np.ndarray): Testing data target variable.
+    - X_train (ndarray): Training data features.
+    - y_train (ndarray): Training data target variable.
+    - X_test (ndarray): Testing data features.
+    - y_test (ndarray): Testing data target variable.
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
@@ -49,8 +54,7 @@ def run_nn_model(
 
     log_title("Start of nn model driver...")
 
-    log_info(
-        f"Number of classes in each output variable: {num_classes_in_vars}")
+    log_info(f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # Ouptut dimension is sum of classes in each output variable
     # because of one hot encoding. Flatten the list of classes
@@ -95,8 +99,7 @@ def run_nn_model(
     log_info("Validation data shape:", X_test.shape, "x", y_test.shape)
 
     # Instantiate the model and move it to the specified device
-    sequential_model = nn_model.create_sequential_model(
-        dim_input, dim_output_flattened, hidden_layer_dims).to(device)
+    sequential_model = nn_model.create_sequential_model(dim_input, dim_output_flattened, hidden_layer_dims).to(device)
 
     log_info(f"Model: \n{sequential_model}\n")
 
@@ -123,8 +126,7 @@ def run_nn_model(
 
     # optimiser = torch.optim.SGD(
     #     sequential_model.parameters(), lr=learning_rate)
-    optimiser = optim.Adam(
-        sequential_model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimiser = optim.Adam(sequential_model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     # --- Training Loop ---
 
@@ -132,17 +134,7 @@ def run_nn_model(
     # for i in tqdm(range(int(epochs))):
     for i in range(int(epochs)):
         metrics = train.nn_train(
-            i,
-            X_train,
-            y_train,
-            batch_size,
-            sequential_model,
-            criterion,
-            optimiser,
-            epochs,
-            metrics,
-            num_classes_in_vars,
-            loss_weights
+            i, X_train, y_train, batch_size, sequential_model, criterion, optimiser, epochs, metrics, num_classes_in_vars, loss_weights
         )
 
     results.show_training_results(metrics)

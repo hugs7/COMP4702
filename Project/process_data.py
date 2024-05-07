@@ -38,10 +38,10 @@ def process_classification_data(
     - test_train_split_ratio (float): The ratio of the testing data.
 
     Returns:
-    - X_train (np.ndarray): The training data features.
-    - y_train (np.ndarray): The training data target variable.
-    - X_test (np.ndarray): The testing data features.
-    - y_test (np.ndarray): The testing data target variable.
+    - X_train (ndarray): The training data features.
+    - y_train (ndarray): The training data target variable.
+    - X_test (ndarray): The testing data features.
+    - y_test (ndarray): The testing data target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
@@ -117,15 +117,15 @@ def test_train_split(X: np.ndarray, y: np.ndarray, ratio: float = 0.3) -> tuple[
     Splits the data into training and testing data.
 
     Parameters:
-    - X (np.ndarray): The input features.
-    - y (np.ndarray): The target variable.
+    - X (ndarray): The input features.
+    - y (ndarray): The target variable.
     - ratio (float): The ratio of the testing data.
 
     Returns:
-    - X_train (np.ndarray): The training data features.
-    - y_train (np.ndarray): The training data target variable.
-    - X_test (np.ndarray): The testing data features.
-    - y_test (np.ndarray): The testing data target variable.
+    - X_train (ndarray): The training data features.
+    - y_train (ndarray): The training data target variable.
+    - X_test (ndarray): The testing data features.
+    - y_test (ndarray): The testing data target variable.
     """
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=ratio)

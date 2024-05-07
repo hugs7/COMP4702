@@ -26,10 +26,10 @@ def run_knn_model(
     a k-nearest neighbours model on the data.
 
     Args:
-    - X_train (np.ndarray): Training data features.
-    - y_train (np.ndarray): Training data target variable (not one-hot-encoded).
-    - X_test (np.ndarray): Testing data features.
-    - y_test (np.ndarray): Testing data target variable (not one-hot-encoded).
+    - X_train (ndarray): Training data features.
+    - y_train (ndarray): Training data target variable (not one-hot-encoded).
+    - X_test (ndarray): Testing data features.
+    - y_test (ndarray): Testing data target variable (not one-hot-encoded).
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
