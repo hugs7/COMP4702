@@ -11,8 +11,16 @@ from knn import knn_model
 from logger import *
 
 
-def run_knn_model(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, X_labels: List[str], y_labels: List[List[str]],
-                  num_classes_in_vars: List[int], k: int = 5) -> None:
+def run_knn_model(
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    X_labels: List[str],
+    y_labels: List[List[str]],
+    num_classes_in_vars: List[int],
+    k: int = 5,
+) -> None:
     """
     Driver script for k-nearest neighbours classification model. Takes in training, test data along with labels and trains
     a k-nearest neighbours model on the data.
@@ -29,14 +37,12 @@ def run_knn_model(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, 
 
     log_title("Start of knn model driver...")
 
-    log_info(
-        f"Number of classes in each output variable: {num_classes_in_vars}")
+    log_info(f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # For multi-variable classification, we need to create a knn classifier for each output variable
     # These are independent of each other.
 
-    log_debug(
-        f"Creating a knn classifier for each of the {len(y_labels)} output variables")
+    log_debug(f"Creating a knn classifier for each of the {len(y_labels)} output variables")
 
     knn_classifiers = []
 
@@ -53,9 +59,7 @@ def run_knn_model(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, 
         log_trace(f"y_train_var:\n{var_y_train}")
         log_trace(f"y_test_var:\n{var_y_test}")
 
-        knn_classifier = knn_model.KNNClassify(
-            X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k
-        )
+        knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k)
 
         # Add the classifier to the list
         knn_classifiers.append(knn_classifier)
@@ -64,7 +68,7 @@ def run_knn_model(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, 
 
         log_info(f"Training KNN classifier for output variable {i}...")
 
-        test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+        test_preds, train_accuracy, test_accuracy = knn_classifier.classify(i)
 
         log_info(f"KNN classifier for output variable {i} trained")
 
