@@ -88,7 +88,6 @@ def main():
     if model_name == "knn":
         run_knn_model(X_train, y_train, X_test, y_test,
                       X_labels, y_labels, num_classes_in_vars)
-        raise NotImplementedError("KNN not implemented")
     elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
     elif model_name == "rf":

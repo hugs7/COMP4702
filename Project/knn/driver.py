@@ -7,7 +7,7 @@ Hugo Burton
 from typing import List
 import numpy as np
 
-import knn.knn
+from knn import knn
 from logger import *
 
 
