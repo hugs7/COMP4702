@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 from sklearn.base import BaseEstimator
+from typing import List
+import utils
 
 from model.base_model import Model
 from logger import *
@@ -14,6 +16,59 @@ from logger import *
 
 BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+
+
+def reconstruct_meshgrid(
+    xx: np.ndarray, yy: np.ndarray, tiled_means: np.ndarray, variable_indices: List[int], tiled_means_indices: List[int]
+) -> np.ndarray:
+    """
+    Reconstructs a meshgrid of points by inserting the means of non-variable features at the correct indices.
+
+    Parameters:
+    - xx (ndarray): The meshgrid of points for the first variable feature.
+    - yy (ndarray): The meshgrid of points for the second variable feature.
+    - tiled_means (ndarray): The means of non-variable features.
+    - variable_indices (List[int]): The indices of the variable features in the meshgrid.
+    - tiled_means_indices (List[int]): The indices of the non-variable features in the means array.
+
+    Returns:
+    - meshgrid (ndarray): The reconstructed meshgrid of points.
+    """
+
+    # Check length of variable_indices is 2
+    num_variable_features = len(variable_indices)
+    if num_variable_features != 2:
+        raise ValueError("Variable indices must be a list of length 2")
+
+    # Check length of xx and yy match
+    if xx.shape[0] != yy.shape[0]:
+        raise ValueError("Meshgrid dimensions do not match")
+
+    # Check dimensionality of tiled_means matches the length of tiled_means_indices
+    num_constant_features = len(tiled_means_indices)
+    if tiled_means.shape[1] != num_constant_features:
+        raise ValueError(
+            f"Dimensionality of means {tiled_means.shape[1]} does not match the number of non-variable features {num_constant_features}.\ntiled_means_indices: {tiled_means_indices}"
+        )
+
+    # Create an empty array to store the reconstructed meshgrid
+    total_meshgrid_features = num_variable_features + num_constant_features
+    meshgrid_length = xx.ravel().shape[0]
+    log_debug(f"Meshgrid length: {meshgrid_length}")
+
+    meshgrid = np.empty((meshgrid_length, total_meshgrid_features))
+
+    log_debug(f"Meshgrid shape: {meshgrid.shape}")
+
+    # Insert the variable features into the meshgrid
+    meshgrid[:, variable_indices] = np.c_[xx.ravel(), yy.ravel()]
+
+    # log_trace(f"Meshgrid variable features:\n{meshgrid}")
+
+    # Insert the means of non-variable features into the meshgrid
+    # meshgrid[:, tiled_means_indices] = tiled_means
+
+    return meshgrid
 
 
 class Classifier(Model):
@@ -35,6 +90,7 @@ class Classifier(Model):
         self,
         test_preds: np.ndarray,
         variable_feature_indices: tuple,
+        all_col_labels,
         resolution=0.02,
         plot_title="Decision Regions",
         buffer: float = 0.5,
@@ -67,24 +123,40 @@ class Classifier(Model):
             if index < 0 or index >= self.X_test.shape[1]:
                 raise ValueError(f"Feature index {index} is out of bounds")
 
-        # Extract feature columns based on the provided indices
-        variable_features = self.X_test[:, variable_feature_indices]
+        log_info(f"Plot resolution: {resolution}")
 
-        log_debug(f"Features:\n{variable_features}")
+        # Extract feature columns based on the provided indices
+        X_variable_features = self.X_test[:, variable_feature_indices]
+        log_debug(f"X variable features:\n{X_variable_features}")
 
         # Calculate mean values of non-variable features
-        mean_values = np.mean(self.X_test[:, ~np.isin(np.arange(self.X_test.shape[1]), variable_feature_indices)], axis=0)
+        constant_feature_indices = list(set(range(self.X_test.shape[1])) - set(variable_feature_indices))
+        # constant_feature_indices = ~np.isin(np.arange(self.X_test.shape[1]), variable_feature_indices)
+
+        log_debug(f"Variable feature indices: {variable_feature_indices}")
+        log_debug(f"Constant feature indices: {constant_feature_indices}")
+
+        mean_values = np.mean(self.X_test[:, constant_feature_indices], axis=0)
 
         log_debug(f"Mean values:\n{mean_values}")
 
         # Generate meshgrid of points to cover the feature space while holding other features constant at their mean values
-        mins = variable_features.min(axis=0) - buffer
-        maxs = variable_features.max(axis=0) + buffer
+        mins = X_variable_features.min(axis=0) - buffer
+        maxs = X_variable_features.max(axis=0) + buffer
 
-        xx, yy = np.meshgrid(
-            np.arange(mins[0], maxs[0], resolution),
-            np.arange(mins[1], maxs[1], resolution),
-        )
+        log_debug(f"Feature mins: {mins}")
+        log_debug(f"Feature maxs: {maxs}")
+
+        x = np.arange(mins[0], maxs[0], resolution)
+        y = np.arange(mins[1], maxs[1], resolution)
+
+        log_trace(f"X:\n{x}")
+        log_trace(f"Y:\n{y}")
+
+        log_debug(f"X shape: {x.shape}")
+        log_debug(f"Y shape: {y.shape}")
+
+        xx, yy = np.meshgrid(x, y)
 
         log_trace(f"Meshgrid XX:\n{xx}")
         log_trace(f"Meshgrid YY:\n{yy}")
@@ -92,26 +164,34 @@ class Classifier(Model):
         log_debug(f"Meshgrid shape XX: {xx.shape}")
         log_debug(f"Meshgrid shape yy: {yy.shape}")
 
-        log_debug(f"Meshgrid range X: {xx.min()} - {xx.max()}")
+        log_debug(f"Meshgrid range XX: {xx.min()} - {xx.max()}")
         log_debug(f"Meshgrid range yy: {yy.min()} - {yy.max()}")
 
         # Compute mean values for non-variable features
-        constant_means = np.tile(mean_values, (xx.ravel().shape[0], 1))
+        tiled_means = np.tile(mean_values, (xx.ravel().shape[0], 1))
 
-        log_trace(f"Constant means:\n{constant_means}")
-        log_debug(f"Constant means shape: {constant_means.shape}")
+        log_trace(f"Constant means:\n{tiled_means}")
+        log_debug(f"Constant means shape: {tiled_means.shape}")
 
-        # Combine variable features with constant mean values
-        meshgrid = np.hstack((constant_means, np.c_[xx.ravel(), yy.ravel()]))
+        # Reconstruct a "fake" / contrived test set retaining original feature variable order
+        meshgrid = reconstruct_meshgrid(xx, yy, tiled_means, variable_feature_indices, constant_feature_indices)
+
+        utils.np_as_pd(meshgrid, all_col_labels)
 
         log_trace(f"Meshgrid:\n{meshgrid}")
         log_debug(f"Meshgrid shape: {meshgrid.shape}")
+        if meshgrid.shape[1] != self.X_test.shape[1]:
+            log_warning(f"Meshgrid shape {meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
 
+        log_line(level="DEBUG")
         # Predict the labels for meshgrid points
         Z_preds = self.model.predict(meshgrid)
-
+        log_debug(f"Predictions:\n{Z_preds}")
+        log_line(level="DEBUG")
         # Reshape the predictions to match the meshgrid dimensions
         Z_preds = Z_preds.reshape(xx.shape)
+        log_debug(f"Predictions (reshaped):\n{Z_preds}")
+        log_line(level="DEBUG")
 
         # Plot the decision boundary
         num_test_classes = len(np.unique(test_preds))
@@ -121,7 +201,7 @@ class Classifier(Model):
 
         # Overlay the test points
         cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
-        dr_plot.scatter(variable_features[:, 0], variable_features[:, 1], c=test_preds, cmap=cmap_points)
+        dr_plot.scatter(X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
         # Setup plot
         dr_plot.set_xlim(xx.min(), xx.max())
