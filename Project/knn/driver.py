@@ -108,7 +108,7 @@ def run_knn_model(
         log_info(f"Number of feature pairs: {num_feature_pairs}")
 
         for i, feature_pair in enumerate(feature_pairs):
-            log_info(f"Plotting decision boundary for feature pair {feature_pair} / {num_feature_pairs}")
+            log_info(f"Plotting decision boundary for feature pair ({feature_pair}). Progress: {i} / {num_feature_pairs}")
 
             # Get the current axes
             plt.sca(axs.flatten()[plot_index])
