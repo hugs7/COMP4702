@@ -4,8 +4,11 @@ Hugo Burton
 06/05/2024
 """
 
+import itertools
 from typing import List
 import numpy as np
+import matplotlib.pyplot as plt
+import math
 
 from knn import knn_model
 from logger import *
@@ -46,7 +49,7 @@ def run_knn_model(
 
     knn_classifiers = []
 
-    # Dictionary of output variable: (predictions, train_accuracy, test_accuracy)
+    # Dictionary of output variable: (y_test_true, test_predictions, train_accuracy, test_accuracy)
     results = {}
 
     for i, var_y_labels in enumerate(y_labels):
@@ -75,10 +78,62 @@ def run_knn_model(
 
         log_info(f"KNN classifier for output variable {i} trained")
 
-        results[i] = (test_preds, train_accuracy, test_accuracy)
+        results[i] = (var_y_test, test_preds, train_accuracy, test_accuracy)
 
-        log_trace(f"Output variable {i} results: {results[i]}")
+        log_debug(f"Output variable {i} results: {results[i]}")
 
         log_line(level="DEBUG")
+
+        # Plot decision regions for each pair of features
+
+        # Calculate the total number of plots
+        total_plots = len(list(itertools.combinations(range(X_train.shape[1]), 2)))
+
+        # Determine the number of rows and columns for the square grid
+        num_plots_per_row = math.ceil(math.sqrt(total_plots))
+        num_plots_per_col = math.ceil(total_plots / num_plots_per_row)
+
+        # Create a square grid of subplots
+        fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(15, 15))
+
+        # Flatten the axs array to iterate over it easily
+        axs = axs.flatten()
+
+        # Iterate over each pair of input variables
+        plot_index = 0
+        feature_pairs = itertools.combinations(range(X_train.shape[1]), 2)
+        feature_pairs = list(feature_pairs)
+        log_debug(f"Feature pairs: {feature_pairs}")
+        num_feature_pairs = len(feature_pairs)
+        log_info(f"Number of feature pairs: {num_feature_pairs}")
+
+        for i, feature_pair in enumerate(feature_pairs):
+            log_info(f"Plotting decision boundary for feature pair {feature_pair} / {num_feature_pairs}")
+
+            # Get the current axes
+            plt.sca(axs.flatten()[plot_index])
+
+            # Generate and plot decision regions for the current pair of input variables
+            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, show_plot=False, resolution=1)
+            # Set title for each subplot
+            subplot.set_title(f"Decision Boundary for Feature Pair {feature_pair}")
+
+            # Add subplot to the list of plots
+            axs[plot_index] = subplot
+
+            # Increment plot index
+            plot_index += 1
+
+        log_info("All decision boundary plots generated")
+
+        # Hide empty subplots
+        for j in range(total_plots, len(axs)):
+            axs[j].axis("off")
+
+        # Adjust layout to prevent overlap
+        plt.tight_layout()
+
+        # Show the decision boundary plots for the current KNN classifier
+        plt.show()
 
     return results
