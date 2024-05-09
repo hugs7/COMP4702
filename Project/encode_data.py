@@ -23,6 +23,65 @@ def encode_non_numeric_data(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
+def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalises the data by subtracting the mean and dividing by the standard deviation for each column.
+
+    Parameters:
+    - data (DataFrame): The data to be normalised.
+
+    Returns:
+    - normalised_data (DataFrame): The normalised data.
+    """
+    # Create a copy of the data
+    normalised_data = data.copy()
+
+    # Iterate over each column in the data
+    for column in normalised_data.columns:
+        # Check if the column contains numerical data
+        column_data = normalised_data[column]
+
+        if np.issubdtype(column_data.dtype, np.number):
+            log_debug(f"Column: {column} is of type {column_data.dtype}. Normalising...")
+            # Calculate the mean and standard deviation for the current column
+            column_mean = column_data.mean()
+            column_std = column_data.std()
+
+            # Normalise the current column
+            column_data = (column_data - column_mean) / column_std
+
+        elif np.issubdtype(column_data.dtype, np.object_):
+            log_debug(f"Column: {column} is of type {column_data.dtype}. Attempting to convert object to number...")
+            try:
+                # Try to convert the column to numeric
+                column_data = pd.to_numeric(column_data, errors="coerce")
+                log_debug(f"Column: {column} successfully converted to number.")
+                # Calculate the mean and standard deviation for the current column
+                column_mean = column_data.mean()
+                column_std = column_data.std()
+
+                # Normalise the current column
+                column_data = (column_data - column_mean) / column_std
+
+            except ValueError:
+                log_debug(f"Column: {column} cannot be converted to number. Skipping normalisation...")
+                log_debug(f"Data type: {column_data.dtype}")
+                # Print example data point
+                sample_data_point = column_data.iloc[0]
+                log_debug(f"Sample Data Point: {sample_data_point}")
+                log_line()
+
+        else:
+            log_debug(f"Column: {column} is of type {column_data.dtype}. Skipping normalisation...")
+            log_debug(f"Data type: {column_data.dtype}")
+            # Print example data point
+            sample_data_point = column_data.iloc[0]
+            log_debug(f"Sample Data Point: {sample_data_point}")
+            log_line()
+
+    return normalised_data
+
+
 def one_hot_encode(y: np.ndarray) -> np.ndarray:
     """
     One-hot encodes the target variable.
