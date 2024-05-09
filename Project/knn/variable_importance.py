@@ -111,7 +111,7 @@ def compute_feature_importance(X: np.ndarray, sample_idx: int, k: int, num_rando
     num_features = X.shape[1]
     feature_importance_coefs = np.zeros(num_features)
     for i, feature_index in enumerate(range(num_features)):
-        log_info(f"Computing feature importance for feature {feature_index}...")
+        log_trace(f"Computing feature importance for feature {feature_index}...")
 
         neighb_dists = point_to_points_distances(X, sample_point, neighb_points, feature_index)
         rand_dists = point_to_points_distances(X, sample_point, rand_points, feature_index)
@@ -122,19 +122,19 @@ def compute_feature_importance(X: np.ndarray, sample_idx: int, k: int, num_rando
         neighb_dist_avg = np.mean(neighb_dists, axis=0)
         rand_dist_avg = np.mean(rand_dists, axis=0)
 
-        log_debug(f"Nearest neighbors distances: {neighb_dist_avg}")
-        log_debug(f"Random neighbors distances: {rand_dist_avg}")
+        log_trace(f"Nearest neighbors distances: {neighb_dist_avg}")
+        log_trace(f"Random neighbors distances: {rand_dist_avg}")
 
         if neighb_dist_avg == 0 or rand_dist_avg == 0:
             ratio = 0
         else:
             ratio = neighb_dist_avg / rand_dist_avg
 
-        log_debug(f"Feature importance: {ratio}")
+        log_trace(f"Feature importance: {ratio}")
 
         feature_importance_coefs[i] = ratio
 
-    log_info(f"Feature importance coefficients: {feature_importance_coefs}")
+    log_trace(f"Feature importance coefficients: {feature_importance_coefs}")
 
     return feature_importance_coefs
 
@@ -160,13 +160,13 @@ def compute_average_feature_importance(X: np.ndarray, num_samples: int, k: int, 
     num_features = X.shape[1]
     feature_importances = np.zeros((num_samples, num_features))
     for i, sample_idx in enumerate(sample_indices):
-        log_info(f"Computing feature importance for sample {sample_idx}. Progress: {i} / {num_samples}...")
+        log_debug(f"Computing feature importance for sample {sample_idx}. Progress: {i} / {num_samples}...")
         feature_importances[i] = compute_feature_importance(X, sample_idx, k, num_random_points)
 
     # Average feature importance across samples
-    log_debug(f"Feature importances: {feature_importances}")
+    log_trace(f"Feature importances: {feature_importances}")
     avg_feature_importance = np.mean(feature_importances, axis=0)
-    log_info(f"Average feature importance: {avg_feature_importance}")
+    log_trace(f"Average feature importance: {avg_feature_importance}")
 
     return avg_feature_importance
 
