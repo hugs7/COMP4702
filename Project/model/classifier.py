@@ -12,6 +12,10 @@ from model.base_model import Model
 from logger import *
 
 
+BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+
+
 class Classifier(Model):
     def __init__(
         self,
@@ -110,13 +114,14 @@ class Classifier(Model):
         Z_preds = Z_preds.reshape(xx.shape)
 
         # Plot the decision boundary
-        cmap_light = ListedColormap(["#FFAAAA", "#AAFFAA", "#AAAAFF"])
+        num_test_classes = len(np.unique(test_preds))
+        cmap_bg = ListedColormap(BACKGROUND_COLOURS[:num_test_classes])
         dr_plot: plt.Axes = plt.gca()
-        dr_plot.pcolormesh(xx, yy, Z_preds, cmap=cmap_light, shading="auto")
+        dr_plot.pcolormesh(xx, yy, Z_preds, cmap=cmap_bg, shading="auto")
 
         # Overlay the test points
-        cmap_bold = ListedColormap(["#FF0000", "#00FF00"])
-        dr_plot.scatter(variable_features[:, 0], variable_features[:, 1], c=test_preds, cmap=cmap_bold)
+        cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
+        dr_plot.scatter(variable_features[:, 0], variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
         # Setup plot
         dr_plot.set_xlim(xx.min(), xx.max())
