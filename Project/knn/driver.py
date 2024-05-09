@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+import pandas as pd
+
 from knn import knn_model
 from knn import variable_importance
 from logger import *
@@ -108,6 +110,7 @@ def run_knn_model(
         delta = 5
         # Plot decision regions for the top delta features
         top_5_feature_idxs = [idx for idx, _ in sorted_importance[:delta]]
+        top_5_feature_cols = [X_labels[idx] for idx in top_5_feature_idxs]
         log_debug(f"Top {delta} feature indices: {top_5_feature_idxs}")
 
         # Calculate the total number of plots
@@ -156,6 +159,13 @@ def run_knn_model(
         for j in range(num_feature_pairs, len(axs)):
             axs[j].axis("off")
 
+        log_line()
+        log_debug("X Test points:")
+        X_test_important_features = X_test[:, top_5_feature_idxs]
+        sample_X_test_df = pd.DataFrame(X_test_important_features, columns=top_5_feature_cols)
+        log_debug(sample_X_test_df)
+
+        log_line()
         # Adjust layout to prevent overlap
         plt.tight_layout()
 
