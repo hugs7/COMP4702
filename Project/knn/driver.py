@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import math
 
 from knn import knn_model
+from knn import variable_importance
 from logger import *
 
 
@@ -53,6 +54,7 @@ def run_knn_model(
     results = {}
 
     for i, var_y_labels in enumerate(y_labels):
+        # ======== Train KNN classifier for this output variable ========
         log_title(f"Output variable {i} classes: {var_y_labels}")
 
         # Get slice of y_train and y_test for this output variable
@@ -74,6 +76,8 @@ def run_knn_model(
 
         log_info(f"Training KNN classifier for output variable {i}...")
 
+        # ======== Obtain results from test and train data ========
+
         test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
 
         log_info(f"KNN classifier for output variable {i} trained")
@@ -84,7 +88,24 @@ def run_knn_model(
 
         log_line(level="DEBUG")
 
-        # Plot decision regions for each pair of features
+        # ======== Compute variable importance ========
+
+        log_title(f"Computing variable importance for output variable {i}...")
+
+        # Calculate permutation importance
+        var_importance = variable_importance.compute_average_feature_importance(X_test, 10, k, 100)
+
+        log_info(f"Variable importance for output variable {i}: {var_importance}")
+
+        sorted_importance = sorted(enumerate(var_importance), key=lambda x: x[1], reverse=True)
+        log_debug(f"Sorted variable importance: {sorted_importance}")
+
+        for idx, importance in sorted_importance:
+            log_debug(f"Feature {idx}: Importance {importance}")
+
+        # ======== Plot Decision Boundaries ========
+
+        # Plot decision regions for each pair of features that are considered important by our threshold, alpha
 
         # Calculate the total number of plots
         total_plots = len(list(itertools.combinations(range(X_train.shape[1]), 2)))
