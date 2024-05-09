@@ -83,7 +83,7 @@ def main():
 
     if model_name == "knn":
         X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
-            dataset_file_path, X_labels, y_labels, False, test_train_ratio
+            dataset_file_path, X_labels, y_labels, False, True, test_train_ratio
         )
         run_knn_model(X_train, y_train, X_test, y_test, X_labels, y_labels, num_classes_in_vars)
     elif model_name == "dt":
@@ -92,7 +92,7 @@ def main():
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
         X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
-            dataset_file_path, X_labels, y_labels, True, test_train_ratio
+            dataset_file_path, X_labels, y_labels, True, False, test_train_ratio
         )
         run_nn_model(X_train, y_train, X_test, y_test, X_labels, y_labels, num_classes_in_vars)
 
