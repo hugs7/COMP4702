@@ -21,6 +21,7 @@ def process_classification_data(
     X_feature_names: List[str],
     y_feature_names: List[str],
     one_hot_encode: bool,
+    normalise_data: bool,
     test_train_split_ratio: float = 0.3,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
     """
@@ -35,6 +36,7 @@ def process_classification_data(
     - X_feature_names (List[str]): The names of the features.
     - y_feature_names (List[str]): The names of the target variable.
     - one_hot_encode (bool): Whether to one-hot encode the target variable.
+    - normalise_data (bool): Whether to normalise the data.
     - test_train_split_ratio (float): The ratio of the testing data.
 
     Returns:
@@ -62,7 +64,11 @@ def process_classification_data(
     X = data_randomised[X_feature_names]
     y = data_randomised[y_feature_names]
 
-    log_info(f"Data pre-processed")
+    # Normalise the data
+    if normalise_data:
+        log_title(f"Normalising X data...")
+        X = encode_data.normalise_data(X)
+        log_info(f"Data normalised")
 
     log_title(f"Encoding data...")
 
