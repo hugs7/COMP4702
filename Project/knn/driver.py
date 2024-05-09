@@ -10,11 +10,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-import pandas as pd
 
 from knn import knn_model
 from knn import variable_importance
 from logger import *
+import utils
 
 
 def run_knn_model(
@@ -139,7 +139,7 @@ def run_knn_model(
             plt.sca(axs.flatten()[plot_index])
 
             # Generate and plot decision regions for the current pair of input variables
-            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, show_plot=False, resolution=0.25)
+            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, X_labels, show_plot=False, resolution=1)
             # Set title for each subplot
             feature_label_x = X_labels[feature_pair[0]]
             feature_label_y = X_labels[feature_pair[1]]
@@ -162,8 +162,7 @@ def run_knn_model(
         log_line()
         log_debug("X Test points:")
         X_test_important_features = X_test[:, top_5_feature_idxs]
-        sample_X_test_df = pd.DataFrame(X_test_important_features, columns=top_5_feature_cols)
-        log_debug(sample_X_test_df)
+        utils.np_as_pd(X_test_important_features, top_5_feature_cols)
 
         log_line()
         # Adjust layout to prevent overlap
