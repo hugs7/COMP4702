@@ -84,25 +84,26 @@ def run_knn_model(
 
         results[i] = (var_y_test, test_preds, train_accuracy, test_accuracy)
 
-        log_debug(f"Output variable {i} results: {results[i]}")
+        log_trace(f"Output variable {i} results: {results[i]}")
 
-        log_line(level="DEBUG")
+        log_line(level="INFO")
 
         # ======== Compute variable importance ========
 
         log_title(f"Computing variable importance for output variable {i}...")
 
         # Calculate permutation importance
-        var_importance = variable_importance.compute_average_feature_importance(X_test, 10, k, 100)
-
-        log_info(f"Variable importance for output variable {i}: {var_importance}")
-
+        var_importance = variable_importance.compute_average_feature_importance(X_test, 5, k, 50)
         sorted_importance = sorted(enumerate(var_importance), key=lambda x: x[1], reverse=True)
-        log_debug(f"Sorted variable importance: {sorted_importance}")
 
+        log_info(f"Variable importance for output variable {i}")
+
+        max_feature_name_length = max([len(feature_name) for feature_name in X_labels])
         for idx, importance in sorted_importance:
-            log_debug(f"Feature {idx}: Importance {importance}")
+            feature_name = X_labels[idx]
+            log_info(f"    Feature {feature_name:<{max_feature_name_length+3}}: Importance {importance:.4f}")
 
+        continue
         # ======== Plot Decision Boundaries ========
 
         # Plot decision regions for each pair of features that are considered important by our threshold, alpha
