@@ -33,6 +33,18 @@ def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
     Returns:
     - normalised_data (DataFrame): The normalised data.
     """
+
+    # Some helper functions
+    def normalise_column(column: pd.Series) -> pd.Series:
+        column_mean = column.mean()
+        column_std = column.std()
+        log_trace(f"Column Mean: {column_mean}, Column Std: {column_std}")
+
+        normalised_column = (column - column_mean) / column_std
+        log_trace(f"Normalised Column Sample: \n{normalised_column.head()}")
+
+        return normalised_column
+
     # Create a copy of the data
     normalised_data = data.copy()
 
@@ -43,12 +55,9 @@ def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
 
         if np.issubdtype(column_data.dtype, np.number):
             log_debug(f"Column: {column} is of type {column_data.dtype}. Normalising...")
-            # Calculate the mean and standard deviation for the current column
-            column_mean = column_data.mean()
-            column_std = column_data.std()
 
             # Normalise the current column
-            column_data = (column_data - column_mean) / column_std
+            column_data = normalise_column(column_data)
 
         elif np.issubdtype(column_data.dtype, np.object_):
             log_debug(f"Column: {column} is of type {column_data.dtype}. Attempting to convert object to number...")
@@ -56,28 +65,15 @@ def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
                 # Try to convert the column to numeric
                 column_data = pd.to_numeric(column_data, errors="coerce")
                 log_debug(f"Column: {column} successfully converted to number.")
-                # Calculate the mean and standard deviation for the current column
-                column_mean = column_data.mean()
-                column_std = column_data.std()
 
                 # Normalise the current column
-                column_data = (column_data - column_mean) / column_std
+                column_data = normalise_column(column_data)
 
             except ValueError:
-                log_debug(f"Column: {column} cannot be converted to number. Skipping normalisation...")
-                log_debug(f"Data type: {column_data.dtype}")
-                # Print example data point
-                sample_data_point = column_data.iloc[0]
-                log_debug(f"Sample Data Point: {sample_data_point}")
-                log_line()
+                log_error(f"Column: {column} cannot be converted to number. Skipping normalisation...")
 
         else:
             log_debug(f"Column: {column} is of type {column_data.dtype}. Skipping normalisation...")
-            log_debug(f"Data type: {column_data.dtype}")
-            # Print example data point
-            sample_data_point = column_data.iloc[0]
-            log_debug(f"Sample Data Point: {sample_data_point}")
-            log_line()
 
     return normalised_data
 
