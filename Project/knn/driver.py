@@ -136,9 +136,13 @@ def run_knn_model(
             plt.sca(axs.flatten()[plot_index])
 
             # Generate and plot decision regions for the current pair of input variables
-            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, show_plot=False, resolution=1)
+            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, show_plot=False, resolution=0.25)
             # Set title for each subplot
-            subplot.set_title(f"Decision Boundary for Feature Pair {feature_pair}")
+            feature_label_x = X_labels[feature_pair[0]]
+            feature_label_y = X_labels[feature_pair[1]]
+            subplot.set_title(f"DB for features {feature_label_x} and {feature_label_y}")
+            subplot.set_xlabel(feature_label_x)
+            subplot.set_ylabel(feature_label_y)
 
             # Add subplot to the list of plots
             axs[plot_index] = subplot
