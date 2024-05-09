@@ -101,19 +101,24 @@ def run_knn_model(
         max_feature_name_length = max([len(feature_name) for feature_name in X_labels])
         for idx, importance in sorted_importance:
             feature_name = X_labels[idx]
-            log_info(f"    Feature {feature_name:<{max_feature_name_length+3}}: Importance {importance:.4f}")
+            log_info(f"    Feature {idx:<2} {feature_name:<{max_feature_name_length+3}}: Importance {importance:.4f}")
 
-        continue
         # ======== Plot Decision Boundaries ========
 
-        # Plot decision regions for each pair of features that are considered important by our threshold, alpha
+        delta = 5
+        # Plot decision regions for the top delta features
+        top_5_feature_idxs = [idx for idx, _ in sorted_importance[:delta]]
+        log_debug(f"Top {delta} feature indices: {top_5_feature_idxs}")
 
         # Calculate the total number of plots
-        total_plots = len(list(itertools.combinations(range(X_train.shape[1]), 2)))
+        feature_combinations = list(itertools.combinations(top_5_feature_idxs, 2))
+        log_debug(f"Feature combinations: {feature_combinations}")
+        num_feature_pairs = len(feature_combinations)
+        log_info(f"Total number of plots: {num_feature_pairs}")
 
         # Determine the number of rows and columns for the square grid
-        num_plots_per_row = math.ceil(math.sqrt(total_plots))
-        num_plots_per_col = math.ceil(total_plots / num_plots_per_row)
+        num_plots_per_row = math.ceil(math.sqrt(num_feature_pairs))
+        num_plots_per_col = math.ceil(num_feature_pairs / num_plots_per_row)
 
         # Create a square grid of subplots
         fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(15, 15))
@@ -123,13 +128,8 @@ def run_knn_model(
 
         # Iterate over each pair of input variables
         plot_index = 0
-        feature_pairs = itertools.combinations(range(X_train.shape[1]), 2)
-        feature_pairs = list(feature_pairs)
-        log_debug(f"Feature pairs: {feature_pairs}")
-        num_feature_pairs = len(feature_pairs)
-        log_info(f"Number of feature pairs: {num_feature_pairs}")
 
-        for i, feature_pair in enumerate(feature_pairs):
+        for i, feature_pair in enumerate(feature_combinations):
             log_info(f"Plotting decision boundary for feature pair ({feature_pair}). Progress: {i} / {num_feature_pairs}")
 
             # Get the current axes
@@ -149,7 +149,7 @@ def run_knn_model(
         log_info("All decision boundary plots generated")
 
         # Hide empty subplots
-        for j in range(total_plots, len(axs)):
+        for j in range(num_feature_pairs, len(axs)):
             axs[j].axis("off")
 
         # Adjust layout to prevent overlap
