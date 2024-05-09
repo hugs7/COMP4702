@@ -2,7 +2,10 @@
 This file contains utility functions that are used throughout the project.
 """
 
-from typing import Dict
+from typing import Dict, List
+import pandas as pd
+import numpy as np
+import logger
 
 
 def key_from_value(dict: Dict, value: str) -> int:
@@ -18,3 +21,19 @@ def key_from_value(dict: Dict, value: str) -> int:
     - int: The key of the value.
     """
     return [k for k, v in dict.items() if v == value][0]
+
+
+def np_as_pd(df: np.ndarray, columns: List[str]) -> None:
+    """
+    Prints a numpy array as a pandas DataFrame.
+
+    Parameters:
+    - df (ndarray): The numpy array to print.
+    - columns (List[str]): The column names for the DataFrame.
+
+    Returns:
+    - None
+    """
+
+    df = pd.DataFrame(df, columns=columns)
+    logger.log_info(df)
