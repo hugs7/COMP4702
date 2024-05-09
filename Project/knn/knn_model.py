@@ -59,7 +59,7 @@ class KNNClassify(Classifier):
         log_info("Results obtained")
 
         log_trace(f"Test predictions:\n{test_predictions}")
-        log_debug(f"Train accuracy: {train_accuracy}")
-        log_debug(f"Test accuracy: {test_accuracy}")
+        log_info(f"Train accuracy: {train_accuracy}")
+        log_info(f"Test accuracy: {test_accuracy}")
 
         return test_predictions, train_accuracy, test_accuracy
