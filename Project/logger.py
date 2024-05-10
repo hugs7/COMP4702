@@ -9,7 +9,7 @@ from utils import key_from_value
 LOG_LEVELS = {0: None, 1: "ERROR", 2: "WARNING",
               3: "INFO", 4: "DEBUG", 5: "TRACE"}
 
-LOG_LEVEL = "TRACE"
+LOG_LEVEL = "DEBUG"
 LOG_LEVEL_INDEX = key_from_value(LOG_LEVELS, LOG_LEVEL)
 
 
