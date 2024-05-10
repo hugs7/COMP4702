@@ -92,7 +92,7 @@ class Classifier(Model):
         self,
         test_preds: np.ndarray,
         variable_feature_indices: tuple,
-        all_col_labels,
+        all_col_labels: list[str],
         resolution=0.02,
         plot_title="Decision Regions",
         buffer: float = 0.5,
@@ -103,7 +103,8 @@ class Classifier(Model):
 
         Parameters:
         - test_preds (ndarray): The predicted labels for the test data.
-        - feature_indices (tuple): The indices of the two features to be used for plotting decision regions.
+        - variable_feature_indices (tuple): The indices of the two features to be used for plotting decision regions.
+        - all_col_labels (list[str]): The labels of all the features.
         - resolution (float): The step size of the mesh grid used for plotting the decision regions. Default is 0.02.
         - plot_title (str): The title of the plot. Default is "Decision Regions".
         - buffer (float): The buffer to add to the minimum and maximum values of the features. Default is 0.5.
@@ -135,13 +136,24 @@ class Classifier(Model):
         log_debug(f"Variable feature indices: {variable_feature_indices}")
         log_debug(f"Constant feature indices: {constant_feature_indices}")
 
+        variable_feature_labels = [all_col_labels[vfi]
+                                   for vfi in variable_feature_indices]
+        constant_feature_labels = [all_col_labels[cfi]
+                                   for cfi in constant_feature_indices]
+
+        log_debug(f"Variable feature labels: {variable_feature_labels}")
+
         # Extract feature columns based on the provided indices
         X_variable_features = self.X_test[:, variable_feature_indices]
         log_debug(f"X variable features:\n{X_variable_features}")
 
         mean_values = np.mean(self.X_test[:, constant_feature_indices], axis=0)
-
-        log_debug(f"Mean values:\n{mean_values}")
+        log_debug(f"Mean values:")
+        max_label_length = max([len(label) for label in all_col_labels])
+        for i, mean_val in enumerate(mean_values):
+            label = all_col_labels[constant_feature_indices[i]]
+            log_debug(
+                f"    {label:<{max_label_length+2}}: {mean_val}")
 
         # Generate meshgrid of points to cover the feature space while holding other features constant at their mean values
         mins = X_variable_features.min(axis=0) - buffer
@@ -173,22 +185,23 @@ class Classifier(Model):
         # Compute mean values for non-variable features
         tiled_means = np.tile(mean_values, (xx.ravel().shape[0], 1))
 
-        log_trace(f"Constant means:\n{tiled_means}")
+        log_trace(f"Constant means:")
+        log_info(utils.np_to_pd(tiled_means, constant_feature_labels))
         log_debug(f"Constant means shape: {tiled_means.shape}")
 
         # Reconstruct a "fake" / contrived test set retaining original feature variable order
         meshgrid = reconstruct_meshgrid(
             xx, yy, tiled_means, variable_feature_indices, constant_feature_indices)
 
-        utils.np_as_pd(meshgrid, all_col_labels)
+        log_info(utils.np_to_pd(meshgrid, all_col_labels))
 
-        log_trace(f"Meshgrid:\n{meshgrid}")
         log_debug(f"Meshgrid shape: {meshgrid.shape}")
         if meshgrid.shape[1] != self.X_test.shape[1]:
             log_warning(
                 f"Meshgrid shape {meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
 
         log_line(level="DEBUG")
+        log_info("Making predictions on meshgrid...")
         # Predict the labels for meshgrid points
         Z_preds = self.model.predict(meshgrid)
         log_debug(f"Predictions:\n{Z_preds}")

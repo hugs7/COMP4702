@@ -176,7 +176,7 @@ def run_knn_model(
         log_line()
         log_debug("X Test points:")
         X_test_important_features = X_test[:, top_5_feature_idxs]
-        utils.np_as_pd(X_test_important_features, top_5_feature_cols)
+        log_info(utils.np_to_pd(X_test_important_features, top_5_feature_cols))
 
         log_line()
         # Adjust layout to prevent overlap

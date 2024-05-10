@@ -23,17 +23,17 @@ def key_from_value(dict: Dict, value: str) -> int:
     return [k for k, v in dict.items() if v == value][0]
 
 
-def np_as_pd(df: np.ndarray, columns: List[str]) -> None:
+def np_to_pd(df: np.ndarray, columns: List[str]) -> pd.DataFrame:
     """
-    Prints a numpy array as a pandas DataFrame.
+    Converts a numpy array into a pandas DataFrame.
 
     Parameters:
     - df (ndarray): The numpy array to print.
     - columns (List[str]): The column names for the DataFrame.
 
     Returns:
-    - None
+    - DataFrame: The DataFrame representation of the numpy array.
     """
 
     df = pd.DataFrame(df, columns=columns)
-    logger.log_info(df)
+    return df
