@@ -14,8 +14,10 @@ from model.base_model import Model
 from logger import *
 
 
-BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
-FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700",
+                      "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
+                      "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
 
 def reconstruct_meshgrid(
@@ -125,16 +127,17 @@ class Classifier(Model):
 
         log_info(f"Plot resolution: {resolution}")
 
-        # Extract feature columns based on the provided indices
-        X_variable_features = self.X_test[:, variable_feature_indices]
-        log_debug(f"X variable features:\n{X_variable_features}")
-
         # Calculate mean values of non-variable features
-        constant_feature_indices = list(set(range(self.X_test.shape[1])) - set(variable_feature_indices))
+        constant_feature_indices = list(
+            set(range(self.X_test.shape[1])) - set(variable_feature_indices))
         # constant_feature_indices = ~np.isin(np.arange(self.X_test.shape[1]), variable_feature_indices)
 
         log_debug(f"Variable feature indices: {variable_feature_indices}")
         log_debug(f"Constant feature indices: {constant_feature_indices}")
+
+        # Extract feature columns based on the provided indices
+        X_variable_features = self.X_test[:, variable_feature_indices]
+        log_debug(f"X variable features:\n{X_variable_features}")
 
         mean_values = np.mean(self.X_test[:, constant_feature_indices], axis=0)
 
@@ -174,14 +177,16 @@ class Classifier(Model):
         log_debug(f"Constant means shape: {tiled_means.shape}")
 
         # Reconstruct a "fake" / contrived test set retaining original feature variable order
-        meshgrid = reconstruct_meshgrid(xx, yy, tiled_means, variable_feature_indices, constant_feature_indices)
+        meshgrid = reconstruct_meshgrid(
+            xx, yy, tiled_means, variable_feature_indices, constant_feature_indices)
 
         utils.np_as_pd(meshgrid, all_col_labels)
 
         log_trace(f"Meshgrid:\n{meshgrid}")
         log_debug(f"Meshgrid shape: {meshgrid.shape}")
         if meshgrid.shape[1] != self.X_test.shape[1]:
-            log_warning(f"Meshgrid shape {meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
+            log_warning(
+                f"Meshgrid shape {meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
 
         log_line(level="DEBUG")
         # Predict the labels for meshgrid points
@@ -201,7 +206,8 @@ class Classifier(Model):
 
         # Overlay the test points
         cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
-        dr_plot.scatter(X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
+        dr_plot.scatter(
+            X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
         # Setup plot
         dr_plot.set_xlim(xx.min(), xx.max())
