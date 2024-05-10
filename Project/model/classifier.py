@@ -20,22 +20,29 @@ FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
                       "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
 
-def reconstruct_meshgrid(
-    xx: np.ndarray, yy: np.ndarray, tiled_means: np.ndarray, variable_indices: List[int], tiled_means_indices: List[int]
+def construct_X_flattened_mesh(
+    xx_flat: np.ndarray, yy_flat: np.ndarray, mean_values: np.ndarray, variable_indices: List[int], constant_indices: List[int], all_col_labels: List[str]
 ) -> np.ndarray:
     """
-    Reconstructs a meshgrid of points by inserting the means of non-variable features at the correct indices.
+    Constructs a flattened meshgrid of points of which the variable columns contain the range of the plot and the 
+    constant columns are the mean of the X_test set. This is used to predict the class of each point to obtain the 
+    Z_preds on the background of the decision boundary plot.
 
     Parameters:
-    - xx (ndarray): The meshgrid of points for the first variable feature.
-    - yy (ndarray): The meshgrid of points for the second variable feature.
-    - tiled_means (ndarray): The means of non-variable features.
+    - xx_flat (ndarray): The flattened meshgrid of points for the first variable feature.
+    - yy_flat (ndarray): The flattened meshgrid of points for the second variable feature.
+    - mean_values (ndarray): The means of non-variable features.
     - variable_indices (List[int]): The indices of the variable features in the meshgrid.
-    - tiled_means_indices (List[int]): The indices of the non-variable features in the means array.
+    - constant_indices (List[int]): The indices of the non-variable features.
+    - all_col_labels (List[str]): The labels of all the features.
 
     Returns:
-    - meshgrid (ndarray): The reconstructed meshgrid of points.
+    - flattened_meshgrid (ndarray): The flattened meshgrid of points with the variable features and constant features.
     """
+
+    log_info("Reconstructing meshgrid...")
+
+    log_trace("Checking input parameters...")
 
     # Check length of variable_indices is 2
     num_variable_features = len(variable_indices)
@@ -43,34 +50,58 @@ def reconstruct_meshgrid(
         raise ValueError("Variable indices must be a list of length 2")
 
     # Check length of xx and yy match
-    if xx.shape[0] != yy.shape[0]:
+    if xx_flat.shape[0] != yy_flat.shape[0]:
         raise ValueError("Meshgrid dimensions do not match")
 
     # Check dimensionality of tiled_means matches the length of tiled_means_indices
-    num_constant_features = len(tiled_means_indices)
-    if tiled_means.shape[1] != num_constant_features:
+    num_constant_features = len(constant_indices)
+    if mean_values.shape[0] != num_constant_features:
         raise ValueError(
-            f"Dimensionality of means {tiled_means.shape[1]} does not match the number of non-variable features {num_constant_features}.\ntiled_means_indices: {tiled_means_indices}"
+            f"Dimensionality of means {mean_values.shape[0]} does not match the number of non-variable features " +
+            f"{num_constant_features}.\ntiled_means_indices: {constant_indices}"
         )
 
     # Create an empty array to store the reconstructed meshgrid
     total_meshgrid_features = num_variable_features + num_constant_features
-    meshgrid_length = xx.ravel().shape[0]
+    log_debug(f"Total meshgrid features: {total_meshgrid_features}")
+
+    meshgrid_length = xx_flat.shape[0]
+    # = yy_flat.shape[0] which was checked above
     log_debug(f"Meshgrid length: {meshgrid_length}")
 
-    meshgrid = np.empty((meshgrid_length, total_meshgrid_features))
+    # Compute mean values for non-variable features
+    constant_col_labels = [all_col_labels[cfi] for cfi in constant_indices]
 
-    log_debug(f"Meshgrid shape: {meshgrid.shape}")
+    log_trace(f"Mean values:\n{mean_values}")
+    tiled_means = np.tile(mean_values, (meshgrid_length, 1))
+    log_debug(f"Tiled means shape: {tiled_means.shape}")
+    log_trace(
+        f"Tiled means:\n{utils.np_to_pd(tiled_means, constant_col_labels)}")
+
+    flattened_meshgrid = np.empty((meshgrid_length, total_meshgrid_features))
+    log_debug(f"Empty flattened meshgrid shape: {flattened_meshgrid.shape}")
+    log_trace(
+        f"Empty flattened meshgrid:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
 
     # Insert the variable features into the meshgrid
-    meshgrid[:, variable_indices] = np.c_[xx.ravel(), yy.ravel()]
+    # Split variable indices into x and y indices
+    x_index, y_index = variable_indices
+    flattened_meshgrid[:, x_index] = xx_flat
+    flattened_meshgrid[:, y_index] = yy_flat
 
-    # log_trace(f"Meshgrid variable features:\n{meshgrid}")
+    variable_col_labels = [all_col_labels[vfi] for vfi in variable_indices]
+    log_debug(f"Variable column labels: {variable_col_labels}")
+    log_trace(
+        f"Flattened meshgrid with only variable columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
 
     # Insert the means of non-variable features into the meshgrid
-    # meshgrid[:, tiled_means_indices] = tiled_means
+    flattened_meshgrid[:, constant_indices] = tiled_means
 
-    return meshgrid
+    log_debug(f"Constant column labels: {constant_col_labels}")
+    log_trace(
+        f"Flattened meshgrid with variable and constant columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+
+    return flattened_meshgrid
 
 
 class Classifier(Model):
@@ -155,6 +186,7 @@ class Classifier(Model):
             log_debug(
                 f"    {label:<{max_label_length+2}}: {mean_val}")
 
+        log_info("Generating X meshgrid...")
         # Generate meshgrid of points to cover the feature space while holding other features constant at their mean values
         mins = X_variable_features.min(axis=0) - buffer
         maxs = X_variable_features.max(axis=0) + buffer
@@ -171,39 +203,35 @@ class Classifier(Model):
         log_debug(f"X shape: {x.shape}")
         log_debug(f"Y shape: {y.shape}")
 
+        # Create meshgrid and flatten for predictions
         xx, yy = np.meshgrid(x, y)
+        xx_flat = xx.ravel()
+        yy_flat = yy.ravel()
 
-        log_trace(f"Meshgrid XX:\n{xx}")
-        log_trace(f"Meshgrid YY:\n{yy}")
+        log_trace(f"Meshgrid flat XX:\n{xx_flat}")
+        log_trace(f"Meshgrid flat YY:\n{yy_flat}")
 
-        log_debug(f"Meshgrid shape XX: {xx.shape}")
-        log_debug(f"Meshgrid shape yy: {yy.shape}")
+        log_debug(f"Meshgrid flat shape XX: {xx_flat.shape}")
+        log_debug(f"Meshgrid flat shape yy: {yy_flat.shape}")
 
-        log_debug(f"Meshgrid range XX: {xx.min()} - {xx.max()}")
-        log_debug(f"Meshgrid range yy: {yy.min()} - {yy.max()}")
+        log_debug(f"Meshgrid flat range XX: {xx_flat.min()} - {xx_flat.max()}")
+        log_debug(f"Meshgrid flat range yy: {yy_flat.min()} - {yy_flat.max()}")
 
-        # Compute mean values for non-variable features
-        tiled_means = np.tile(mean_values, (xx.ravel().shape[0], 1))
+        # Construct a "fake" / contrived test set retaining original feature variable order
+        flattened_X_meshgrid = construct_X_flattened_mesh(
+            xx_flat, yy_flat, mean_values, variable_feature_indices, constant_feature_indices, all_col_labels)
 
-        log_trace(f"Constant means:")
-        log_info(utils.np_to_pd(tiled_means, constant_feature_labels))
-        log_debug(f"Constant means shape: {tiled_means.shape}")
+        log_info(utils.np_to_pd(flattened_X_meshgrid, all_col_labels))
 
-        # Reconstruct a "fake" / contrived test set retaining original feature variable order
-        meshgrid = reconstruct_meshgrid(
-            xx, yy, tiled_means, variable_feature_indices, constant_feature_indices)
-
-        log_info(utils.np_to_pd(meshgrid, all_col_labels))
-
-        log_debug(f"Meshgrid shape: {meshgrid.shape}")
-        if meshgrid.shape[1] != self.X_test.shape[1]:
+        log_debug(f"Meshgrid shape: {flattened_X_meshgrid.shape}")
+        if flattened_X_meshgrid.shape[1] != self.X_test.shape[1]:
             log_warning(
-                f"Meshgrid shape {meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
+                f"Meshgrid shape {flattened_X_meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
 
         log_line(level="DEBUG")
         log_info("Making predictions on meshgrid...")
         # Predict the labels for meshgrid points
-        Z_preds = self.model.predict(meshgrid)
+        Z_preds = self.model.predict(flattened_X_meshgrid)
         log_debug(f"Predictions:\n{Z_preds}")
         log_line(level="DEBUG")
         # Reshape the predictions to match the meshgrid dimensions
