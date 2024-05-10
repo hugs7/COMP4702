@@ -20,8 +20,6 @@ def main():
     set_log_level()
     welcome()
 
-    dataset_name = "Thorax"
-
     models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
               "rf": "Random Forest", "nn": "Neural Network"}
 
