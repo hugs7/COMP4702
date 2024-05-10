@@ -5,12 +5,34 @@ Helper for printing messages in color
 from colorama import Fore, Style
 from typing import Any
 from utils import key_from_value
+import os
+
 
 LOG_LEVELS = {0: None, 1: "ERROR", 2: "WARNING",
               3: "INFO", 4: "DEBUG", 5: "TRACE"}
 
-LOG_LEVEL = "DEBUG"
-LOG_LEVEL_INDEX = key_from_value(LOG_LEVELS, LOG_LEVEL)
+LOG_LEVEL = None
+LOG_LEVEL_INDEX = None
+
+# Read from .env file
+current_dir = os.path.dirname(__file__)
+env_file_path = os.path.join(current_dir, ".env")
+# Check if the .env file exists
+if not os.path.exists(env_file_path):
+    # Create the .env file and set the default log level to INFO
+    with open(env_file_path, 'w') as environment_file:
+        environment_file.write("LOG_LEVEL=INFO\n")
+
+# Read the log level from the .env file
+with open(env_file_path, "r") as environment_file:
+    for line in environment_file:
+        if line.startswith('LOG_LEVEL'):
+            LOG_LEVEL = line.strip().split('=')[1].strip()
+            LOG_LEVEL_INDEX = key_from_value(LOG_LEVELS, LOG_LEVEL)
+            break
+
+if LOG_LEVEL is None:
+    raise ValueError("LOG_LEVEL not defined in .env")
 
 
 def check_log_level(level: str) -> bool:
