@@ -43,12 +43,14 @@ def run_knn_model(
 
     log_title("Start of knn model driver...")
 
-    log_info(f"Number of classes in each output variable: {num_classes_in_vars}")
+    log_info(
+        f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # For multi-variable classification, we need to create a knn classifier for each output variable
     # These are independent of each other.
 
-    log_debug(f"Creating a knn classifier for each of the {len(y_labels)} output variables")
+    log_debug(
+        f"Creating a knn classifier for each of the {len(y_labels)} output variables")
 
     knn_classifiers = []
 
@@ -69,7 +71,8 @@ def run_knn_model(
         log_debug(f"y_train_var shape: {var_y_train.shape}")
         log_debug(f"y_test_var shape: {var_y_test.shape}")
 
-        knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k)
+        knn_classifier = knn_model.KNNClassify(
+            X_train, var_y_train, X_test, var_y_test, X_labels, var_y_labels, k=k)
 
         # Add the classifier to the list
         knn_classifiers.append(knn_classifier)
@@ -95,17 +98,23 @@ def run_knn_model(
         log_title(f"Computing variable importance for output variable {i}...")
 
         # Calculate permutation importance
-        var_importance = variable_importance.compute_average_feature_importance(X_test, 5, k, 50)
-        sorted_importance = sorted(enumerate(var_importance), key=lambda x: x[1], reverse=True)
+        var_importance = variable_importance.compute_average_feature_importance(
+            X_test, 5, k, 50)
+        sorted_importance = sorted(
+            enumerate(var_importance), key=lambda x: x[1], reverse=True)
 
         log_info(f"Variable importance for output variable {i}")
 
-        max_feature_name_length = max([len(feature_name) for feature_name in X_labels])
+        max_feature_name_length = max(
+            [len(feature_name) for feature_name in X_labels])
         for idx, importance in sorted_importance:
             feature_name = X_labels[idx]
-            log_info(f"    Feature {idx:<2} {feature_name:<{max_feature_name_length+3}}: Importance {importance:.4f}")
+            log_info(
+                f"    Feature {idx:<2} {feature_name:<{max_feature_name_length+3}}: Importance {importance:.4f}")
 
         # ======== Plot Decision Boundaries ========
+
+        log_title(f"Plotting decision boundaries for output variable {i}...")
 
         delta = 5
         # Plot decision regions for the top delta features
@@ -114,7 +123,8 @@ def run_knn_model(
         log_debug(f"Top {delta} feature indices: {top_5_feature_idxs}")
 
         # Calculate the total number of plots
-        feature_combinations = list(itertools.combinations(top_5_feature_idxs, 2))
+        feature_combinations = list(
+            itertools.combinations(top_5_feature_idxs, 2))
         log_debug(f"Feature combinations: {feature_combinations}")
         num_feature_pairs = len(feature_combinations)
         log_info(f"Total number of plots: {num_feature_pairs}")
@@ -124,7 +134,8 @@ def run_knn_model(
         num_plots_per_col = math.ceil(num_feature_pairs / num_plots_per_row)
 
         # Create a square grid of subplots
-        fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(15, 15))
+        fig, axs = plt.subplots(
+            num_plots_per_row, num_plots_per_col, figsize=(15, 15))
 
         # Flatten the axs array to iterate over it easily
         axs = axs.flatten()
@@ -133,17 +144,20 @@ def run_knn_model(
         plot_index = 0
 
         for i, feature_pair in enumerate(feature_combinations):
-            log_info(f"Plotting decision boundary for feature pair ({feature_pair}). Progress: {i} / {num_feature_pairs}")
+            log_info(
+                f"Plotting decision boundary for feature pair ({feature_pair}). Progress: {i} / {num_feature_pairs}")
 
             # Get the current axes
             plt.sca(axs.flatten()[plot_index])
 
             # Generate and plot decision regions for the current pair of input variables
-            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, X_labels, show_plot=False, resolution=1)
+            subplot = knn_classifier.plot_decision_regions(
+                test_preds, feature_pair, X_labels, show_plot=False, resolution=1)
             # Set title for each subplot
             feature_label_x = X_labels[feature_pair[0]]
             feature_label_y = X_labels[feature_pair[1]]
-            subplot.set_title(f"DB for features {feature_label_x} and {feature_label_y}")
+            subplot.set_title(
+                f"DB for features {feature_label_x} and {feature_label_y}")
             subplot.set_xlabel(feature_label_x)
             subplot.set_ylabel(feature_label_y)
 
