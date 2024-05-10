@@ -10,17 +10,20 @@ from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
 import process_data
 from logger import *
+from check_log_level import set_log_level
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
 
 
 def main():
+    set_log_level()
     welcome()
 
     dataset_name = "Thorax"
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "rf": "Random Forest", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
+              "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         print(
@@ -47,7 +50,8 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(
+            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
@@ -85,7 +89,8 @@ def main():
         X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_labels, y_labels, False, True, test_train_ratio
         )
-        run_knn_model(X_train, y_train, X_test, y_test, X_labels, y_labels, num_classes_in_vars)
+        run_knn_model(X_train, y_train, X_test, y_test,
+                      X_labels, y_labels, num_classes_in_vars)
     elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
     elif model_name == "rf":
@@ -94,7 +99,8 @@ def main():
         X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_labels, y_labels, True, False, test_train_ratio
         )
-        run_nn_model(X_train, y_train, X_test, y_test, X_labels, y_labels, num_classes_in_vars)
+        run_nn_model(X_train, y_train, X_test, y_test,
+                     X_labels, y_labels, num_classes_in_vars)
 
 
 if __name__ == "__main__":
