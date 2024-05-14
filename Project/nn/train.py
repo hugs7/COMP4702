@@ -10,8 +10,10 @@ CPU = "cpu"
 
 def nn_train(
     epoch: int,
-    train_data: torch.Tensor,
-    train_labels: torch.Tensor,
+    X_train: torch.Tensor,
+    y_train: torch.Tensor,
+    X_validation: torch.Tensor,
+    y_validation: torch.Tensor,
     batch_size: int,
     sequential_model: torch.nn.Sequential,
     criterion: torch.nn.CrossEntropyLoss,
@@ -26,8 +28,10 @@ def nn_train(
 
     Args:
     - epoch (int): Current epoch
-    - train_data (torch.Tensor): Training data
-    - train_labels (torch.Tensor): Training labels. These should already be flattened into [batch size, num_variables, num_classes for each variable]
+    - X_train (torch.Tensor): Training data
+    - y_train (torch.Tensor): Training labels. These should already be flattened into [batch size, num_variables, num_classes for each variable]
+    - X_validation (torch.Tensor): Validation data
+    - y_validation (torch.Tensor): Validation labels
     - batch_size (int): Batch size
     - sequential_model (torch.nn.Sequential): Model object
     - criterion (torch.nn.CrossEntropyLoss): Loss function
@@ -42,16 +46,16 @@ def nn_train(
     """
 
     # Select a random batch of data
-    indices = np.random.randint(0, train_data.shape[0], size=batch_size)
+    indices = np.random.randint(0, X_train.shape[0], size=batch_size)
 
     # Obtain the data and labels for the batch
-    x = train_data[indices, :]
+    x = X_train[indices, :]
 
     log_trace("Data: ", x)
     log_debug("Shape of x: ", x.shape)
     log_line(level="TRACE")
-    log_trace("Labels: ", train_labels[indices])
-    log_debug("Shape of labels: ", train_labels[indices].shape)
+    log_trace("Labels: ", y_train[indices])
+    log_debug("Shape of labels: ", y_train[indices].shape)
     # NEED TO FIX LABELS dimensionality
 
     # Make predictions
@@ -70,12 +74,10 @@ def nn_train(
     for i, num_classes in enumerate(num_classes_in_vars):
         log_debug(f"Variable Index: {i}, recovered_var_dim: {num_classes}")
 
-        reshaped_pred = y_pred[:,
-                               cum_index_offset: cum_index_offset + num_classes]
+        reshaped_pred = y_pred[:, cum_index_offset : cum_index_offset + num_classes]
 
         # Pad the reshaped prediction with zeros to match the maximum number of classes
-        reshaped_pred = torch.nn.functional.pad(
-            reshaped_pred, (0, max_classes - num_classes))
+        reshaped_pred = torch.nn.functional.pad(reshaped_pred, (0, max_classes - num_classes))
 
         log_trace(f"Reshaped prediction: ", reshaped_pred)
         reshaped_preds.append(reshaped_pred)
@@ -90,7 +92,7 @@ def nn_train(
     log_debug("Shape of reshaped predictions: ", reshaped_preds.shape)
 
     # True labels
-    y_true = train_labels[indices]
+    y_true = y_train[indices]
 
     log_trace("Y True Labels: ", y_true)
     log_debug("Y True shape: ", y_true.shape)
@@ -103,8 +105,12 @@ def nn_train(
     if loss_weights is None:
         loss_weights = [1.0 for _ in range(num_output_vars)]
     else:
-        assert len(loss_weights) == num_output_vars, ("Loss weights must be provided for each variable. Received: ", len(
-            loss_weights), "Expected: ", num_output_vars)
+        assert len(loss_weights) == num_output_vars, (
+            "Loss weights must be provided for each variable. Received: ",
+            len(loss_weights),
+            "Expected: ",
+            num_output_vars,
+        )
 
     # Compute the loss for each variable
     for var in range(num_output_vars):
@@ -188,8 +194,7 @@ def nn_train(
 
         # Take average of all accuracies
         train_accuracy = sum(accuracies) / len(accuracies)
-        log_info(
-            f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss_var.item()}")
+        log_info(f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {loss_var.item()}")
 
         metrics.append([epoch, loss_var.item(), train_accuracy])
 

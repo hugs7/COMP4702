@@ -32,8 +32,8 @@ def to_tensor(data: np.ndarray) -> torch.Tensor:
 def run_nn_model(
     X_train: np.ndarray,
     y_train: np.ndarray,
-    X_test: np.ndarray,
-    y_test: np.ndarray,
+    X_validation: np.ndarray,
+    y_validation: np.ndarray,
     X_labels: List[str],
     y_labels: List[List[str]],
     unique_classes: List[List[str]],
@@ -46,8 +46,8 @@ def run_nn_model(
     Args:
     - X_train (ndarray): Training data features.
     - y_train (ndarray): Training data target variable.
-    - X_test (ndarray): Testing data features.
-    - y_test (ndarray): Testing data target variable.
+    - X_validation (ndarray): Validation data features.
+    - y_validation (ndarray): Validation data target variable.
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - unique_classes (List[List[str]]): The unique classes in each target variable.
@@ -82,8 +82,8 @@ def run_nn_model(
     X_train = to_tensor(X_train)
     y_train = to_tensor(y_train)
 
-    X_test = to_tensor(X_test)
-    y_test = to_tensor(y_test)
+    X_validation = to_tensor(X_validation)
+    y_validation = to_tensor(y_validation)
 
     log_info("Data converted to tensors")
 
@@ -94,11 +94,11 @@ def run_nn_model(
     # Move data to device
     X_train = X_train.to(device)
     y_train = y_train.to(device)
-    X_test = X_test.to(device)
-    y_test = y_test.to(device)
+    X_validation = X_validation.to(device)
+    y_validation = y_validation.to(device)
 
     log_info("Training data shape:", X_train.shape, "x", y_train.shape)
-    log_info("Validation data shape:", X_test.shape, "x", y_test.shape)
+    log_info("Validation data shape:", X_validation.shape, "x", y_validation.shape)
 
     # Instantiate the model and move it to the specified device
     sequential_model = nn_model.create_sequential_model(dim_input, dim_output_flattened, hidden_layer_dims).to(device)
@@ -136,7 +136,19 @@ def run_nn_model(
     # for i in tqdm(range(int(epochs))):
     for i in range(int(epochs)):
         metrics = train.nn_train(
-            i, X_train, y_train, batch_size, sequential_model, criterion, optimiser, epochs, metrics, num_classes_in_vars, loss_weights
+            i,
+            X_train,
+            y_train,
+            X_validation,
+            y_validation,
+            batch_size,
+            sequential_model,
+            criterion,
+            optimiser,
+            epochs,
+            metrics,
+            num_classes_in_vars,
+            loss_weights,
         )
 
     results.show_training_results(metrics)
