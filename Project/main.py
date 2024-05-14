@@ -8,8 +8,10 @@ import sys
 
 from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
+from load_data import load_data
 import process_data
 from logger import *
+import correlation
 from check_log_level import set_log_level
 
 from nn.driver import run_nn_model
@@ -24,6 +26,13 @@ def main():
               "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
+        if len(sys.argv) == 2:
+            arg = sys.argv[1]
+            if arg == "--help":
+                available_items("models", models)
+                available_items("datasets", DATASET_MAPPING.keys())
+                sys.exit(0)
+
         print(
             f"{Fore.LIGHTRED_EX}Usage: {Fore.LIGHTCYAN_EX}python main.py {Fore.LIGHTMAGENTA_EX}<model_name> <dataset_name>{Style.RESET_ALL}\n"
         )
@@ -33,18 +42,22 @@ def main():
 
         sys.exit(1)
 
+    # Check model
+    first_arg = sys.argv[1].lower()
+    if first_arg == "corr":
+        pass
+    else:
+        model_name = first_arg
+        if model_name not in models.keys():
+            log_error(f"Model {model_name} not found")
+            available_items("models", models)
+            sys.exit(1)
+
     # Check dataset
     dataset_name = sys.argv[2]
     if dataset_name not in DATASET_MAPPING:
         log_error(f"Dataset {dataset_name} not found")
         available_items("datasets", DATASET_MAPPING.keys())
-        sys.exit(1)
-
-    # Check model
-    model_name = sys.argv[1].lower()
-    if model_name not in models.keys():
-        log_error(f"Model {model_name} not found")
-        available_items("models", models)
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
@@ -62,7 +75,7 @@ def main():
 
     dataset_file_path = os.path.join(data_folder, dataset_file_name)
 
-    log_info(f"Creating {model_name} model for {dataset_name} dataset...")
+    # === Column Labels ===
 
     # Specify the indices of the columns that are the variables we are predicting
     y_col_indices = [0, 1]
@@ -77,6 +90,20 @@ def main():
 
     log_info(f"X labels: {X_labels}")
     log_info(f"y labels: {y_labels}")
+
+    # === Correlation Matrix ===
+
+    if first_arg == "corr":
+        log_info("Plotting the correlation matrix of the data")
+        data = load_data(dataset_file_path)
+        X = data[X_labels]
+        title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
+        correlation.plot_correlation_matrix(X, title)
+        sys.exit(0)
+
+    # === Model ===
+
+    log_info(f"Creating {model_name} model for {dataset_name} dataset...")
 
     # --- Dataset ---
 
