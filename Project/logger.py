@@ -23,7 +23,8 @@ def check_log_level(level: str) -> bool:
     level = key_from_value(LOG_LEVELS, level)
 
     if LOG_LEVEL_INDEX is None:
-        raise ValueError("LOG_LEVEL_INDEX not found")
+        raise ValueError(
+            "LOG_LEVEL_INDEX not found. Ensure you have called 'set_log_level()' before using the logger.")
 
     return level <= LOG_LEVEL_INDEX
 
