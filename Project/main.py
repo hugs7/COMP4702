@@ -90,6 +90,7 @@ def main():
 
     log_info(f"X labels: {X_labels}")
     log_info(f"y labels: {y_labels}")
+    log_line(level="INFO")
 
     # === Correlation Matrix ===
 
