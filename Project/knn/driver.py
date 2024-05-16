@@ -77,24 +77,21 @@ def run_knn_model(
         log_debug(f"y_train_var shape: {var_y_train.shape}")
         log_debug(f"y_test_var shape: {var_y_test.shape}")
 
-        knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, var_y, k=k)
+        knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=k)
 
         # Add the classifier to the list
         knn_classifiers.append(knn_classifier)
 
-        log_debug(f"KNN classifier for output variable {i} created")
-
-        log_debug(f"Obtaining unique classes for output variable {i}...")
+        log_debug(f"KNN classifier for output variable {i} ({var_y}) created")
 
         log_debug(f"Training KNN classifier for output variable {i}...")
 
         # ======== Obtain results from test and train data ========
 
         test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
-
-        log_debug(f"KNN classifier for output variable {i} trained")
-
         results[i] = (var_y_test, test_preds, train_accuracy, test_accuracy)
+
+        log_debug(f"KNN classifier for output variable {i} ({var_y}) trained")
 
         log_trace(f"Output variable {i} results: {results[i]}")
 
