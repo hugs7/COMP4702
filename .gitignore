@@ -172,3 +172,7 @@ cython_debug/
 
 # Data Folders
 **/data/
+
+# Project
+# Plots
+/Project/plots
