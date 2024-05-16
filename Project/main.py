@@ -3,6 +3,7 @@ Main Driver file for project
 """
 
 import os
+from typing import List
 from colorama import Fore, Style
 import sys
 
@@ -63,6 +64,7 @@ def main():
         raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
+    columns: List[str]
 
     folder_of_script = os.path.dirname(__file__)
     data_folder = os.path.join(folder_of_script, "data")
@@ -76,10 +78,16 @@ def main():
     # === Column Labels ===
 
     # Specify the indices of the columns that are the variables we are predicting
-    y_col_indices = [0]
+    y_col_indices = [9]
+    x_col_names = [
+        "Thorax_length",
+        "Replicate",
+    ]
+    x_col_indices = [columns.index(col) for col in x_col_names]
+    exclude_col_indices = [2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17]
 
     # Derive the indices of the x variables by removing the y indices
-    x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices]
+    # x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in exclude_col_indices]
 
     # Obtain the vars of the x and y variables
     X_vars = [columns[i] for i in x_col_indices]
@@ -113,7 +121,9 @@ def main():
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
         )
 
-        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars)
+        k = 30
+
+        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, k=k)
     elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
     elif model_name == "rf":
