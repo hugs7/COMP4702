@@ -123,6 +123,7 @@ class Classifier(Model):
         test_preds: np.ndarray,
         variable_feature_indices: tuple,
         all_col_labels: list[str],
+        classes: list[str],
         resolution=0.02,
         plot_title="Decision Regions",
         buffer: float = 0.5,
@@ -135,6 +136,7 @@ class Classifier(Model):
         - test_preds (ndarray): The predicted labels for the test data.
         - variable_feature_indices (tuple): The indices of the two features to be used for plotting decision regions.
         - all_col_labels (list[str]): The labels of all the features.
+        - classes (list[str]): The unique class labels.
         - resolution (float): The step size of the mesh grid used for plotting the decision regions. Default is 0.02.
         - plot_title (str): The title of the plot. Default is "Decision Regions".
         - buffer (float): The buffer to add to the minimum and maximum values of the features. Default is 0.5.
@@ -244,7 +246,7 @@ class Classifier(Model):
 
         # Overlay the test points
         cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
-        dr_plot.scatter(X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
+        scatter = dr_plot.scatter(X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
         # Setup plot
         dr_plot.set_xlim(xx.min(), xx.max())
@@ -252,6 +254,19 @@ class Classifier(Model):
         dr_plot.set_xlabel("Feature 1")
         dr_plot.set_ylabel("Feature 2")
         dr_plot.set_title(plot_title)
+
+        # Add legend
+
+        log_warning("classes: ", classes)
+        legend_labels = [f"Class {i}: {class_label}" for i, class_label in enumerate(classes)]
+        legend1 = dr_plot.legend(handles=scatter.legend_elements()[0], labels=legend_labels, title="Classes", loc="upper right")
+        # legend1 = dr_plot.legend(*scatter.legend_elements(), title="Classes", labels=legend_labels, loc="upper right")
+
+        dr_plot.add_artist(legend1)
+
+        # Add legend - old
+        # legend1 = dr_plot.legend(*scatter.legend_elements(), title="Classes", loc="upper right")
+        # dr_plot.add_artist(legend1)
 
         if show_plot:
             dr_plot.show()

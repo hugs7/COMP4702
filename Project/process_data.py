@@ -23,7 +23,7 @@ def process_classification_data(
     one_hot_encode: bool,
     normalise_data: bool,
     test_train_split_ratio: float = 0.3,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[int]]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[List[str]], List[int]]:
     """
     Preprocesses data ready for supervised learning by picking the X and y columns as passed,
     randomising the data, and encoding non-numeric data. Finally, the data is converted to
@@ -44,6 +44,7 @@ def process_classification_data(
     - y_train (ndarray): The training data target variable.
     - X_test (ndarray): The testing data features.
     - y_test (ndarray): The testing data target variable.
+    - unique_classes (List[np.ndarray]): The unique classe names in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
@@ -63,6 +64,9 @@ def process_classification_data(
     # Split the data into training and testing data
     X = data_randomised[X_feature_names]
     y = data_randomised[y_feature_names]
+
+    y_unique_classes = [list(y[col].unique()) for col in y.columns]
+    log_debug(f"Unique classes in each target variable: {y_unique_classes}")
 
     # Normalise the data
     if normalise_data:
@@ -91,7 +95,8 @@ def process_classification_data(
 
     # Calculate number of classes in each target variable
     num_output_vars = y.shape[1]
-    num_classes_in_vars = [len(np.unique(y[:, col])) for col in range(num_output_vars)]
+    unique_classes = [np.unique(y[:, col]) for col in range(num_output_vars)]
+    num_classes_in_vars = [len(classes) for classes in unique_classes]
 
     if one_hot_encode:
         log_title(f"One-hot encoding target variables...")
@@ -115,7 +120,7 @@ def process_classification_data(
 
     log_line()
 
-    return X_train, y_train, X_test, y_test, num_classes_in_vars
+    return X_train, y_train, X_test, y_test, y_unique_classes, num_classes_in_vars
 
 
 def test_train_split(X: np.ndarray, y: np.ndarray, ratio: float = 0.3) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:

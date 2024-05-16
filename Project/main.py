@@ -22,8 +22,7 @@ def main():
     set_log_level()
     welcome()
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
-              "rf": "Random Forest", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         if len(sys.argv) == 2:
@@ -61,8 +60,7 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(
-            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
 
@@ -78,18 +76,17 @@ def main():
     # === Column Labels ===
 
     # Specify the indices of the columns that are the variables we are predicting
-    y_col_indices = [0, 1]
+    y_col_indices = [0]
 
     # Derive the indices of the x variables by removing the y indices
     x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices]
 
-    # Obtain the labels of the x and y variables
+    # Obtain the vars of the x and y variables
+    X_vars = [columns[i] for i in x_col_indices]
+    y_vars = [columns[i] for i in y_col_indices]
 
-    X_labels = [columns[i] for i in x_col_indices]
-    y_labels = [columns[i] for i in y_col_indices]
-
-    log_info(f"X labels: {X_labels}")
-    log_info(f"y labels: {y_labels}")
+    log_info(f"X vars: {X_vars}")
+    log_info(f"y vars: {y_vars}")
     log_line(level="INFO")
 
     # === Correlation Matrix ===
@@ -97,7 +94,7 @@ def main():
     if first_arg == "corr":
         log_info("Plotting the correlation matrix of the data")
         data = load_data(dataset_file_path)
-        X = data[X_labels]
+        X = data[X_vars]
         title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
         correlation.plot_correlation_matrix(X, title)
         sys.exit(0)
@@ -112,21 +109,20 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
-        X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
-            dataset_file_path, X_labels, y_labels, False, True, test_train_ratio
+        X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
+            dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
         )
-        run_knn_model(X_train, y_train, X_test, y_test,
-                      X_labels, y_labels, num_classes_in_vars)
+
+        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars)
     elif model_name == "dt":
         raise NotImplementedError("Decision tree not implemented")
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
-        X_train, y_train, X_test, y_test, num_classes_in_vars = process_data.process_classification_data(
-            dataset_file_path, X_labels, y_labels, True, False, test_train_ratio
+        X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
+            dataset_file_path, X_vars, y_vars, True, False, test_train_ratio
         )
-        run_nn_model(X_train, y_train, X_test, y_test,
-                     X_labels, y_labels, num_classes_in_vars)
+        run_nn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, num_classes_in_vars)
 
 
 if __name__ == "__main__":

@@ -24,6 +24,7 @@ def run_knn_model(
     y_test: np.ndarray,
     X_labels: List[str],
     y_labels: List[List[str]],
+    unique_classes: List[List[str]],
     num_classes_in_vars: List[int],
     k: int = 5,
 ) -> None:
@@ -38,6 +39,7 @@ def run_knn_model(
     - y_test (ndarray): Testing data target variable (not one-hot-encoded).
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
+    - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
@@ -57,7 +59,9 @@ def run_knn_model(
 
     for i, var_y_labels in enumerate(y_labels):
         # ======== Train KNN classifier for this output variable ========
-        log_title(f"Output variable {i} classes: {var_y_labels}")
+        log_title(f"Output variable {i}: {var_y_labels}")
+        y_var_unique_classes = unique_classes[i]
+        log_info(f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
         # Get slice of y_train and y_test for this output variable
         var_y_train = y_train[:, i]
@@ -75,6 +79,8 @@ def run_knn_model(
         knn_classifiers.append(knn_classifier)
 
         log_debug(f"KNN classifier for output variable {i} created")
+
+        log_debug(f"Obtaining unique classes for output variable {i}...")
 
         log_debug(f"Training KNN classifier for output variable {i}...")
 
@@ -109,7 +115,7 @@ def run_knn_model(
 
         log_info(f"Plotting decision boundaries for output variable {i}...")
 
-        delta = 5
+        delta = 3
         # Plot decision regions for the top delta features
         top_5_feature_idxs = [idx for idx, _ in sorted_importance[:delta]]
         top_5_feature_cols = [X_labels[idx] for idx in top_5_feature_idxs]
@@ -141,7 +147,9 @@ def run_knn_model(
             plt.sca(axs.flatten()[plot_index])
 
             # Generate and plot decision regions for the current pair of input variables
-            subplot = knn_classifier.plot_decision_regions(test_preds, feature_pair, X_labels, show_plot=False, resolution=1)
+            subplot = knn_classifier.plot_decision_regions(
+                test_preds, feature_pair, X_labels, y_var_unique_classes, show_plot=False, resolution=1
+            )
             # Set title for each subplot
             feature_label_x = X_labels[feature_pair[0]]
             feature_label_y = X_labels[feature_pair[1]]
@@ -166,7 +174,13 @@ def run_knn_model(
         X_test_important_features = X_test[:, top_5_feature_idxs]
         log_debug(utils.np_to_pd(X_test_important_features, top_5_feature_cols))
 
-        log_line()
+        log_line(level="DEBUG")
+
+        # Add an over all legend for all the subplots
+        ax0 = axs[0]
+        log_info(f"AX0: {ax0}")
+        # fig.legend(handles, labels, loc="upper center")
+
         # Adjust layout to prevent overlap
         plt.tight_layout()
 
