@@ -6,7 +6,7 @@ Hugo Burton
 from typing import Any, Tuple
 from sklearn.tree import DecisionTreeClassifier
 import pandas as pd
-from pandas import DataFrame
+import numpy as np
 
 from model.classifier import Classifier
 
@@ -14,16 +14,17 @@ from model.classifier import Classifier
 class DTClassifier(Classifier):
     def __init__(
         self,
-        X_train: DataFrame,
-        y_train: DataFrame,
-        X_test: DataFrame,
-        y_test: DataFrame,
-        feature_names: list[str],
+        X_train: np.ndarray,
+        y_train: np.ndarray,
+        X_test: np.ndarray,
+        y_test: np.ndarray,
+        X_labels: list[str],
+        y_labels: list[list[str]],
         max_tree_depth: int = None,
     ):
         self.model = DecisionTreeClassifier(max_depth=max_tree_depth)
 
-        super().__init__(X_train, y_train, X_test, y_test, feature_names, self.model)
+        super().__init__(self.model, X_train, y_train, X_test, y_test, X_labels, y_labels)
 
     def classify(self) -> Tuple[Any, float, float]:
         """
