@@ -36,6 +36,7 @@ def run_nn_model(
     y_test: np.ndarray,
     X_labels: List[str],
     y_labels: List[List[str]],
+    unique_classes: List[List[str]],
     num_classes_in_vars: List[int],
 ) -> None:
     """
@@ -49,6 +50,7 @@ def run_nn_model(
     - y_test (ndarray): Testing data target variable.
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
+    - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     """
 
