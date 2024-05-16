@@ -21,7 +21,7 @@ def run_dt_model(
     unique_classes: List[List[str]],
     num_classes_in_vars: List[int],
     max_tree_depth: int = 5,
-) -> None:
+) -> List[int]:
     """
     Question 1
     Fit a single Decision Tree classifier to the training data
@@ -40,7 +40,7 @@ def run_dt_model(
     - max_tree_depth (int): The maximum depth of the decision tree.
 
     Returns:
-    - None
+    - Ranking of variables by importance. Format is a descending ordered list of the indices of the predictors.
     """
 
     decision_tree_model = decision_tree.DTClassifier(X_train, y_train, X_test, y_test, X_labels, y_labels, max_tree_depth=max_tree_depth)
@@ -59,7 +59,16 @@ def run_dt_model(
     variable_importance = decision_tree_model.model.feature_importances_
     log_info(f"Variable importance: {variable_importance}")
 
-    log_title("Plotting decision regions...")
+    # Convert variable importance to a list of indices in descending order
+    predictors_ordered = np.argsort(variable_importance)[::-1]
+    log_info(f"Predictors ordered by importance: {predictors_ordered}")
 
+    predictors_ordered_names = [X_labels[i] for i in predictors_ordered]
+    log_info(f"Predictors ordered by importance (names): {predictors_ordered_names}")
+
+    log_title("Plotting decision regions...")
+    exit()
     # Plot decision boundaries
-    decision_tree_model.plot_decision_regions(resolution=0.02)
+    # decision_tree_model.plot_decision_regions(test_preds, , resolution=0.02)
+
+    return variable_importance
