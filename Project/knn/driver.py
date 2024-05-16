@@ -133,7 +133,7 @@ def run_knn_model(
         num_plots_per_col = math.ceil(num_feature_pairs / num_plots_per_row)
 
         # Create a square grid of subplots
-        fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(15, 15))
+        fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(10, 6))
 
         # Flatten the axs array to iterate over it easily
         # Flatten only if there is more than one row
