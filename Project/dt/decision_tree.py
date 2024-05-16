@@ -26,7 +26,7 @@ class DTClassifier(Classifier):
 
         super().__init__(self.model, X_train, y_train, X_test, y_test, X_labels, y_labels)
 
-    def classify(self) -> Tuple[Any, float, float]:
+    def classify(self) -> Tuple[np.ndarray, float, float]:
         """
         Trains the decision tree model using the provided training data.
 
