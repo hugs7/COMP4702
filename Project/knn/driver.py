@@ -41,6 +41,7 @@ def run_knn_model(
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
+    - k (int): The number of neighbours to consider.
     """
 
     log_title("Start of knn model driver...")
