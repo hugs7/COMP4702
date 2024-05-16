@@ -9,13 +9,11 @@ def show_training_results(metrics):
     metrics = np.asarray(metrics)
 
     # Training Loss
-    training_accuracy_x = metrics[:, 0]
+    epochs_x = metrics[:, 0]
     training_accuracy_y = metrics[:, 2]
-    train_metrics = (training_accuracy_x, training_accuracy_y)
+    val_accuracy_y = metrics[:, 4]
 
-    # Validation Loss
-    # validation_loss_x = metrics[:, 0]
-    # validation_loss_y = metrics[:, 3]
-    # validation_metrics = (validation_loss_x, validation_loss_y)
+    train_metrics = (epochs_x, training_accuracy_y, "Training")
+    val_metrics = (epochs_x, val_accuracy_y, "Validation")
 
-    lineplot("Epoch", "Accuracy", train_metrics)
+    lineplot("Epoch", "Accuracy", train_metrics, val_metrics)

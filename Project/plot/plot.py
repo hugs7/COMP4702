@@ -5,16 +5,24 @@ import matplotlib.pyplot as plt
 import torch
 
 
-def lineplot(x_label: str, y_label: str, *args: Tuple[np.ndarray, np.ndarray]):
+def lineplot(x_label: str, y_label: str, *args: Tuple[np.ndarray, np.ndarray, str]):
     """
-    Plot a line graph
+    Plots a line plot of the given data.
+
+    Parameters:
+    - x_label (str): The label for the x-axis.
+    - y_label (str): The label for the y-axis.
+    - args (Tuple[np.ndarray, np.ndarray, str]): The data to plot. Each tuple contains 
+        - x (np.ndarray): The x values.
+        - y (np.ndarray): The y values.
+        - label (str): The label for the line.
     """
 
     sb.set_context("talk")
     sb.set_style("dark")
 
-    for i, (x, y) in enumerate(args):
-        sb.lineplot(x=x, y=y, label=f"Line {i+1}")
+    for (x, y, label) in (args):
+        sb.lineplot(x=x, y=y, label=label)
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -27,7 +35,7 @@ def plot_gelu():
     input = torch.arange(-6, 6, step=0.1)
     output = geLu(input)
 
-    lineplot("X", "GeLU(X)", (input, output))
+    lineplot("X", "GeLU(X)", (input, output, "GeLU"))
 
     return input
 
@@ -40,4 +48,4 @@ def plot_sigmoid(input):
     # Input remains the same
     output = sigmoid(input)
 
-    lineplot("X", "Sigmoid(X)", (input, output))
+    lineplot("X", "Sigmoid(X)", (input, output, "Sigmoid"))

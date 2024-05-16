@@ -1,5 +1,5 @@
 import numpy as np
-from typing import List
+from typing import List, Tuple
 import torch
 
 from logger import *
@@ -46,10 +46,12 @@ def make_predictions(
     for i, num_classes in enumerate(num_classes_in_vars):
         log_debug(f"Variable Index: {i}, recovered_var_dim: {num_classes}")
 
-        reshaped_pred = y_pred[:, cum_index_offset : cum_index_offset + num_classes]
+        reshaped_pred = y_pred[:,
+                               cum_index_offset: cum_index_offset + num_classes]
 
         # Pad the reshaped prediction with zeros to match the maximum number of classes
-        reshaped_pred = torch.nn.functional.pad(reshaped_pred, (0, max_classes - num_classes))
+        reshaped_pred = torch.nn.functional.pad(
+            reshaped_pred, (0, max_classes - num_classes))
 
         log_trace(f"Reshaped prediction: ", reshaped_pred)
         reshaped_preds.append(reshaped_pred)
@@ -88,6 +90,7 @@ def compute_loss(
     Returns:
     - torch.Tensor: The total computed loss for the model as a tensor
     """
+
     data_type = "training" if train_data else "validation"
 
     log_debug(f"Computing loss for {data_type} data...")
@@ -142,6 +145,83 @@ def compute_loss(
     return total_loss_tensor
 
 
+def tensor_to_cpu(tensor: torch.Tensor, detach: bool) -> torch.Tensor:
+    """
+    Moves a tensor to the CPU
+
+    Args:
+    - tensor (torch.Tensor): The tensor to move
+    - detach (bool): Whether to detach the tensor
+
+    Returns:
+    - torch.Tensor: The tensor on the CPU
+    """
+
+    if detach:
+        return tensor.cpu().detach().numpy()
+    else:
+        return tensor.cpu().numpy()
+
+
+def compute_accuracy(num_output_vars: int, y_true: torch.Tensor, train_preds: torch.Tensor, train_data: bool) -> float:
+    """
+    Computes the accuracy given the true labels and the predictions
+
+    Args:
+    - num_output_vars (int): Number of output variables
+    - y_true (torch.Tensor): True labels
+    - train_preds (torch.Tensor): Predictions
+    - train_data (bool): Whether the data is training or not. If false, data is validation.
+
+    Returns:
+    - float: The accuracy
+    """
+
+    data_type = "training" if train_data else "validation"
+
+    log_debug(f"Computing accuracy for {data_type} data...")
+
+    # Find argument which maximises the prediction value
+    # Again we need to reshape the predictions and take argmax of each recovered variable
+    var_accuracies = []
+    for var in range(num_output_vars):
+        log_debug(f"Output Variable: {var}")
+
+        y_true_var = y_true[:, var]
+        y_pred_var = train_preds[:, var]
+
+        log_trace("Y True Var: ", y_true_var)
+        log_trace("Y Pred Var: ", y_pred_var)
+
+        log_debug("Y True Var shape: ", y_true_var.shape)
+        log_debug("Y Pred Var shape: ", y_pred_var.shape)
+
+        # Compute the argmax of the predictions
+        argmax = y_pred_var.argmax(dim=1)
+
+        # Recover the true class from the one-hot encoding of y_true_var to obtain the index of the true class
+        y_true_var = y_true_var.argmax(dim=1)
+
+        log_debug("Argmax (predictions): ", argmax)
+        log_debug("True class: ", y_true_var)
+
+        # Comparison
+        comparison = argmax == y_true_var
+
+        log_debug("Comparison: ", comparison)
+
+        overall_accuracy = torch.mean((comparison).float())
+        var_accuracy_val = tensor_to_cpu(overall_accuracy, detach=False)
+        var_accuracies.append(var_accuracy_val)
+
+    # Take average of all accuracies
+    overall_accuracy = sum(var_accuracies) / len(var_accuracies)
+
+    log_debug(f"Overall accuracy ({data_type}): {overall_accuracy}")
+
+    return overall_accuracy
+
+
 def nn_train(
     epoch: int,
     X_train: torch.Tensor,
@@ -156,7 +236,7 @@ def nn_train(
     metrics: List[float],
     num_classes_in_vars: int,
     loss_weights: List[float] = None,
-) -> List:
+) -> List[Tuple[int, float, float, float, float]]:
     """
     One epoch of training
 
@@ -176,7 +256,12 @@ def nn_train(
     - loss_weights (List[float]): Weights for the loss function. If not provided, defaults to 1.0 for each variable
 
     Returns:
-    - List: List of metrics with the new metrics appended
+    - List[Tuple]: List of metrics with the new metrics appended. Each tuple contains:
+        - epoch (int): Current epoch
+        - train_loss (float): Training loss
+        - train_accuracy (float): Training accuracy
+        - validation_loss (float): Validation loss
+        - validation_accuracy (float): Validation accuracy
     """
 
     # Select a random batch of data
@@ -192,7 +277,8 @@ def nn_train(
     log_debug("Shape of labels: ", y_train[indices].shape)
     # NEED TO FIX LABELS dimensionality
 
-    reshaped_preds = make_predictions(X, sequential_model, num_classes_in_vars, train_data=True)
+    train_preds = make_predictions(
+        X, sequential_model, num_classes_in_vars, train_data=True)
 
     # True labels
     y_true = y_train[indices]
@@ -200,8 +286,9 @@ def nn_train(
     log_trace("Y True Labels: ", y_true)
     log_debug("Y True shape: ", y_true.shape)
 
-    # Compute the loss
-    total_loss_tensor = compute_loss(reshaped_preds, y_true, criterion, num_classes_in_vars, loss_weights, train_data=True)
+    # Compute the loss of the training data
+    train_loss_tensor = compute_loss(
+        train_preds, y_true, criterion, num_classes_in_vars, loss_weights, train_data=True)
 
     # Zero the gradients
     log_debug("Zeroing gradients...")
@@ -209,7 +296,7 @@ def nn_train(
 
     # Compute the gradients
     log_trace("Computing gradients...")
-    total_loss_tensor.backward()
+    train_loss_tensor.backward()
 
     # Update the weights
     log_trace("Optimising...")
@@ -219,44 +306,32 @@ def nn_train(
 
     num_output_vars = len(num_classes_in_vars)
     if epoch % 100 == 0 or epoch == optimisation_steps - 1:
-        total_loss = total_loss_tensor.cpu().detach().numpy()
-        # Find argument which maximises the prediction value
-        # Again we need to reshape the predictions and take argmax of each recovered variable
-        accuracies = []
-        for var in range(num_output_vars):
-            log_debug(f"Output Variable: {var}")
+        train_loss_cpu = tensor_to_cpu(train_loss_tensor, detach=True)
 
-            y_true_var = y_true[:, var]
-            y_pred_var = reshaped_preds[:, var]
+        log_debug("Train loss: ", train_loss_cpu)
 
-            log_trace("Y True Var: ", y_true_var)
-            log_trace("Y Pred Var: ", y_pred_var)
+        log_debug("Making predictions on validation data...")
+        val_preds = make_predictions(
+            X_validation, sequential_model, num_classes_in_vars, train_data=False)
+        validation_loss_tensor = compute_loss(
+            val_preds, y_validation, criterion, num_classes_in_vars, loss_weights, train_data=False)
+        validation_loss_cpu = tensor_to_cpu(
+            validation_loss_tensor, detach=True)
 
-            log_debug("Y True Var shape: ", y_true_var.shape)
-            log_debug("Y Pred Var shape: ", y_pred_var.shape)
+        log_debug("Validation loss: ", validation_loss_cpu)
 
-            # Compute the argmax of the predictions
-            argmax = y_pred_var.argmax(dim=1)
+        train_accuracy = compute_accuracy(
+            num_output_vars, y_true, train_preds, train_data=True)
+        validation_accuracy = compute_accuracy(
+            num_output_vars, y_validation, val_preds, train_data=False)
 
-            # Recover the true class from the one-hot encoding of y_true_var to obtain the index of the true class
-            y_true_var = y_true_var.argmax(dim=1)
+        opt_steps_digits = len(str(optimisation_steps))
 
-            log_debug("Argmax (predictions): ", argmax)
-            log_debug("True class: ", y_true_var)
+        log_info(
+            f"Epoch: {epoch:<{opt_steps_digits}} / {optimisation_steps:{opt_steps_digits}}, Train accuracy: {train_accuracy:.4f}, " +
+            f"Loss: {train_loss_cpu:.4f}, Validation accuracy: {validation_accuracy:.4f}, Loss: {validation_loss_cpu:.4f}")
 
-            # Comparison
-            comparison = argmax == y_true_var
-
-            log_debug("Comparison: ", comparison)
-
-            train_accuracy = torch.mean((comparison).float())
-            train_accuracy_value = train_accuracy.cpu().numpy()
-            accuracies.append(train_accuracy_value)
-
-        # Take average of all accuracies
-        train_accuracy = sum(accuracies) / len(accuracies)
-        log_info(f"Epoch: {epoch} / {optimisation_steps}, Train accuracy: {train_accuracy}, Loss: {total_loss}")
-
-        metrics.append([epoch, total_loss, train_accuracy])
+        metrics.append([epoch, train_loss_cpu, train_accuracy,
+                       validation_loss_cpu, validation_accuracy])
 
     return metrics

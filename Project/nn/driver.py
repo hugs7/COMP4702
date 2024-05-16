@@ -56,7 +56,8 @@ def run_nn_model(
 
     log_title("Start of nn model driver...")
 
-    log_info(f"Number of classes in each output variable: {num_classes_in_vars}")
+    log_info(
+        f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # Ouptut dimension is sum of classes in each output variable
     # because of one hot encoding. Flatten the list of classes
@@ -98,10 +99,12 @@ def run_nn_model(
     y_validation = y_validation.to(device)
 
     log_info("Training data shape:", X_train.shape, "x", y_train.shape)
-    log_info("Validation data shape:", X_validation.shape, "x", y_validation.shape)
+    log_info("Validation data shape:",
+             X_validation.shape, "x", y_validation.shape)
 
     # Instantiate the model and move it to the specified device
-    sequential_model = nn_model.create_sequential_model(dim_input, dim_output_flattened, hidden_layer_dims).to(device)
+    sequential_model = nn_model.create_sequential_model(
+        dim_input, dim_output_flattened, hidden_layer_dims).to(device)
 
     log_info(f"Model: \n{sequential_model}\n")
 
@@ -128,7 +131,8 @@ def run_nn_model(
 
     # optimiser = torch.optim.SGD(
     #     sequential_model.parameters(), lr=learning_rate)
-    optimiser = optim.Adam(sequential_model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    optimiser = optim.Adam(sequential_model.parameters(),
+                           lr=learning_rate, weight_decay=weight_decay)
 
     # --- Training Loop ---
 
