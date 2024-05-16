@@ -14,18 +14,21 @@ from model.base_model import Model
 from logger import *
 
 
-BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700",
-                      "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
-FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
-                      "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
 
 def construct_X_flattened_mesh(
-    xx_flat: np.ndarray, yy_flat: np.ndarray, mean_values: np.ndarray, variable_indices: List[int], constant_indices: List[int], all_col_labels: List[str]
+    xx_flat: np.ndarray,
+    yy_flat: np.ndarray,
+    mean_values: np.ndarray,
+    variable_indices: List[int],
+    constant_indices: List[int],
+    all_col_labels: List[str],
 ) -> np.ndarray:
     """
-    Constructs a flattened meshgrid of points of which the variable columns contain the range of the plot and the 
-    constant columns are the mean of the X_test set. This is used to predict the class of each point to obtain the 
+    Constructs a flattened meshgrid of points of which the variable columns contain the range of the plot and the
+    constant columns are the mean of the X_test set. This is used to predict the class of each point to obtain the
     Z_preds on the background of the decision boundary plot.
 
     Parameters:
@@ -40,7 +43,7 @@ def construct_X_flattened_mesh(
     - flattened_meshgrid (ndarray): The flattened meshgrid of points with the variable features and constant features.
     """
 
-    log_info("Reconstructing meshgrid...")
+    log_debug("Reconstructing meshgrid...")
 
     log_trace("Checking input parameters...")
 
@@ -57,8 +60,8 @@ def construct_X_flattened_mesh(
     num_constant_features = len(constant_indices)
     if mean_values.shape[0] != num_constant_features:
         raise ValueError(
-            f"Dimensionality of means {mean_values.shape[0]} does not match the number of non-variable features " +
-            f"{num_constant_features}.\ntiled_means_indices: {constant_indices}"
+            f"Dimensionality of means {mean_values.shape[0]} does not match the number of non-variable features "
+            + f"{num_constant_features}.\ntiled_means_indices: {constant_indices}"
         )
 
     # Create an empty array to store the reconstructed meshgrid
@@ -75,13 +78,11 @@ def construct_X_flattened_mesh(
     log_trace(f"Mean values:\n{mean_values}")
     tiled_means = np.tile(mean_values, (meshgrid_length, 1))
     log_debug(f"Tiled means shape: {tiled_means.shape}")
-    log_trace(
-        f"Tiled means:\n{utils.np_to_pd(tiled_means, constant_col_labels)}")
+    log_trace(f"Tiled means:\n{utils.np_to_pd(tiled_means, constant_col_labels)}")
 
     flattened_meshgrid = np.empty((meshgrid_length, total_meshgrid_features))
     log_debug(f"Empty flattened meshgrid shape: {flattened_meshgrid.shape}")
-    log_trace(
-        f"Empty flattened meshgrid:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+    log_trace(f"Empty flattened meshgrid:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
 
     # Insert the variable features into the meshgrid
     # Split variable indices into x and y indices
@@ -91,15 +92,13 @@ def construct_X_flattened_mesh(
 
     variable_col_labels = [all_col_labels[vfi] for vfi in variable_indices]
     log_debug(f"Variable column labels: {variable_col_labels}")
-    log_trace(
-        f"Flattened meshgrid with only variable columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+    log_trace(f"Flattened meshgrid with only variable columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
 
     # Insert the means of non-variable features into the meshgrid
     flattened_meshgrid[:, constant_indices] = tiled_means
 
     log_debug(f"Constant column labels: {constant_col_labels}")
-    log_trace(
-        f"Flattened meshgrid with variable and constant columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+    log_trace(f"Flattened meshgrid with variable and constant columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
 
     return flattened_meshgrid
 
@@ -157,20 +156,17 @@ class Classifier(Model):
             if index < 0 or index >= self.X_test.shape[1]:
                 raise ValueError(f"Feature index {index} is out of bounds")
 
-        log_info(f"Plot resolution: {resolution}")
+        log_debug(f"Plot resolution: {resolution}")
 
         # Calculate mean values of non-variable features
-        constant_feature_indices = list(
-            set(range(self.X_test.shape[1])) - set(variable_feature_indices))
+        constant_feature_indices = list(set(range(self.X_test.shape[1])) - set(variable_feature_indices))
         # constant_feature_indices = ~np.isin(np.arange(self.X_test.shape[1]), variable_feature_indices)
 
         log_debug(f"Variable feature indices: {variable_feature_indices}")
         log_debug(f"Constant feature indices: {constant_feature_indices}")
 
-        variable_feature_labels = [all_col_labels[vfi]
-                                   for vfi in variable_feature_indices]
-        constant_feature_labels = [all_col_labels[cfi]
-                                   for cfi in constant_feature_indices]
+        variable_feature_labels = [all_col_labels[vfi] for vfi in variable_feature_indices]
+        constant_feature_labels = [all_col_labels[cfi] for cfi in constant_feature_indices]
 
         log_debug(f"Variable feature labels: {variable_feature_labels}")
 
@@ -183,10 +179,9 @@ class Classifier(Model):
         max_label_length = max([len(label) for label in all_col_labels])
         for i, mean_val in enumerate(mean_values):
             label = all_col_labels[constant_feature_indices[i]]
-            log_debug(
-                f"    {label:<{max_label_length+2}}: {mean_val}")
+            log_debug(f"    {label:<{max_label_length+2}}: {mean_val}")
 
-        log_info("Generating X meshgrid...")
+        log_debug("Generating X meshgrid...")
         # Generate meshgrid of points to cover the feature space while holding other features constant at their mean values
         mins = X_variable_features.min(axis=0) - buffer
         maxs = X_variable_features.max(axis=0) + buffer
@@ -219,17 +214,19 @@ class Classifier(Model):
 
         # Construct a "fake" / contrived test set retaining original feature variable order
         flattened_X_meshgrid = construct_X_flattened_mesh(
-            xx_flat, yy_flat, mean_values, variable_feature_indices, constant_feature_indices, all_col_labels)
+            xx_flat, yy_flat, mean_values, variable_feature_indices, constant_feature_indices, all_col_labels
+        )
 
-        log_info(utils.np_to_pd(flattened_X_meshgrid, all_col_labels))
+        log_trace(utils.np_to_pd(flattened_X_meshgrid, all_col_labels))
 
         log_debug(f"Meshgrid shape: {flattened_X_meshgrid.shape}")
         if flattened_X_meshgrid.shape[1] != self.X_test.shape[1]:
             log_warning(
-                f"Meshgrid shape {flattened_X_meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}")
+                f"Meshgrid shape {flattened_X_meshgrid.shape} does not match the number of features in the test data {self.X_test.shape}"
+            )
 
         log_line(level="DEBUG")
-        log_info("Making predictions on meshgrid...")
+        log_debug("Making predictions on meshgrid...")
         # Predict the labels for meshgrid points
         Z_preds = self.model.predict(flattened_X_meshgrid)
         log_debug(f"Predictions:\n{Z_preds}")
@@ -247,8 +244,7 @@ class Classifier(Model):
 
         # Overlay the test points
         cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
-        dr_plot.scatter(
-            X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
+        dr_plot.scatter(X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
         # Setup plot
         dr_plot.set_xlim(xx.min(), xx.max())
