@@ -32,7 +32,8 @@ def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> 
     - test_train_ratio (float): The ratio of test to train data.
 
     Returns:
-    - ndarray: The ranking of the variables by importance.
+    - ndarray: The ranking of the variables by importance as a 2D array. Rows are output
+               variables and columns are the indices of the predictors in descending order of importance.
     """
 
     X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(

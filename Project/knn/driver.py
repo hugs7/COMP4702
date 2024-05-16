@@ -42,7 +42,8 @@ def run_knn_model(
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
-    - ordered_predictor_indicies (ndarray): The indices of the predictors in descending order of importance.
+    - ordered_predictor_indicies (ndarray): 2D array of indices of the predictors in descending order of importance. Rows are output
+                                            variables and columns are the ordered indices of the predictors for that output variable.
     - k (int): The number of neighbours to consider.
     """
 
@@ -99,25 +100,21 @@ def run_knn_model(
 
         log_line(level="DEBUG")
 
-        # ======== Compute variable importance ========
-
-        log_info(f"Computing variable importance for output variable {i}...")
-
-        # Calculate permutation importance
-        var_importance = variable_importance.compute_average_feature_importance(X_test, 5, k, 50)
-        sorted_importance = sorted(enumerate(var_importance), key=lambda x: x[1], reverse=True)
+        # ======== Variable importance ========
 
         log_info(f"Variable importance for output variable {i}")
 
         max_feature_name_length = max([len(feature_name) for feature_name in X_labels])
-        for idx, importance in sorted_importance:
-            feature_name = X_labels[idx]
-            log_info(f"    Feature {idx:<2} {feature_name:<{max_feature_name_length+3}}: Importance {importance:.4f}")
+        var_y_predictor_importance = ordered_predictor_indicies[i, :]
+        log_info(f"  Predictors ordered by importance:", var_y_predictor_importance)
+        for feature_indx in var_y_predictor_importance:
+            feature_name = X_labels[feature_indx]
+            log_info(f"    Feature {feature_indx:<2} {feature_name:<{max_feature_name_length+3}}")
 
         # ======== Plot Decision Boundaries ========
 
         log_info(f"Plotting decision boundaries for output variable {i}...")
 
-        knn_classifier.plot_multivar_decision_regions(var_y, test_preds, ordered_predictor_indicies, y_var_unique_classes, 3)
+        knn_classifier.plot_multivar_decision_regions(var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, 4)
 
     return results

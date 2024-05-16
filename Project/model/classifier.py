@@ -135,7 +135,7 @@ class Classifier(Model):
         Parameters:
         - output_variable_name (str): The name of the output variable.
         - test_preds (ndarray): The predicted labels for the test data.
-        - ordered_predictor_indicies (ndarray): The indices of the predictors ordered by importance.
+        - ordered_predictor_indicies (ndarray): The indices of the predictors ordered by importance for this output variable. Should only be 1D.
         - y_var_unique_classes (List[str]): The unique class names for the output variable.
         - delta (int): The number of top features to plot. Default is 5. Note this is not the number of plots.
 
