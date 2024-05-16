@@ -173,13 +173,7 @@ def run_knn_model(
         log_debug("X Test points:")
         X_test_important_features = X_test[:, top_5_feature_idxs]
         log_debug(utils.np_to_pd(X_test_important_features, top_5_feature_cols))
-
         log_line(level="DEBUG")
-
-        # Add an over all legend for all the subplots
-        ax0 = axs[0]
-        log_info(f"AX0: {ax0}")
-        # fig.legend(handles, labels, loc="upper center")
 
         # Adjust layout to prevent overlap
         plt.tight_layout()

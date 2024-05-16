@@ -257,16 +257,10 @@ class Classifier(Model):
 
         # Add legend
 
-        log_warning("classes: ", classes)
+        log_debug("classes: ", classes)
         legend_labels = [f"Class {i}: {class_label}" for i, class_label in enumerate(classes)]
         legend1 = dr_plot.legend(handles=scatter.legend_elements()[0], labels=legend_labels, title="Classes", loc="upper right")
-        # legend1 = dr_plot.legend(*scatter.legend_elements(), title="Classes", labels=legend_labels, loc="upper right")
-
         dr_plot.add_artist(legend1)
-
-        # Add legend - old
-        # legend1 = dr_plot.legend(*scatter.legend_elements(), title="Classes", loc="upper right")
-        # dr_plot.add_artist(legend1)
 
         if show_plot:
             dr_plot.show()
