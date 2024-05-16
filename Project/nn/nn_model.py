@@ -1,5 +1,6 @@
 import torch
 from typing import List
+from logger import *
 
 
 def create_sequential_model(
@@ -17,7 +18,7 @@ def create_sequential_model(
         Sequential model
     """
 
-    print("Input dimension: ", dim_input)
+    log_info("Input dimension: ", dim_input)
 
     hiddens = [dim_input, *hidden_layer_dims]
     # [32 * 32 * 3, 100, 100]
