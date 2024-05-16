@@ -115,7 +115,8 @@ def run_knn_model(
 
         log_info(f"Plotting decision boundaries for output variable {i}...")
 
-        delta = 3
+        delta = 6
+        delta = min(delta, len(X_labels))
         # Plot decision regions for the top delta features
         top_5_feature_idxs = [idx for idx, _ in sorted_importance[:delta]]
         top_5_feature_cols = [X_labels[idx] for idx in top_5_feature_idxs]
@@ -135,16 +136,22 @@ def run_knn_model(
         fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(15, 15))
 
         # Flatten the axs array to iterate over it easily
-        axs = axs.flatten()
+        # Flatten only if there is more than one row
+        if num_plots_per_row > 1:
+            axs = axs.flatten()
 
         # Iterate over each pair of input variables
         plot_index = 0
 
         for i, feature_pair in enumerate(feature_combinations):
-            log_info(f"Plotting decision boundary for feature pair ({feature_pair}). Progress: {i} / {num_feature_pairs}")
+            log_info(f"Plotting decision boundary for feature pair {feature_pair}. Progress: {i} / {num_feature_pairs}")
 
             # Get the current axes
-            plt.sca(axs.flatten()[plot_index])
+            # If only 1 plot, axs is not an array
+            if num_plots_per_row > 1:
+                plt.sca(axs[plot_index])
+            else:
+                plt.sca(axs)
 
             # Generate and plot decision regions for the current pair of input variables
             subplot = knn_classifier.plot_decision_regions(
@@ -158,7 +165,10 @@ def run_knn_model(
             subplot.set_ylabel(feature_label_y)
 
             # Add subplot to the list of plots
-            axs[plot_index] = subplot
+            if num_plots_per_row > 1:
+                axs[plot_index] = subplot
+            else:
+                axs = subplot
 
             # Increment plot index
             plot_index += 1
@@ -166,7 +176,8 @@ def run_knn_model(
         log_debug("All decision boundary plots generated")
 
         # Hide empty subplots
-        for j in range(num_feature_pairs, len(axs)):
+        num_axes = len(axs) if isinstance(axs, np.ndarray) else 1
+        for j in range(num_feature_pairs, num_axes):
             axs[j].axis("off")
 
         log_line(level="DEBUG")
