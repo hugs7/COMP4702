@@ -118,12 +118,12 @@ def run_knn_model(
         delta = 6
         delta = min(delta, len(X_labels))
         # Plot decision regions for the top delta features
-        top_5_feature_idxs = [idx for idx, _ in sorted_importance[:delta]]
-        top_5_feature_cols = [X_labels[idx] for idx in top_5_feature_idxs]
-        log_debug(f"Top {delta} feature indices: {top_5_feature_idxs}")
+        top_delta_feature_idxs = [idx for idx, _ in sorted_importance[:delta]]
+        top_5_feature_cols = [X_labels[idx] for idx in top_delta_feature_idxs]
+        log_info(f"Top {delta} feature indices: {top_delta_feature_idxs}")
 
         # Calculate the total number of plots
-        feature_combinations = list(itertools.combinations(top_5_feature_idxs, 2))
+        feature_combinations = list(itertools.combinations(top_delta_feature_idxs, 2))
         log_trace(f"Feature combinations: {feature_combinations}")
         num_feature_pairs = len(feature_combinations)
         log_debug(f"Total number of plots: {num_feature_pairs}")
@@ -182,7 +182,7 @@ def run_knn_model(
 
         log_line(level="DEBUG")
         log_debug("X Test points:")
-        X_test_important_features = X_test[:, top_5_feature_idxs]
+        X_test_important_features = X_test[:, top_delta_feature_idxs]
         log_debug(utils.np_to_pd(X_test_important_features, top_5_feature_cols))
         log_line(level="DEBUG")
 
