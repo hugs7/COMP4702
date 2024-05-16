@@ -63,7 +63,8 @@ def main():
     set_log_level()
     welcome()
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "rf": "Random Forest", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
+              "rf": "Random Forest", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         if len(sys.argv) == 2:
@@ -101,7 +102,8 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(
+            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
     columns: List[str]
@@ -119,10 +121,16 @@ def main():
 
     # Specify the indices of the columns that are the variables we are predicting
     y_col_names = ["Species", "Population"]
-    x_col_names = ["Thorax_length", "Replicate", "Vial", "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
-
     y_col_indices = utils.col_names_to_indices(columns, y_col_names)
-    x_col_indices = utils.col_names_to_indices(columns, x_col_names)
+
+    if model_name == "nn":
+        # Use all columns for neural network
+        x_col_indices = [i for i in range(
+            len(columns)) if i not in y_col_indices]
+    else:
+        x_col_names = ["Thorax_length", "Replicate", "Vial",
+                       "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
+        x_col_indices = utils.col_names_to_indices(columns, x_col_names)
 
     # Obtain the vars of the x and y variables
     X_vars = [columns[i] for i in x_col_indices]
@@ -152,7 +160,8 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
-        predictors_ordered = dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio)
+        predictors_ordered = dt_variable_ranking(
+            dataset_file_path, X_vars, y_vars, test_train_ratio)
 
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
@@ -160,7 +169,8 @@ def main():
 
         k = 30
 
-        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, predictors_ordered, k=k)
+        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars,
+                      unique_classes, num_classes_in_vars, predictors_ordered, k=k)
     elif model_name == "dt":
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
@@ -179,7 +189,8 @@ def main():
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, True, False, test_train_ratio
         )
-        run_nn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars)
+        run_nn_model(X_train, y_train, X_test, y_test, X_vars,
+                     y_vars, unique_classes, num_classes_in_vars)
 
 
 if __name__ == "__main__":
