@@ -126,6 +126,8 @@ def main():
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
+        # Grid search cv function
+
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, True, False, test_train_ratio
         )
