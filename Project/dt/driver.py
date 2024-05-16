@@ -50,27 +50,46 @@ def run_dt_model(
     num_output_vars = len(y_labels)
     predictors_ordered = np.zeros((num_output_vars, num_input_vars), dtype=int)
 
+    # Dictionary of output variable: (y_test_true, test_predictions, train_accuracy, test_accuracy)
+    results = {}
+
     for i, var_y in enumerate(y_labels):
         # ======== Train KNN classifier for this output variable ========
         log_title(f"Output variable {i}: {var_y}")
         y_var_unique_classes = unique_classes[i]
         log_info(f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
+        # Get slice of y_train and y_test for this output variable
+        var_y_train = y_train[:, i]
+        var_y_test = y_test[:, i]
+
+        log_trace(f"y_train_var:\n{var_y_train}")
+        log_trace(f"y_test_var:\n{var_y_test}")
+
+        log_debug(f"y_train_var shape: {var_y_train.shape}")
+        log_debug(f"y_test_var shape: {var_y_test.shape}")
+
         decision_tree_model = decision_tree.DTClassifier(
-            X_train, y_train, X_test, y_test, X_labels, y_labels, max_tree_depth=max_tree_depth
+            X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, max_tree_depth=max_tree_depth
         )
 
+        log_debug(f"Decision tree model for output variable {i} ({var_y}) created")
+
+        log_debug(f"Training decision tree classifier for output variable {i}...")
+
+        # ======== Obtain results from test and train data ========
+
         test_preds, train_accuracy, test_accuracy = decision_tree_model.classify()
+        results[i] = (var_y_test, test_preds, train_accuracy, test_accuracy)
 
-        log_debug(f"Test predictions: {test_preds}")
+        log_debug(f"Decision tree classifier for output variable {i} ({var_y}) trained")
 
-        log_info(f"Train accuracy: {train_accuracy}")
-        log_info(f"Test accuracy: {test_accuracy}")
+        log_trace(f"Output variable {i} results: {results[i]}")
 
-        log_line(level="INFO")
+        log_line(level="DEBUG")
 
         # Variable importance
-        log_title("Variable importance:")
+        log_title("Fetching variable importance...")
         variable_importance = decision_tree_model.model.feature_importances_
         log_info(f"Variable importance: {variable_importance}")
 
