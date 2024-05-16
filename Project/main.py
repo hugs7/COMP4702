@@ -15,6 +15,7 @@ import process_data
 from logger import *
 import correlation
 from check_log_level import set_log_level
+import utils
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
@@ -117,14 +118,11 @@ def main():
     # === Column Labels ===
 
     # Specify the indices of the columns that are the variables we are predicting
-    y_col_indices = [9]
-    y_col_indices = [0, 1]
-    x_col_names = ["Thorax_length", "wing_loading"]
-    x_col_indices = [columns.index(col) for col in x_col_names]
-    exclude_col_indices = [2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17]
+    y_col_names = ["Species", "Population"]
+    x_col_names = ["Thorax_length", "Replicate", "Vial", "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
 
-    # Derive the indices of the x variables by removing the y indices
-    x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in exclude_col_indices]
+    y_col_indices = utils.col_names_to_indices(columns, y_col_names)
+    x_col_indices = utils.col_names_to_indices(columns, x_col_names)
 
     # Obtain the vars of the x and y variables
     X_vars = [columns[i] for i in x_col_indices]
