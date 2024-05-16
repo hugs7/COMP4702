@@ -6,6 +6,7 @@ import os
 from typing import List
 from colorama import Fore, Style
 import sys
+import numpy as np
 
 from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
@@ -14,9 +15,48 @@ import process_data
 from logger import *
 import correlation
 from check_log_level import set_log_level
+import utils
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
+from dt.driver import run_dt_model
+
+
+def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> np.ndarray:
+    """
+    Fits a decision tree model to the data and returns the ranking of the variables by importance.
+
+    Parameters:
+    - dataset_file_path (str): The path to the dataset file.
+    - X_vars (List[str]): The names of the predictor variables.
+    - y_vars (List[str]): The names of the target variables.
+    - test_train_ratio (float): The ratio of test to train data.
+
+    Returns:
+    - ndarray: The ranking of the variables by importance as a 2D array. Rows are output
+               variables and columns are the indices of the predictors in descending order of importance.
+    """
+
+    X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
+        dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
+    )
+
+    max_tree_depth = 6
+
+    predictors_ordered = run_dt_model(
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        X_vars,
+        y_vars,
+        unique_classes,
+        num_classes_in_vars,
+        max_tree_depth=max_tree_depth,
+        variable_importance_only=True,
+    )
+
+    return predictors_ordered
 
 
 def main():
@@ -78,13 +118,11 @@ def main():
     # === Column Labels ===
 
     # Specify the indices of the columns that are the variables we are predicting
-    y_col_indices = [9]
-    x_col_names = ["Thorax_length", "wing_loading"]
-    x_col_indices = [columns.index(col) for col in x_col_names]
-    exclude_col_indices = [2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17]
+    y_col_names = ["Species", "Population"]
+    x_col_names = ["Thorax_length", "Replicate", "Vial", "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
 
-    # Derive the indices of the x variables by removing the y indices
-    # x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in exclude_col_indices]
+    y_col_indices = utils.col_names_to_indices(columns, y_col_names)
+    x_col_indices = utils.col_names_to_indices(columns, x_col_names)
 
     # Obtain the vars of the x and y variables
     X_vars = [columns[i] for i in x_col_indices]
@@ -114,15 +152,25 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
+        predictors_ordered = dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio)
+
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
         )
 
         k = 30
 
-        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, k=k)
+        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, predictors_ordered, k=k)
     elif model_name == "dt":
-        raise NotImplementedError("Decision tree not implemented")
+        X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
+            dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
+        )
+
+        max_tree_depth = 6
+
+        predictors_ordered = run_dt_model(
+            X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, max_tree_depth=max_tree_depth
+        )
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
