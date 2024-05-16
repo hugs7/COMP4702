@@ -70,12 +70,12 @@ def run_nn_model(
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(5e4)
+    epochs = int(1e2)
     batch_size = 1000
     learning_rate = 2e-4
     weight_decay = 0.01
 
-    loss_weights = [1.2, 1.0]
+    loss_weights = [1.0 for _ in range(len(num_classes_in_vars))]
 
     log_title("Convert data to tensors...")
 
