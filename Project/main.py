@@ -16,6 +16,7 @@ from logger import *
 import correlation
 from check_log_level import set_log_level
 import utils
+import file_helper
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
@@ -84,6 +85,7 @@ def main():
         sys.exit(1)
 
     # Check model
+    model_name = None
     first_arg = sys.argv[1].lower()
     if first_arg == "corr":
         pass
@@ -110,10 +112,11 @@ def main():
 
     folder_of_script = os.path.dirname(__file__)
     data_folder = os.path.join(folder_of_script, "data")
+    plots_folder = os.path.join(folder_of_script, "plots")
 
     # Create data folder if it does not exist
-    if not os.path.exists(data_folder):
-        os.makedirs(data_folder)
+    file_helper.make_folder_if_not_exists(data_folder)
+    file_helper.make_folder_if_not_exists(plots_folder)
 
     dataset_file_path = os.path.join(data_folder, dataset_file_name)
 
@@ -147,7 +150,10 @@ def main():
         data = load_data(dataset_file_path)
         X = data[X_vars]
         title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
-        correlation.plot_correlation_matrix(X, title)
+        corr_plot_save_path = os.path.join(
+            plots_folder, f"{dataset_name}_corr_matrix.png")
+        file_helper.remove_file_if_exist(corr_plot_save_path)
+        correlation.plot_correlation_matrix(data, title, corr_plot_save_path)
         sys.exit(0)
 
     # === Model ===
