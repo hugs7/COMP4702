@@ -71,7 +71,7 @@ def run_nn_model(
     hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
-    epochs = int(1e2)
+    epochs = int(5e3)
     batch_size = 1000
     learning_rate = 2e-4
     weight_decay = 0.01
