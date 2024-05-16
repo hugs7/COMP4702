@@ -213,16 +213,17 @@ class Classifier(Model):
             else:
                 plt.sca(axs)
 
-            # Generate and plot decision regions for the current pair of input variables
-            subplot, scatter = self.plot_decision_regions(
-                output_variable_name, test_preds, feature_pair, self.X_labels, y_var_unique_classes, show_plot=False, resolution=1, show_legend=False)
-            # Set title for each subplot
+            # Get the labels for the current pair of input variables
             feature_label_x = self.X_labels[feature_pair[0]]
             feature_label_y = self.X_labels[feature_pair[1]]
-            subplot.set_title(
-                f"DB for features {feature_label_x} and {feature_label_y}")
-            subplot.set_xlabel(feature_label_x)
-            subplot.set_ylabel(feature_label_y)
+
+            # Set title for each subplot
+            plot_title = f"Boundary plot for {output_variable_name}: {feature_label_x} vs {feature_label_y}"
+
+            # Generate and plot decision regions for the current pair of input variables
+            subplot, scatter = self.plot_decision_regions(
+                output_variable_name, test_preds, feature_pair, self.X_labels, y_var_unique_classes, plot_title=plot_title,
+                show_plot=False, resolution=1, show_legend=False, x_label=feature_label_x, y_label=feature_label_y)
 
             # Add subplot to the list of plots
             if num_plots_per_row > 1:
@@ -272,6 +273,8 @@ class Classifier(Model):
         buffer: float = 0.5,
         show_plot: bool = True,
         show_legend: bool = True,
+        x_label: str = "X",
+        y_label: str = "Y",
     ) -> Tuple[plt.Axes, PathCollection]:
         """
         Plots the decision regions for a classifier.
@@ -287,6 +290,8 @@ class Classifier(Model):
         - buffer (float): The buffer to add to the minimum and maximum values of the features. Default is 0.5.
         - show_plot (bool): Whether to display the plot. Default is True. Function will always return the plot object.
         - show_legend (bool): Whether to display the legend. Default is True.
+        - x_label (str): The label for the x-axis. Default is "X".
+        - y_label (str): The label for the y-axis. Default is "Y".
 
         Returns:
         - Tuple[plt.Axes, PathCollection]: The plot and the scatter plot object.
@@ -401,8 +406,8 @@ class Classifier(Model):
         # Setup plot
         dr_plot.set_xlim(xx.min(), xx.max())
         dr_plot.set_ylim(yy.min(), yy.max())
-        dr_plot.set_xlabel("X")
-        dr_plot.set_ylabel("Y")
+        dr_plot.set_xlabel(x_label)
+        dr_plot.set_ylabel(y_label)
         dr_plot.set_title(plot_title)
 
         # Add legend if required
