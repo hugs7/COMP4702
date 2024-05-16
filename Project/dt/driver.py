@@ -57,7 +57,8 @@ def run_dt_model(
         # ======== Train KNN classifier for this output variable ========
         log_title(f"Output variable {i}: {var_y}")
         y_var_unique_classes = unique_classes[i]
-        log_info(f"Unique classes for output variable {i}: {y_var_unique_classes}")
+        log_info(
+            f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
         # Get slice of y_train and y_test for this output variable
         var_y_train = y_train[:, i]
@@ -73,16 +74,19 @@ def run_dt_model(
             X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, max_tree_depth=max_tree_depth
         )
 
-        log_debug(f"Decision tree model for output variable {i} ({var_y}) created")
+        log_debug(
+            f"Decision tree model for output variable {i} ({var_y}) created")
 
-        log_debug(f"Training decision tree classifier for output variable {i}...")
+        log_debug(
+            f"Training decision tree classifier for output variable {i}...")
 
         # ======== Obtain results from test and train data ========
 
         test_preds, train_accuracy, test_accuracy = decision_tree_model.classify()
         results[i] = (var_y_test, test_preds, train_accuracy, test_accuracy)
 
-        log_debug(f"Decision tree classifier for output variable {i} ({var_y}) trained")
+        log_debug(
+            f"Decision tree classifier for output variable {i} ({var_y}) trained")
 
         log_trace(f"Output variable {i} results: {results[i]}")
 
@@ -97,13 +101,16 @@ def run_dt_model(
         predictors_ordered_var = np.argsort(variable_importance)[::-1]
         log_info(f"Predictors ordered by importance: {predictors_ordered}")
 
-        predictors_ordered_names = [X_labels[i] for i in predictors_ordered_var]
-        log_info(f"Predictors ordered by importance (names): {predictors_ordered_names}")
+        predictors_ordered_names = [X_labels[i]
+                                    for i in predictors_ordered_var]
+        log_info(
+            f"Predictors ordered by importance (names): {predictors_ordered_names}")
 
         if not variable_importance_only:
             log_title("Plotting decision regions...")
 
-            decision_tree_model.plot_multivar_decision_regions()
+            decision_tree_model.plot_multivar_decision_regions(
+                var_y, test_preds, predictors_ordered_var, y_var_unique_classes, delta=4)
 
         predictors_ordered[i] = predictors_ordered_var
 
