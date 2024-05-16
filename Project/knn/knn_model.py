@@ -40,7 +40,7 @@ class KNNClassify(Classifier):
             tuple[KNeighborsClassifier, np.ndarray, float, float]: A tuple containing the knn classifier, test predictions, train accuracy, and test accuracy.
         """
 
-        log_info(f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}")
+        log_debug(f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}")
 
         log_title("Training KNN model...")
 
@@ -48,8 +48,8 @@ class KNNClassify(Classifier):
 
         log_info("KNN model trained")
 
-        log_title("Getting results...")
         # Get results
+        log_title("Getting results...")
         train_accuracy = self.model.score(self.X_train, self.y_train)
 
         test_predictions = self.model.predict(self.X_test)
