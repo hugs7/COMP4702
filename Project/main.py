@@ -6,6 +6,7 @@ import os
 from typing import List
 from colorama import Fore, Style
 import sys
+import numpy as np
 
 from welcome import welcome, available_items
 from dataset import DATASET_MAPPING
@@ -18,6 +19,42 @@ from check_log_level import set_log_level
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
 from dt.driver import run_dt_model
+
+
+def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> np.ndarray:
+    """
+    Fits a decision tree model to the data and returns the ranking of the variables by importance.
+
+    Parameters:
+    - dataset_file_path (str): The path to the dataset file.
+    - X_vars (List[str]): The names of the predictor variables.
+    - y_vars (List[str]): The names of the target variables.
+    - test_train_ratio (float): The ratio of test to train data.
+
+    Returns:
+    - ndarray: The ranking of the variables by importance.
+    """
+
+    X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
+        dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
+    )
+
+    max_tree_depth = 6
+
+    predictors_ordered = run_dt_model(
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        X_vars,
+        y_vars,
+        unique_classes,
+        num_classes_in_vars,
+        max_tree_depth=max_tree_depth,
+        variable_importance_only=True,
+    )
+
+    return predictors_ordered
 
 
 def main():
@@ -115,13 +152,15 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
+        predictors_ordered = dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio)
+
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
         )
 
         k = 30
 
-        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, k=k)
+        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, predictors_ordered, k=k)
     elif model_name == "dt":
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
@@ -129,7 +168,9 @@ def main():
 
         max_tree_depth = 6
 
-        run_dt_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, max_tree_depth=max_tree_depth)
+        predictors_ordered = run_dt_model(
+            X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, max_tree_depth=max_tree_depth
+        )
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
