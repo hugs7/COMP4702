@@ -51,3 +51,18 @@ def accuracy_to_error(accuracy: float) -> float:
     """
 
     return 1 - accuracy
+
+
+def col_names_to_indices(all_col_names: List[str], col_names: List[str]) -> List[int]:
+    """
+    Converts a list of column names to their corresponding indices in a DataFrame.
+
+    Parameters:
+    - all_col_names (List[str]): All the column names in the DataFrame.
+    - col_names (List[str]): The column names to search for.
+
+    Returns:
+    - List[int]: The indices of the column names in the DataFrame.
+    """
+
+    return [all_col_names.index(col) for col in col_names]
