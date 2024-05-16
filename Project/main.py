@@ -118,6 +118,7 @@ def main():
 
     # Specify the indices of the columns that are the variables we are predicting
     y_col_indices = [9]
+    y_col_indices = [0, 1]
     x_col_names = ["Thorax_length", "wing_loading"]
     x_col_indices = [columns.index(col) for col in x_col_names]
     exclude_col_indices = [2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17]
