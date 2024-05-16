@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 
 from model.classifier import Classifier
+from logger import *
 
 
 class DTClassifier(Classifier):
@@ -37,8 +38,17 @@ class DTClassifier(Classifier):
         X = pd.DataFrame(self.X_train, columns=self.X_labels)
         y = self.y_train
 
+        log_debug(f"X_train dim: {X.shape}, y_train dim: {y.shape}")
+
+        log_title("Training decision tree model...")
+
         # Fit model
         self.model.fit(X, y)
+
+        log_info("Decision tree model trained")
+
+        # Get results
+        log_title("Getting results...")
 
         # Results from training
         train_accuracy = self.model.score(X, y)
@@ -46,5 +56,11 @@ class DTClassifier(Classifier):
         # Test predictions
         test_predictions = self.model.predict(self.X_test)
         test_accuracy = self.model.score(self.X_test, self.y_test)
+
+        log_info("Results obtained")
+
+        log_debug(f"Test predictions:\n{test_predictions}")
+        log_info(f"Train accuracy: {train_accuracy}")
+        log_info(f"Test accuracy: {test_accuracy}")
 
         return test_predictions, train_accuracy, test_accuracy
