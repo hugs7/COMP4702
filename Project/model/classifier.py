@@ -3,6 +3,8 @@ Classification Model Class
 Hugo Burton
 """
 
+import itertools
+import math
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
@@ -117,6 +119,111 @@ class Classifier(Model):
         super().__init__(X_train, y_train, X_test, y_test, X_labels, y_labels)
 
         self.model = model
+
+    def plot_multivar_decision_regions(
+        self,
+        output_variable_name: str,
+        test_preds: np.ndarray,
+        ordered_predictor_indicies: np.ndarray,
+        y_var_unique_classes: List[str],
+        delta: int = 5,
+    ) -> None:
+        """
+        Wrapper for plotting decision regions for more than 2 features. Places the top Delta
+        features within a grid of subplots and plots the decision regions for each pair of features.
+
+        Parameters:
+        - output_variable_name (str): The name of the output variable.
+        - test_preds (ndarray): The predicted labels for the test data.
+        - ordered_predictor_indicies (ndarray): The indices of the predictors ordered by importance.
+        - y_var_unique_classes (List[str]): The unique class names for the output variable.
+        - delta (int): The number of top features to plot. Default is 5. Note this is not the number of plots.
+
+        Returns:
+        - None
+        """
+
+        log_info(f"Plotting decision boundaries for output variable {output_variable_name}...")
+
+        # Clamp delta to the number of features
+        if delta > len(self.X_labels):
+            log_warning(f"Delta value {delta} exceeds the number of features {len(self.X_labels)}. Clamping to {len(self.X_labels)}")
+            delta = min(delta, len(self.X_labels))
+
+        # Plot decision regions for the top delta features
+        top_predictor_indices = ordered_predictor_indicies[:delta]
+        log_info(f"Top {delta} feature indices: {top_predictor_indices}")
+        top_delta_feature_cols = [self.X_labels[idx] for idx in top_predictor_indices]
+
+        # Calculate the total number of plots
+        feature_combinations = list(itertools.combinations(top_predictor_indices, 2))
+        log_trace(f"Feature combinations: {feature_combinations}")
+        num_feature_pairs = len(feature_combinations)
+        log_debug(f"Total number of plots: {num_feature_pairs}")
+
+        # Determine the number of rows and columns for the square grid
+        num_plots_per_row = math.ceil(math.sqrt(num_feature_pairs))
+        num_plots_per_col = math.ceil(num_feature_pairs / num_plots_per_row)
+
+        # Create a square grid of subplots
+        fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(10, 6))
+
+        # Flatten the axs array to iterate over it easily
+        # Flatten only if there is more than one row
+        if num_plots_per_row > 1:
+            axs = axs.flatten()
+
+        # Iterate over each pair of input variables
+        plot_index = 0
+
+        for i, feature_pair in enumerate(feature_combinations):
+            log_info(f"Plotting decision boundary for feature pair {feature_pair}. Progress: {i} / {num_feature_pairs}")
+
+            # Get the current axes
+            # If only 1 plot, axs is not an array
+            if num_plots_per_row > 1:
+                plt.sca(axs[plot_index])
+            else:
+                plt.sca(axs)
+
+            # Generate and plot decision regions for the current pair of input variables
+            subplot = self.plot_decision_regions(
+                test_preds, feature_pair, self.X_labels, y_var_unique_classes, show_plot=False, resolution=1
+            )
+            # Set title for each subplot
+            feature_label_x = self.X_labels[feature_pair[0]]
+            feature_label_y = self.X_labels[feature_pair[1]]
+            subplot.set_title(f"DB for features {feature_label_x} and {feature_label_y}")
+            subplot.set_xlabel(feature_label_x)
+            subplot.set_ylabel(feature_label_y)
+
+            # Add subplot to the list of plots
+            if num_plots_per_row > 1:
+                axs[plot_index] = subplot
+            else:
+                axs = subplot
+
+            # Increment plot index
+            plot_index += 1
+
+        log_debug("All decision boundary plots generated")
+
+        # Hide empty subplots
+        num_axes = len(axs) if isinstance(axs, np.ndarray) else 1
+        for j in range(num_feature_pairs, num_axes):
+            axs[j].axis("off")
+
+        log_line(level="DEBUG")
+        log_debug("X Test points:")
+        X_test_important_features = self.X_test[:, top_predictor_indices]
+        log_debug(utils.np_to_pd(X_test_important_features, top_delta_feature_cols))
+        log_line(level="DEBUG")
+
+        # Adjust layout to prevent overlap
+        plt.tight_layout()
+
+        # Show the decision boundary plots for the current KNN classifier
+        plt.show()
 
     def plot_decision_regions(
         self,
