@@ -64,7 +64,7 @@ def main():
     welcome()
 
     models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
-              "rf": "Random Forest", "nn": "Neural Network"}
+              "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         if len(sys.argv) == 2:
@@ -181,8 +181,6 @@ def main():
         predictors_ordered = run_dt_model(
             X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, max_tree_depth=max_tree_depth
         )
-    elif model_name == "rf":
-        raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
         # Grid search cv function
 
