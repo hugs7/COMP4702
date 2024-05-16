@@ -37,3 +37,17 @@ def np_to_pd(df: np.ndarray, columns: List[str]) -> pd.DataFrame:
 
     df = pd.DataFrame(df, columns=columns)
     return df
+
+
+def accuracy_to_error(accuracy: float) -> float:
+    """
+    Converts an accuracy score to an error score.
+
+    Parameters:
+    - accuracy (float): The accuracy score to convert.
+
+    Returns:
+    - float: The error score.
+    """
+
+    return 1 - accuracy
