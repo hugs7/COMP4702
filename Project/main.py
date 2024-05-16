@@ -17,6 +17,7 @@ from check_log_level import set_log_level
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
+from dt.driver import run_dt_model
 
 
 def main():
@@ -84,7 +85,7 @@ def main():
     exclude_col_indices = [2, 3, 4, 5, 11, 12, 13, 14, 15, 16, 17]
 
     # Derive the indices of the x variables by removing the y indices
-    # x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in exclude_col_indices]
+    x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in exclude_col_indices]
 
     # Obtain the vars of the x and y variables
     X_vars = [columns[i] for i in x_col_indices]
@@ -122,7 +123,13 @@ def main():
 
         run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, k=k)
     elif model_name == "dt":
-        raise NotImplementedError("Decision tree not implemented")
+        X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
+            dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
+        )
+
+        max_tree_depth = 6
+
+        run_dt_model(X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, max_tree_depth=max_tree_depth)
     elif model_name == "rf":
         raise NotImplementedError("Random forest not implemented")
     elif model_name == "nn":
