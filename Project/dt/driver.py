@@ -42,37 +42,50 @@ def run_dt_model(
     - variable_importance_only (bool): Flag for whether we just want to compute variable importance (and not show plots).
 
     Returns:
-    - Ranking of variables by importance. Format is a descending ordered list of the indices of the predictors.
+    - (nparray) Ranking of variables by importance in a 2D array with each row in descending ordered of indices of the
+                predictors for that row's variable.
     """
 
-    decision_tree_model = decision_tree.DTClassifier(X_train, y_train, X_test, y_test, X_labels, y_labels, max_tree_depth=max_tree_depth)
+    num_input_vars = len(X_labels)
+    num_output_vars = len(y_labels)
+    predictors_ordered = np.zeros((num_output_vars, num_input_vars), dtype=int)
 
-    test_preds, train_accuracy, test_accuracy = decision_tree_model.classify()
+    for i, var_y in enumerate(y_labels):
+        # ======== Train KNN classifier for this output variable ========
+        log_title(f"Output variable {i}: {var_y}")
+        y_var_unique_classes = unique_classes[i]
+        log_info(f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
-    log_debug(f"Test predictions: {test_preds}")
+        decision_tree_model = decision_tree.DTClassifier(
+            X_train, y_train, X_test, y_test, X_labels, y_labels, max_tree_depth=max_tree_depth
+        )
 
-    log_info(f"Train accuracy: {train_accuracy}")
-    log_info(f"Test accuracy: {test_accuracy}")
+        test_preds, train_accuracy, test_accuracy = decision_tree_model.classify()
 
-    log_line(level="INFO")
+        log_debug(f"Test predictions: {test_preds}")
 
-    # Variable importance
-    log_title("Variable importance:")
-    variable_importance = decision_tree_model.model.feature_importances_
-    log_info(f"Variable importance: {variable_importance}")
+        log_info(f"Train accuracy: {train_accuracy}")
+        log_info(f"Test accuracy: {test_accuracy}")
 
-    # Convert variable importance to a list of indices in descending order
-    predictors_ordered = np.argsort(variable_importance)[::-1]
-    log_info(f"Predictors ordered by importance: {predictors_ordered}")
+        log_line(level="INFO")
 
-    predictors_ordered_names = [X_labels[i] for i in predictors_ordered]
-    log_info(f"Predictors ordered by importance (names): {predictors_ordered_names}")
+        # Variable importance
+        log_title("Variable importance:")
+        variable_importance = decision_tree_model.model.feature_importances_
+        log_info(f"Variable importance: {variable_importance}")
 
-    if not variable_importance_only:
-        log_title("Plotting decision regions...")
+        # Convert variable importance to a list of indices in descending order
+        predictors_ordered_var = np.argsort(variable_importance)[::-1]
+        log_info(f"Predictors ordered by importance: {predictors_ordered}")
 
-        exit()
+        predictors_ordered_names = [X_labels[i] for i in predictors_ordered_var]
+        log_info(f"Predictors ordered by importance (names): {predictors_ordered_names}")
 
-        # decision_tree_model.plot_decision_regions(test_preds, , resolution=0.02)
+        if not variable_importance_only:
+            log_title("Plotting decision regions...")
+
+            decision_tree_model.plot_multivar_decision_regions()
+
+        predictors_ordered[i] = predictors_ordered_var
 
     return predictors_ordered
