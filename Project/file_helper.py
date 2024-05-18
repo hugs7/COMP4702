@@ -67,9 +67,9 @@ def delete_folder_contents(folder_path: str) -> None:
         file_path = os.path.join(folder_path, file)
         if os.path.isfile(file_path):
             os.remove(file_path)
-            log_info(f"Removed file: {file_path}")
+            log_debug(f"Removed file: {file_path}")
         elif os.path.isdir(file_path):
             os.rmdir(file_path)
-            log_info(f"Removed folder: {file_path}")
+            log_debug(f"Removed folder: {file_path}")
         else:
             log_warning(f"Unexpected type. Could not remove {file_path}")
