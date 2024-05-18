@@ -24,7 +24,7 @@ from knn.driver import run_knn_model
 from dt.driver import run_dt_model
 
 
-def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> np.ndarray:
+def dt_variable_ranking(dataset_name: str, dataset_file_path: str, X_vars: List[str], y_vars: List[str], test_train_ratio: float) -> np.ndarray:
     """
     Fits a decision tree model to the data and returns the ranking of the variables by importance.
 
@@ -46,6 +46,7 @@ def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> 
     max_tree_depth = 6
 
     predictors_ordered = run_dt_model(
+        dataset_name,
         X_train,
         y_train,
         X_test,
@@ -173,8 +174,8 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
-        predictors_ordered = dt_variable_ranking(
-            dataset_file_path, X_vars, y_vars, test_train_ratio)
+        predictors_ordered = dt_variable_ranking(dataset_name,
+                                                 dataset_file_path, X_vars, y_vars, test_train_ratio)
 
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
