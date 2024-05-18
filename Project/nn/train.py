@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple
 import torch
+import utils
 
 from logger import *
 
@@ -147,24 +148,6 @@ def compute_loss(
     return total_loss_tensor
 
 
-def tensor_to_cpu(tensor: torch.Tensor, detach: bool) -> torch.Tensor:
-    """
-    Moves a tensor to the CPU
-
-    Args:
-    - tensor (torch.Tensor): The tensor to move
-    - detach (bool): Whether to detach the tensor
-
-    Returns:
-    - torch.Tensor: The tensor on the CPU
-    """
-
-    if detach:
-        return tensor.cpu().detach().numpy()
-    else:
-        return tensor.cpu().numpy()
-
-
 def compute_accuracy(num_output_vars: int, y_true: torch.Tensor, train_preds: torch.Tensor, train_data: bool) -> float:
     """
     Computes the accuracy given the true labels and the predictions
@@ -213,7 +196,7 @@ def compute_accuracy(num_output_vars: int, y_true: torch.Tensor, train_preds: to
         log_debug("Comparison: ", comparison)
 
         overall_accuracy = torch.mean((comparison).float())
-        var_accuracy_val = tensor_to_cpu(overall_accuracy, detach=False)
+        var_accuracy_val = utils.tensor_to_cpu(overall_accuracy, detach=False)
         var_accuracies.append(var_accuracy_val)
 
     # Take average of all accuracies
@@ -309,7 +292,7 @@ def nn_train(
 
     num_output_vars = len(num_classes_in_vars)
     if epoch % 100 == 0 or epoch == optimisation_steps - 1:
-        train_loss_cpu = tensor_to_cpu(train_loss_tensor, detach=True)
+        train_loss_cpu = utils.tensor_to_cpu(train_loss_tensor, detach=True)
 
         log_debug("Train loss: ", train_loss_cpu)
 
@@ -318,7 +301,7 @@ def nn_train(
             X_validation, sequential_model, num_classes_in_vars, train_data=False)
         validation_loss_tensor = compute_loss(
             val_preds, y_validation, criterion, num_classes_in_vars, loss_weights, train_data=False)
-        validation_loss_cpu = tensor_to_cpu(
+        validation_loss_cpu = utils.tensor_to_cpu(
             validation_loss_tensor, detach=True)
 
         log_debug("Validation loss: ", validation_loss_cpu)

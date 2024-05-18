@@ -5,6 +5,7 @@ This file contains utility functions that are used throughout the project.
 from typing import Dict, List
 import pandas as pd
 import numpy as np
+import torch
 import logger
 
 
@@ -66,3 +67,21 @@ def col_names_to_indices(all_col_names: List[str], col_names: List[str]) -> List
     """
 
     return [all_col_names.index(col) for col in col_names]
+
+
+def tensor_to_cpu(tensor: torch.Tensor, detach: bool) -> torch.Tensor:
+    """
+    Moves a tensor to the CPU
+
+    Args:
+    - tensor (torch.Tensor): The tensor to move
+    - detach (bool): Whether to detach the tensor
+
+    Returns:
+    - torch.Tensor: The tensor on the CPU
+    """
+
+    if detach:
+        return tensor.cpu().detach().numpy()
+    else:
+        return tensor.cpu().numpy()
