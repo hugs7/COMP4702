@@ -175,6 +175,7 @@ def run_nn_model(
     num_classes_in_vars: List[int],
     nn_folder_path: str,
     plots_folder_path: str = None,
+    save_model: bool = True
 ) -> None:
     """
     Driver script for Neural Network model. Takes in training, test data along with labels and trains
@@ -192,6 +193,7 @@ def run_nn_model(
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     - nn_folder_path (str): The path of the neural network model.
     - plots_folder_path (str): The path to save the plots to.
+    - save_model (bool): If true, the final model will be saved. Default is True.
     """
 
     log_title(f"Start of nn model driver for dataset: {dataset_name}...")
@@ -200,18 +202,22 @@ def run_nn_model(
 
     final_model_folder, checkpoints_folder = get_model_save_folders(
         nn_folder_path)
-    file_helper.make_folder_if_not_exists(final_model_folder)
-    file_helper.make_folder_if_not_exists(checkpoints_folder)
+    if save_model:
+        file_helper.make_folder_if_not_exists(final_model_folder)
+        file_helper.make_folder_if_not_exists(checkpoints_folder)
 
-    log_info(f"Folders configured")
+        log_info(f"Folders configured")
 
-    log_info(
-        f"Clearing contents of folders {final_model_folder} and {checkpoints_folder}")
-    file_helper.delete_folder_contents(final_model_folder)
-    file_helper.delete_folder_contents(checkpoints_folder)
+        log_info(
+            f"Clearing contents of folders {final_model_folder} and {checkpoints_folder}")
+        file_helper.delete_folder_contents(final_model_folder)
+        file_helper.delete_folder_contents(checkpoints_folder)
 
-    log_info(f"Folders cleared")
-    log_line(level="INFO")
+        log_info(f"Folders cleared")
+        log_line(level="INFO")
+    else:
+        # Disable saving checkpoints by setting the folder to None
+        checkpoints_folder = None
 
     log_info(
         f"Number of classes in each output variable: {num_classes_in_vars}")
@@ -291,11 +297,12 @@ def run_nn_model(
         )
 
     # Save the final model
-    log_info("Saving final model...")
-    save_model(final_model_folder, sequential_model,  metrics)
+    if save_model:
+        log_info("Saving final model...")
+        save_model(final_model_folder, sequential_model,  metrics)
 
-    log_info("Final Model saved")
-    log_line(level="INFO")
+        log_info("Final Model saved")
+        log_line(level="INFO")
 
     # Show training results
     log_title("Training Results")

@@ -104,7 +104,7 @@ def nn_train(
     optimisation_steps: int,
     metrics: List[float],
     num_classes_in_vars: int,
-    checkpoints_folder: str,
+    checkpoints_folder: str | None,
     loss_weights: List[float] = None,
 ) -> List[Tuple[int, float, float, float, float]]:
     """
@@ -123,7 +123,7 @@ def nn_train(
     - optimisation_steps (int): Number of steps to train
     - metrics (int): List of metrics
     - num_classes_in_vars (List[int]): The number of classes in each output variable - used for recovering the true classification from the flattened output of the model
-    - checkpoints_folder (str): The folder to save the model checkpoints
+    - checkpoints_folder (str | None): The folder to save the model checkpoints. If None, no checkpoints are saved
     - loss_weights (List[float]): Weights for the loss function. If not provided, defaults to 1.0 for each variable
 
     Returns:
@@ -203,9 +203,10 @@ def nn_train(
         metrics.append([epoch, train_loss_cpu, train_accuracy,
                        validation_loss_cpu, validation_accuracy])
 
-        if epoch % 1000 == 0 or epoch == optimisation_steps - 1:
-            # Save model checkpoint
-            save_model(checkpoints_folder, sequential_model,
-                       metrics, epoch // 1000)
+        if checkpoints_folder:
+            if epoch % 1000 == 0 or epoch == optimisation_steps - 1:
+                # Save model checkpoint
+                save_model(checkpoints_folder, sequential_model,
+                           metrics, epoch // 1000)
 
     return metrics
