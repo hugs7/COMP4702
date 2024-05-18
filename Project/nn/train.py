@@ -338,7 +338,9 @@ def nn_train(
         metrics.append([epoch, train_loss_cpu, train_accuracy,
                        validation_loss_cpu, validation_accuracy])
 
-        # Save model checkpoint
-        save_model(checkpoints_folder, sequential_model, "nn", metrics, epoch)
+        if epoch % 1000 == 0 or epoch == optimisation_steps - 1:
+            # Save model checkpoint
+            save_model(checkpoints_folder, sequential_model,
+                       "nn", metrics, epoch)
 
     return metrics
