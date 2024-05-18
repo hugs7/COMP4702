@@ -340,6 +340,6 @@ def nn_train(
         if epoch % 1000 == 0 or epoch == optimisation_steps - 1:
             # Save model checkpoint
             save_model(checkpoints_folder, sequential_model,
-                       "nn", metrics, epoch % 1000)
+                       metrics, epoch % 1000)
 
     return metrics

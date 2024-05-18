@@ -202,7 +202,7 @@ def run_nn_model(
 
     # Save the final model
     log_info("Saving final model...")
-    save_model(final_model_folder, sequential_model, "nn", metrics)
+    save_model(final_model_folder, sequential_model,  metrics)
 
     log_info("Final Model saved")
     log_line(level="INFO")
