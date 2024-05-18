@@ -5,17 +5,20 @@ Hugo Burton
 
 import itertools
 import math
+import os
+from typing import List, Tuple
 from matplotlib.collections import PathCollection
 from matplotlib.legend import Legend
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 from sklearn.base import BaseEstimator
-from typing import List, Tuple
+
+import file_helper
 import utils
+from logger import *
 
 from model.base_model import Model
-from logger import *
 
 
 BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700",
@@ -148,6 +151,8 @@ class Classifier(Model):
         ordered_predictor_indicies: np.ndarray,
         y_var_unique_classes: List[str],
         delta: int = 5,
+        dataset_name: str = None,
+        plots_folder_path: str = None,
     ) -> None:
         """
         Wrapper for plotting decision regions for more than 2 features. Places the top Delta
@@ -159,6 +164,8 @@ class Classifier(Model):
         - ordered_predictor_indicies (ndarray): The indices of the predictors ordered by importance for this output variable. Should only be 1D.
         - y_var_unique_classes (List[str]): The unique class names for the output variable.
         - delta (int): The number of top features to plot. Default is 5. Note this is not the number of plots.
+        - dataset_name (str): The name of the dataset. Default is None.
+        - plots_folder_path (str): The path to save the plots to. Default is None.
 
         Returns:
         - None
@@ -166,6 +173,13 @@ class Classifier(Model):
 
         log_info(
             f"Plotting decision boundaries for output variable {output_variable_name}...")
+
+        save_plot = False
+        plot_path = ""
+        if dataset_name is not None and plots_folder_path is not None:
+            save_plot = True
+            plot_path = os.path.join(
+                plots_folder_path, f"{dataset_name}_decision_boundaries_{output_variable_name}.png")
 
         # Clamp delta to the number of features
         if delta > len(self.X_labels):
@@ -258,7 +272,12 @@ class Classifier(Model):
             fig, scatter.legend_elements()[0], legend_labels, title=output_variable_name, loc="upper right")
         fig.add_artist(scatter_legend)
 
-        # Show the decision boundary plots for the current KNN classifier
+        if save_plot:
+            file_helper.remove_file_if_exist(plot_path)
+            log_info(f"Saving plot to {plot_path}")
+            plt.savefig(plot_path)
+
+        # Show the decision boundary plots for the current classifier
         plt.show()
 
     def plot_decision_regions(

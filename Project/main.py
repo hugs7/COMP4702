@@ -182,8 +182,8 @@ def main():
 
         k = 30
 
-        run_knn_model(X_train, y_train, X_test, y_test, X_vars, y_vars,
-                      unique_classes, num_classes_in_vars, predictors_ordered, k=k)
+        run_knn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars, y_vars,
+                      unique_classes, num_classes_in_vars, predictors_ordered, k=k, plots_folder_path=plots_folder)
     elif model_name == "dt":
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, False, test_train_ratio

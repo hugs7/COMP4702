@@ -13,6 +13,7 @@ from logger import *
 
 
 def run_knn_model(
+    dataset_name: str,
     X_train: np.ndarray,
     y_train: np.ndarray,
     X_test: np.ndarray,
@@ -23,12 +24,14 @@ def run_knn_model(
     num_classes_in_vars: List[int],
     ordered_predictor_indicies: np.ndarray,
     k: int = 5,
+    plots_folder_path: str = None,
 ) -> None:
     """
     Driver script for k-nearest neighbours classification model. Takes in training, test data along with labels and trains
     a k-nearest neighbours model on the data.
 
     Args:
+    - dataset_name (str): The name of the dataset.
     - X_train (ndarray): Training data features.
     - y_train (ndarray): Training data target variable (not one-hot-encoded).
     - X_test (ndarray): Testing data features.
@@ -40,6 +43,7 @@ def run_knn_model(
     - ordered_predictor_indicies (ndarray): 2D array of indices of the predictors in descending order of importance. Rows are output
                                             variables and columns are the ordered indices of the predictors for that output variable.
     - k (int): The number of neighbours to consider.
+    - plots_folder_path (str): The path to save the plots to.
     """
 
     log_title("Start of knn model driver...")
@@ -115,6 +119,6 @@ def run_knn_model(
         log_info(f"Plotting decision boundaries for output variable {i}...")
 
         knn_classifier.plot_multivar_decision_regions(
-            var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, 4)
+            var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, 4, dataset_name, plots_folder_path)
 
     return results
