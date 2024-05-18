@@ -151,14 +151,14 @@ def nn_train(
         X, sequential_model, num_classes_in_vars, classifier.TRAINING)
 
     # True labels
-    y_true = y_train[indices]
+    y_train_batch = y_train[indices]
 
-    log_trace("Y True Labels: ", y_true)
-    log_debug("Y True shape: ", y_true.shape)
+    log_trace("Y True Labels: ", y_train_batch)
+    log_debug("Y True shape: ", y_train_batch.shape)
 
     # Compute the loss of the training data
     train_loss_tensor = compute_loss(
-        train_preds, y_true, criterion, num_classes_in_vars, loss_weights, classifier.TRAINING)
+        train_preds, y_train_batch, criterion, num_classes_in_vars, loss_weights, classifier.TRAINING)
 
     # Zero the gradients
     log_debug("Zeroing gradients...")
@@ -191,7 +191,7 @@ def nn_train(
         log_debug("Validation loss: ", validation_loss_cpu)
 
         train_accuracy = compute_accuracy(
-            num_output_vars, y_true, train_preds, train_data=True)
+            num_output_vars, y_train_batch, train_preds, train_data=True)
         validation_accuracy = compute_accuracy(
             num_output_vars, y_validation, val_preds, classifier.VALIDATION)
 
