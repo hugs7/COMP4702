@@ -49,17 +49,23 @@ def read_model(model_save_path: str) -> Union[torch.nn.Module, None]:
     return model_obj
 
 
-def save_model(folder_path: str, model: torch.nn.Module, model_name: str, train_losses: List[float], validation_losses: List[float], checkpoint_num: int = None):
+def save_model(folder_path: str, model: torch.nn.Module, model_name: str, metrics: List, checkpoint_num: int = None):
     """
     Handles saving the model to a file.
+
+    Args:
+    - folder_path (str): The folder to save the model to.
+    - model (torch.nn.Module): The model to save.
+    - model_name (str): The name of the model.
+    - metrics (List): The metrics to save.
+    - checkpoint_num (int): The checkpoint number. If None, then it is the final model.
     """
 
     is_checkpoint = checkpoint_num is not None
 
     model_obj = {
         "model_state_dict": model.state_dict(),
-        "train_loss": train_losses,
-        "validation_loss": validation_losses,
+        "metrics": metrics,
         "is_cuda": torch.cuda.is_available(),
         "model_name": model_name,
         "is_checkpoint": is_checkpoint,
