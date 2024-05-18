@@ -176,6 +176,7 @@ def run_nn_model(
             epochs,
             metrics,
             num_classes_in_vars,
+            checkpoints_folder,
             loss_weights,
         )
 

@@ -251,8 +251,9 @@ def nn_train(
     - criterion (torch.nn.CrossEntropyLoss): Loss function
     - optimiser (torch.optim.SGD): Optimiser
     - optimisation_steps (int): Number of steps to train
-    - num_classes_in_vars (List[int]): The number of classes in each output variable - used for recovering the true classification from the flattened output of the model
     - metrics (int): List of metrics
+    - num_classes_in_vars (List[int]): The number of classes in each output variable - used for recovering the true classification from the flattened output of the model
+    - checkpoints_folder (str): The folder to save the model checkpoints
     - loss_weights (List[float]): Weights for the loss function. If not provided, defaults to 1.0 for each variable
 
     Returns:
