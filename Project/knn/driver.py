@@ -7,8 +7,10 @@ Hugo Burton
 from typing import List
 import numpy as np
 
+from plot.plot import plot_multivar_decision_regions
 
 from knn import knn_model
+
 from logger import *
 
 
@@ -118,7 +120,10 @@ def run_knn_model(
 
         log_info(f"Plotting decision boundaries for output variable {i}...")
 
-        knn_classifier.plot_multivar_decision_regions(
-            var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, 4, dataset_name, plots_folder_path)
+        predict_callback = knn_classifier.model.predict
+
+        plot_multivar_decision_regions(
+            var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, knn_classifier.X_test,
+            knn_classifier.X_labels, predict_callback, 4, dataset_name, plots_folder_path)
 
     return results
