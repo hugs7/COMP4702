@@ -6,7 +6,9 @@ Hugo Burton
 
 from typing import List
 import numpy as np
+from sklearn.model_selection import KFold, StratifiedKFold
 
+from model.classifier import aggregate_fold_results
 from plot.plot import plot_multivar_decision_regions
 
 from knn import knn_model
@@ -26,8 +28,9 @@ def run_knn_model(
     num_classes_in_vars: List[int],
     ordered_predictor_indicies: np.ndarray,
     k: int = 5,
+    n_splits: int = 5,
     plots_folder_path: str = None,
-) -> None:
+) -> dict[int, tuple[np.ndarray, np.ndarray, float, float]]:
     """
     Driver script for k-nearest neighbours classification model. Takes in training, test data along with labels and trains
     a k-nearest neighbours model on the data.
@@ -45,7 +48,11 @@ def run_knn_model(
     - ordered_predictor_indicies (ndarray): 2D array of indices of the predictors in descending order of importance. Rows are output
                                             variables and columns are the ordered indices of the predictors for that output variable.
     - k (int): The number of neighbours to consider.
+    - n_splits (int): The number of splits to use in cross-validation.
     - plots_folder_path (str): The path to save the plots to.
+
+    Returns:
+    - dict[int, tuple[np.ndarray, np.ndarray, float, float]]: Dictionary of output variable: (y_test_true, test_predictions, train_accuracy, test_accuracy)
     """
 
     log_title("Start of knn model driver...")
@@ -59,8 +66,6 @@ def run_knn_model(
     log_debug(
         f"Creating a knn classifier for each of the {len(y_labels)} output variables")
 
-    knn_classifiers = []
-
     # Dictionary of output variable: (y_test_true, test_predictions, train_accuracy, test_accuracy)
     results = {}
 
@@ -72,7 +77,7 @@ def run_knn_model(
             f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
         # Get slice of y_train and y_test for this output variable
-        var_y_train = y_train[:, i]
+        var_y_train = y_train[:, i]     # To be split up into
         var_y_test = y_test[:, i]
 
         log_trace(f"y_train_var:\n{var_y_train}")
@@ -81,24 +86,52 @@ def run_knn_model(
         log_debug(f"y_train_var shape: {var_y_train.shape}")
         log_debug(f"y_test_var shape: {var_y_test.shape}")
 
-        knn_classifier = knn_model.KNNClassify(
-            X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=k)
+        log_debug(
+            f"Defining k-fold cross-validation with {n_splits} splits...")
+        kf = StratifiedKFold(n_splits=n_splits, shuffle=True,
+                             random_state=42)  # Because why not
+        log_trace(f"KFold object: {kf}")
 
-        # Add the classifier to the list
-        knn_classifiers.append(knn_classifier)
+        fold_results = []
 
-        log_debug(f"KNN classifier for output variable {i} ({var_y}) created")
+        for fold, (train_index, validation_index) in enumerate(kf.split(X_train, var_y_train)):
+            log_info(f"Fold {fold+1}/{n_splits}...")
 
-        log_debug(f"Training KNN classifier for output variable {i}...")
+            X_train_fold, X_validation_fold = X_train[train_index], X_train[validation_index]
+            y_train_fold, y_validation_fold = var_y_train[train_index], var_y_train[validation_index]
 
-        # ======== Obtain results from test and train data ========
+            knn_classifier = knn_model.KNNClassify(
+                X_train_fold, y_train_fold, X_validation_fold, y_validation_fold, X_labels, y_var_unique_classes, k=k)
 
-        test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
-        results[i] = (var_y_test, test_preds, train_accuracy, test_accuracy)
+            log_trace(
+                f"KNN classifier for output variable {i} ({var_y}) created")
 
-        log_debug(f"KNN classifier for output variable {i} ({var_y}) trained")
+            log_debug(f"Training KNN classifier for output variable {i}...")
 
-        log_trace(f"Output variable {i} results: {results[i]}")
+            # ======== Obtain results from test and train data ========
+
+            test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+
+            log_trace(
+                f"KNN classifier for output variable {i} ({var_y}) trained")
+
+            test_preds, train_accuracy, test_accuracy = knn_classifier.classify()
+            fold_results.append(
+                (y_test, test_preds, train_accuracy, test_accuracy))
+
+            log_trace(f"Output variable {i} results: {results[i]}")
+
+            log_line(level="DEBUG")
+
+        log_debug(
+            f"Cross validation training complete for output variable {i} ({var_y}). Aggregating results...")
+
+        cv_results = aggregate_fold_results(fold_results)
+
+        log_debug(
+            f"Aggregated results: {cv_results}")
+
+        results[i] = cv_results
 
         log_line(level="DEBUG")
 

@@ -37,6 +37,24 @@ def check_data_type(data_type: str) -> int:
     return 0
 
 
+def aggregate_fold_results(fold_results: list[tuple[np.ndarray, np.ndarray, float, float]]) -> tuple[np.ndarray, np.ndarray, float, float]:
+    """
+    Aggregates the results from the folds in a cross-validation run into a single set of results.
+
+    Args:
+    - fold_results (list[tuple[np.ndarray, np.ndarray, float, float]]): The results from each fold
+
+    Returns:
+    - tuple[np.ndarray, np.ndarray, float, float]: A tuple containing the aggregated test labels, test predictions, mean train accuracy, and mean test accuracy.
+    """
+    y_tests, test_preds, train_accuracies, test_accuracies = zip(*fold_results)
+    aggregated_y_tests = np.concatenate(y_tests)
+    aggregated_test_preds = np.concatenate(test_preds)
+    mean_train_accuracy = np.mean(train_accuracies)
+    mean_test_accuracy = np.mean(test_accuracies)
+    return (aggregated_y_tests, aggregated_test_preds, mean_train_accuracy, mean_test_accuracy)
+
+
 class Classifier(Model):
     def __init__(
         self,
