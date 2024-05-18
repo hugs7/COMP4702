@@ -101,11 +101,11 @@ def run_dt_model(
         # Variable importance
         log_title("Fetching variable importance...")
         variable_importance = decision_tree_model.model.feature_importances_
-        log_info(f"Variable importance: {variable_importance}")
+        log_debug(f"Variable importance: {variable_importance}")
 
         # Convert variable importance to a list of indices in descending order
         predictors_ordered_var = np.argsort(variable_importance)[::-1]
-        log_info(f"Predictors ordered by importance: {predictors_ordered}")
+        log_debug(f"Predictors ordered by importance: {predictors_ordered}")
 
         predictors_ordered_names = [X_labels[i]
                                     for i in predictors_ordered_var]
