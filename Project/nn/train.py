@@ -190,7 +190,7 @@ def nn_train(
         log_debug("Validation loss: ", validation_loss_cpu)
 
         train_accuracy = compute_accuracy(
-            num_output_vars, y_train_batch, train_preds, train_data=True)
+            num_output_vars, y_train_batch, train_preds, classifier.TRAINING)
         validation_accuracy = compute_accuracy(
             num_output_vars, y_validation, val_preds, classifier.VALIDATION)
 
