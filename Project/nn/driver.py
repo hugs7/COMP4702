@@ -402,19 +402,19 @@ def run_saved_nn_model(
     sequential_model = nn_model.create_sequential_model(
         dim_input, dim_output_flattened, NN_MODEL_HIDDEN_LAYER_DIMS).to(device)
 
-    log_info(f"Loading model state dict into model...")
+    log_debug(f"Loading model state dict into model...")
     sequential_model.load_state_dict(state_dict)
 
-    log_info(f"Model state dict loaded from {model_save_path}")
+    log_debug(f"Model state dict loaded from {model_save_path}")
 
     log_info(
-        f"Making predictions on test data. Test data shape: {X_test_tensor.shape}")
+        f"Making predictions on test data.")
 
     test_preds = make_predictions(
         X_test_tensor, sequential_model, num_classes_in_vars, classifier.TESTING)
 
-    log_debug(f"Predictions made on test data", test_preds)
-    log_info(f"Predictions shape: {test_preds.shape}")
+    log_trace(f"Predictions made on test data", test_preds)
+    log_debug(f"Predictions shape: {test_preds.shape}")
 
     # Compute the accuracy of the model
     num_output_vars = len(num_classes_in_vars)
