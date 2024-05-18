@@ -143,11 +143,14 @@ def main():
     y_col_names = ["Species", "Population"]
     y_col_indices = utils.col_names_to_indices(columns, y_col_names)
 
+    x_exclude_names = ["Year_start", "Year_end"]
+    x_exclude_indices = utils.col_names_to_indices(columns, x_exclude_names)
+
     if model_name:
         if model_name == "nn":
             # Use all columns for neural network
             x_col_indices = [i for i in range(
-                len(columns)) if i not in y_col_indices]
+                len(columns)) if i not in y_col_indices and i not in x_exclude_indices]
         else:
             x_col_names = ["Thorax_length", "Replicate", "Vial",
                            "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
