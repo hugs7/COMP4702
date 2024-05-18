@@ -12,6 +12,7 @@ import numpy as np
 
 import results
 import file_helper
+import decode_data
 from logger import *
 
 import model.classifier as classifier
@@ -401,14 +402,21 @@ def run_saved_nn_model(
     log_debug(f"Predictions made on test data", test_preds)
     log_info(f"Predictions shape: {test_preds.shape}")
 
-    num_output_vars = len(num_classes_in_vars)
-
     # Compute the accuracy of the model
+    num_output_vars = len(num_classes_in_vars)
     train_accuracy = compute_accuracy(
         num_output_vars, y_test, test_preds, classifier.TESTING)
+
+    # Decode the one-hot encoded test predictions
+    test_preds_arg_max = decode_data.decode_one_hot_encoded_data(test_preds)
 
     log_info(f"Accuracy of the model: {train_accuracy}")
 
     # Decision boundary plots
 
-    # Annoying! We need to reshape the predictions by separating each output variable (axis 1)
+    for i, test_preds_var in enumerate(test_preds_arg_max):
+        log_title(f"Output variable {i}: {y_labels[i]}")
+        log_info(
+            f"Unique classes for output variable {i}: {unique_classes[i]}")
+        log_info(
+            f"Test predictions for output variable {i}:\n{test_preds_var}")
