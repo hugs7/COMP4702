@@ -30,6 +30,7 @@ def to_tensor(data: np.ndarray) -> torch.Tensor:
 
 
 def run_nn_model(
+    dataset_name: str,
     X_train: np.ndarray,
     y_train: np.ndarray,
     X_validation: np.ndarray,
@@ -38,12 +39,14 @@ def run_nn_model(
     y_labels: List[List[str]],
     unique_classes: List[List[str]],
     num_classes_in_vars: List[int],
+    plots_folder_path: str = None,
 ) -> None:
     """
     Driver script for Neural Network model. Takes in training, test data along with labels and trains
     a neural network model on the data.
 
     Args:
+    - dataset_name (str): The name of the dataset.
     - X_train (ndarray): Training data features.
     - y_train (ndarray): Training data target variable.
     - X_validation (ndarray): Validation data features.
@@ -52,6 +55,7 @@ def run_nn_model(
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
+    - plots_folder_path (str): The path to save the plots to.
     """
 
     log_title("Start of nn model driver...")

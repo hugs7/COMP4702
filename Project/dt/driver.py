@@ -8,10 +8,10 @@ import numpy as np
 
 from dt import decision_tree
 from logger import *
-from utils import accuracy_to_error
 
 
 def run_dt_model(
+    dataset_name: str,
     X_train: np.ndarray,
     y_train: np.ndarray,
     X_test: np.ndarray,
@@ -22,6 +22,7 @@ def run_dt_model(
     num_classes_in_vars: List[int],
     max_tree_depth: int = 5,
     variable_importance_only: bool = False,
+    plots_folder_path: str = None,
 ) -> np.ndarray:
     """
     Question 1
@@ -30,6 +31,7 @@ def run_dt_model(
     E_{hold-out}
 
     Parameters:
+    - dataset_name (str): The name of the dataset.
     - X_train (ndarray): The training data features.
     - y_train (ndarray): The training data target variable.
     - X_test (ndarray): The testing data features.
@@ -40,6 +42,7 @@ def run_dt_model(
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     - max_tree_depth (int): The maximum depth of the decision tree.
     - variable_importance_only (bool): Flag for whether we just want to compute variable importance (and not show plots).
+    - plots_folder_path (str): The path to save the plots to.
 
     Returns:
     - (nparray) Ranking of variables by importance in a 2D array with each row in descending ordered of indices of the
@@ -110,7 +113,7 @@ def run_dt_model(
             log_title("Plotting decision regions...")
 
             decision_tree_model.plot_multivar_decision_regions(
-                var_y, test_preds, predictors_ordered_var, y_var_unique_classes, delta=4)
+                var_y, test_preds, predictors_ordered_var, y_var_unique_classes, delta=4, dataset_name=dataset_name, plots_folder_path=plots_folder_path)
 
         predictors_ordered[i] = predictors_ordered_var
 

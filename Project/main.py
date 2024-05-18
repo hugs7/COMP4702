@@ -186,22 +186,21 @@ def main():
                       unique_classes, num_classes_in_vars, predictors_ordered, k=k, plots_folder_path=plots_folder)
     elif model_name == "dt":
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
-            dataset_file_path, X_vars, y_vars, False, False, test_train_ratio
-        )
+            dataset_file_path, X_vars, y_vars, False, False, test_train_ratio, )
 
-        max_tree_depth = 6
+        max_tree_depth = 10
 
-        predictors_ordered = run_dt_model(
-            X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars, max_tree_depth=max_tree_depth
-        )
+        predictors_ordered = run_dt_model(dataset_name,
+                                          X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars,
+                                          max_tree_depth=max_tree_depth, plots_folder_path=plots_folder)
     elif model_name == "nn":
         # Grid search cv function
 
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, True, False, test_train_ratio
         )
-        run_nn_model(X_train, y_train, X_test, y_test, X_vars,
-                     y_vars, unique_classes, num_classes_in_vars)
+        run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
+                     y_vars, unique_classes, num_classes_in_vars, plots_folder_path=plots_folder)
 
 
 if __name__ == "__main__":
