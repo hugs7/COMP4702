@@ -8,13 +8,14 @@ from typing import List
 
 from logger import *
 import utils
+import model.classifier as classifier
 
 
 def make_predictions(
     X: torch.Tensor,
     sequential_model: torch.nn.Sequential,
     num_classes_in_vars: List[int],
-    train_data: bool = True,
+    data_type: str,
 ) -> torch.Tensor:
     """
     Makes predictions given an X tensor and model. Reshapes the predictions
@@ -24,14 +25,14 @@ def make_predictions(
     - X (torch.Tensor): Input tensor
     - sequential_model (torch.nn.Sequential): Model object
     - num_classes_in_vars (List[int]): The number of classes in each output variable
-    - train_data (bool): Whether the data is training or not. If false, data is validation.
-                         Only affects headings in log output
+    - data_type (str). Taking value "training", "validation" or "testing"
 
     Returns:
     - torch.Tensor: Reshaped Predictions
     """
 
-    data_type = "training" if train_data else "validation"
+    if classifier.check_data_type(data_type):
+        return None
 
     # Make predictions
     y_pred = sequential_model(X)
@@ -70,7 +71,7 @@ def make_predictions(
     return reshaped_preds
 
 
-def compute_accuracy(num_output_vars: int, y_true: torch.Tensor, train_preds: torch.Tensor, train_data: bool) -> float:
+def compute_accuracy(num_output_vars: int, y_true: torch.Tensor, train_preds: torch.Tensor, data_type: str,) -> float:
     """
     Computes the accuracy given the true labels and the predictions
 
@@ -78,13 +79,14 @@ def compute_accuracy(num_output_vars: int, y_true: torch.Tensor, train_preds: to
     - num_output_vars (int): Number of output variables
     - y_true (torch.Tensor): True labels
     - train_preds (torch.Tensor): Predictions
-    - train_data (bool): Whether the data is training or not. If false, data is validation.
+    - data_type (str). Taking value "training", "validation" or "testing"
 
     Returns:
     - float: The accuracy
     """
 
-    data_type = "training" if train_data else "validation"
+    if classifier.check_data_type(data_type):
+        return None
 
     log_debug(f"Computing accuracy for {data_type} data...")
 

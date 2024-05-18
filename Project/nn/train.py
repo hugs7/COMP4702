@@ -7,6 +7,7 @@ from logger import *
 
 from nn.model_handler import save_model
 from nn.predict import compute_accuracy, make_predictions
+import model.classifier as classifier
 
 CUDA = "cuda"
 CPU = "cpu"
@@ -18,7 +19,7 @@ def compute_loss(
     criterion: torch.nn.CrossEntropyLoss,
     num_classes_in_vars: List[int],
     loss_weights: List[float] = None,
-    train_data: bool = True,
+    data_type: str = classifier.TRAINING,
 ) -> torch.Tensor:
     """
     Computes the loss for the model
@@ -29,13 +30,14 @@ def compute_loss(
     - criterion (torch.nn.CrossEntropyLoss): Loss function
     - num_classes_in_vars (List[int]): The number of classes in each output variable
     - loss_weights (List[float]): Weights for the loss function. If not provided, defaults to 1.0 for each variable
-    - train_data (bool): Whether the data is training or not. If false, data is validation.
+    - data_type (str): The type of data. Takes value "training", "validation" or "testing". Defaults to "training"
 
     Returns:
     - torch.Tensor: The total computed loss for the model as a tensor
     """
 
-    data_type = "training" if train_data else "validation"
+    if classifier.check_data_type(data_type):
+        return None
 
     log_debug(f"Computing loss for {data_type} data...")
 
@@ -146,7 +148,7 @@ def nn_train(
     log_debug("Shape of labels: ", y_train[indices].shape)
 
     train_preds = make_predictions(
-        X, sequential_model, num_classes_in_vars, train_data=True)
+        X, sequential_model, num_classes_in_vars, classifier.TRAINING)
 
     # True labels
     y_true = y_train[indices]
@@ -156,7 +158,7 @@ def nn_train(
 
     # Compute the loss of the training data
     train_loss_tensor = compute_loss(
-        train_preds, y_true, criterion, num_classes_in_vars, loss_weights, train_data=True)
+        train_preds, y_true, criterion, num_classes_in_vars, loss_weights, classifier.TRAINING)
 
     # Zero the gradients
     log_debug("Zeroing gradients...")
@@ -180,9 +182,9 @@ def nn_train(
 
         log_debug("Making predictions on validation data...")
         val_preds = make_predictions(
-            X_validation, sequential_model, num_classes_in_vars, train_data=False)
+            X_validation, sequential_model, num_classes_in_vars, classifier.VALIDATION)
         validation_loss_tensor = compute_loss(
-            val_preds, y_validation, criterion, num_classes_in_vars, loss_weights, train_data=False)
+            val_preds, y_validation, criterion, num_classes_in_vars, loss_weights, classifier.VALIDATION)
         validation_loss_cpu = utils.tensor_to_cpu(
             validation_loss_tensor, detach=True)
 
@@ -191,7 +193,7 @@ def nn_train(
         train_accuracy = compute_accuracy(
             num_output_vars, y_true, train_preds, train_data=True)
         validation_accuracy = compute_accuracy(
-            num_output_vars, y_validation, val_preds, train_data=False)
+            num_output_vars, y_validation, val_preds, classifier.VALIDATION)
 
         opt_steps_digits = len(str(optimisation_steps))
 
