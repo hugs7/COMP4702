@@ -341,7 +341,7 @@ def plot_decision_regions(
 
     # Create meshgrid and flatten for predictions
     if use_tensors:
-        xx, yy = torch.meshgrid(x, y)
+        xx, yy = torch.meshgrid(x, y, indexing="ij")
         xx_flat = xx.flatten()
         yy_flat = yy.flatten()
     else:
