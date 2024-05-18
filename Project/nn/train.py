@@ -4,6 +4,8 @@ import torch
 
 from logger import *
 
+from nn.model_handler import save_model
+
 CUDA = "cuda"
 CPU = "cpu"
 
@@ -235,6 +237,7 @@ def nn_train(
     optimisation_steps: int,
     metrics: List[float],
     num_classes_in_vars: int,
+    checkpoints_folder: str,
     loss_weights: List[float] = None,
 ) -> List[Tuple[int, float, float, float, float]]:
     """
@@ -334,5 +337,8 @@ def nn_train(
 
         metrics.append([epoch, train_loss_cpu, train_accuracy,
                        validation_loss_cpu, validation_accuracy])
+
+        # Save model checkpoint
+        save_model(checkpoints_folder, sequential_model, "nn", metrics, epoch)
 
     return metrics
