@@ -75,7 +75,7 @@ def delete_folder_contents(folder_path: str) -> None:
             log_warning(f"Unexpected type. Could not remove {file_path}")
 
 
-def show_files_in_folder(folder_path: str) -> None:
+def show_files_in_folder(folder_path: str, level: str = "INFO") -> None:
     """
     Shows the files in a folder.
 
@@ -83,6 +83,6 @@ def show_files_in_folder(folder_path: str) -> None:
     - folder_path (str): The path of the folder to show the files of.
     """
 
-    log_info(f"Files in folder: {folder_path}")
+    log(f"Files in folder: {folder_path}", leve=level)
     for file in os.listdir(folder_path):
-        log_info(file)
+        log(file, leve=level)
