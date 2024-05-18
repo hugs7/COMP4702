@@ -53,3 +53,23 @@ def remove_file_if_exist(file_path: str, warn_if_not_exist: bool = False) -> Non
 
     os.remove(file_path)
     log_info(f"Removed file: {file_path}")
+
+
+def delete_folder_contents(folder_path: str) -> None:
+    """
+    Deletes all contents of a folder.
+
+    Args:
+    - folder_path (str): The path of the folder to delete the contents of.
+    """
+
+    for file in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, file)
+        if os.path.isfile(file_path):
+            os.remove(file_path)
+            log_info(f"Removed file: {file_path}")
+        elif os.path.isdir(file_path):
+            os.rmdir(file_path)
+            log_info(f"Removed folder: {file_path}")
+        else:
+            log_warning(f"Unexpected type. Could not remove {file_path}")
