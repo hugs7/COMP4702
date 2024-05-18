@@ -83,4 +83,4 @@ def save_model(folder_path: str, model: torch.nn.Module, metrics: List, checkpoi
     with open(model_save_path, "wb") as f:
         torch.save(model_obj, f)
 
-    log_debug(f"Model saved to: {model_save_path}")
+    log_info(f"Model saved to: {model_save_path}")
