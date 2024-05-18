@@ -4,12 +4,14 @@ Driver script for Neural Network model
 Hugo Burton
 """
 
+import os
 from typing import List
 import torch
 import torch.optim as optim
 import numpy as np
 
 import results
+import file_helper
 from logger import *
 
 from nn import train, nn_model
@@ -39,6 +41,7 @@ def run_nn_model(
     y_labels: List[List[str]],
     unique_classes: List[List[str]],
     num_classes_in_vars: List[int],
+    nn_folder_path: str,
     plots_folder_path: str = None,
 ) -> None:
     """
@@ -55,10 +58,28 @@ def run_nn_model(
     - y_labels (List[List[str]]): The names of each class within each target variable. Of which there can be multiple
     - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
+    - nn_folder_path (str): The path of the neural network model.
     - plots_folder_path (str): The path to save the plots to.
     """
 
     log_title("Start of nn model driver...")
+
+    log_info(f"Configuring folders")
+
+    final_model_folder = os.path.join(nn_folder_path, "final_model")
+    checkpoints_folder = os.path.join(nn_folder_path, "checkpoints")
+    file_helper.make_folder_if_not_exists(final_model_folder)
+    file_helper.make_folder_if_not_exists(checkpoints_folder)
+
+    log_info(f"Folders configured")
+
+    log_info(
+        f"Clearing contents of folders {final_model_folder} and {checkpoints_folder}")
+    file_helper.delete_folder_contents(final_model_folder)
+    file_helper.delete_folder_contents(checkpoints_folder)
+
+    log_info(f"Folders cleared")
+    log_line(level="INFO")
 
     log_info(
         f"Number of classes in each output variable: {num_classes_in_vars}")
