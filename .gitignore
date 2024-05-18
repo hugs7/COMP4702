@@ -176,3 +176,7 @@ cython_debug/
 # Project
 # Plots
 /Project/plots
+
+# NN checkpoints and saves
+/Project/nn/final_model
+/Project/nn/checkpoints

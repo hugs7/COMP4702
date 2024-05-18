@@ -4,6 +4,8 @@ import torch
 
 from logger import *
 
+from nn.model_handler import save_model
+
 CUDA = "cuda"
 CPU = "cpu"
 
@@ -235,6 +237,7 @@ def nn_train(
     optimisation_steps: int,
     metrics: List[float],
     num_classes_in_vars: int,
+    checkpoints_folder: str,
     loss_weights: List[float] = None,
 ) -> List[Tuple[int, float, float, float, float]]:
     """
@@ -251,8 +254,9 @@ def nn_train(
     - criterion (torch.nn.CrossEntropyLoss): Loss function
     - optimiser (torch.optim.SGD): Optimiser
     - optimisation_steps (int): Number of steps to train
-    - num_classes_in_vars (List[int]): The number of classes in each output variable - used for recovering the true classification from the flattened output of the model
     - metrics (int): List of metrics
+    - num_classes_in_vars (List[int]): The number of classes in each output variable - used for recovering the true classification from the flattened output of the model
+    - checkpoints_folder (str): The folder to save the model checkpoints
     - loss_weights (List[float]): Weights for the loss function. If not provided, defaults to 1.0 for each variable
 
     Returns:
@@ -333,5 +337,10 @@ def nn_train(
 
         metrics.append([epoch, train_loss_cpu, train_accuracy,
                        validation_loss_cpu, validation_accuracy])
+
+        if epoch % 1000 == 0 or epoch == optimisation_steps - 1:
+            # Save model checkpoint
+            save_model(checkpoints_folder, sequential_model,
+                       "nn", metrics, epoch % 1000)
 
     return metrics

@@ -199,8 +199,11 @@ def main():
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, True, False, test_train_ratio
         )
+
+        nn_folder_path = os.path.join(folder_of_script, "nn")
+
         run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
-                     y_vars, unique_classes, num_classes_in_vars, plots_folder_path=plots_folder)
+                     y_vars, unique_classes, num_classes_in_vars, nn_folder_path=nn_folder_path, plots_folder_path=plots_folder)
 
 
 if __name__ == "__main__":
