@@ -21,6 +21,13 @@ BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700",
 FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
                       "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
+PLOT_WIDTH = 25
+PLOT_HEIGHT = 13
+
+# 540p resolution for each subplot :)
+PLOT_WIDTH_PIXELS = 540
+PLOT_HEIGHT_PIXELS = 360
+
 
 def lineplot(x_label: str, y_label: str, save_path: str = None, *args: Tuple[np.ndarray, np.ndarray, str]):
     """
@@ -151,7 +158,7 @@ def plot_multivar_decision_regions(
 
     # Create a square grid of subplots
     fig, axs = plt.subplots(
-        num_plots_per_row, num_plots_per_col, figsize=(10, 6))
+        num_plots_per_row, num_plots_per_col, figsize=(PLOT_WIDTH, PLOT_HEIGHT))
 
     # Flatten the axs array to iterate over it easily
     # Flatten only if there is more than one row
@@ -182,7 +189,7 @@ def plot_multivar_decision_regions(
         # Generate and plot decision regions for the current pair of input variables
         subplot, scatter = plot_decision_regions(
             output_variable_name, test_preds, feature_pair, X_labels, y_var_unique_classes, X_points, predict_callback, plot_title=plot_title,
-            show_plot=False, resolution=1, show_legend=False, x_label=feature_label_x, y_label=feature_label_y, use_tensors=use_tensors)
+            show_plot=False, show_legend=False, x_label=feature_label_x, y_label=feature_label_y, use_tensors=use_tensors)
 
         # Add subplot to the list of plots
         if num_plots_per_row > 1:
@@ -233,7 +240,6 @@ def plot_decision_regions(
     classes: list[str],
     X_points: np.ndarray | torch.Tensor,
     predict_callback: callable,
-    resolution=0.02,
     plot_title="Decision Regions",
     buffer: float = 0.5,
     show_plot: bool = True,
@@ -253,7 +259,6 @@ def plot_decision_regions(
     - classes (list[str]): The unique class labels.
     - X_points (ndarray): The test data features.
     - predict_callback (callable): The function to use to predict the labels for the meshgrid points.
-    - resolution (float): The step size of the mesh grid used for plotting the decision regions. Default is 0.02.
     - plot_title (str): The title of the plot. Default is "Decision Regions".
     - buffer (float): The buffer to add to the minimum and maximum values of the features. Default is 0.5.
     - show_plot (bool): Whether to display the plot. Default is True. Function will always return the plot object.
@@ -277,8 +282,6 @@ def plot_decision_regions(
     for index in variable_feature_indices:
         if index < 0 or index >= X_points.shape[1]:
             raise ValueError(f"Feature index {index} is out of bounds")
-
-    log_debug(f"Plot resolution: {resolution}")
 
     # Calculate mean values of non-variable features
     constant_feature_indices = list(
@@ -326,12 +329,19 @@ def plot_decision_regions(
     log_debug(f"Feature mins: {mins}")
     log_debug(f"Feature maxs: {maxs}")
 
+    # Compute resolution from the range of the features
+    resolution_x = (maxs[0] - mins[0]) / PLOT_WIDTH_PIXELS
+    resolution_y = (maxs[1] - mins[1]) / PLOT_HEIGHT_PIXELS
+
+    log_debug(f"Resolution X: {resolution_x}")
+    log_debug(f"Resolution Y: {resolution_y}")
+
     if use_tensors:
-        x = torch.arange(mins[0], maxs[0], resolution)
-        y = torch.arange(mins[1], maxs[1], resolution)
+        x = torch.arange(mins[0], maxs[0], resolution_x)
+        y = torch.arange(mins[1], maxs[1], resolution_y)
     else:
-        x = np.arange(mins[0], maxs[0], resolution)
-        y = np.arange(mins[1], maxs[1], resolution)
+        x = np.arange(mins[0], maxs[0], resolution_x)
+        y = np.arange(mins[1], maxs[1], resolution_y)
 
     log_trace(f"X:\n{x}")
     log_trace(f"Y:\n{y}")
