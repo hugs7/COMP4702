@@ -44,7 +44,8 @@ def np_to_pd(df: np.ndarray | torch.Tensor, columns: List[str], use_tensors: boo
     if use_tensors:
         logger.log_debug(
             "Converting numpy array to tensor before Pandas DataFrame")
-        df = utils.tensor_to_cpu(torch.tensor(df), detach=True)
+        df = df.clone()
+        df = utils.tensor_to_cpu(df, detach=True)
 
     df = pd.DataFrame(df, columns=columns)
     return df
