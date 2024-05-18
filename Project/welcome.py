@@ -5,6 +5,7 @@ import seaborn as sb
 from colorama import Fore, Style
 
 from logger import *
+from check_log_level import set_log_level
 
 
 def welcome():
@@ -46,3 +47,8 @@ def available_items(collective_name: str, items: list[str]) -> None:
     for item in items:
         print(f"  - {item}")
     print()
+
+
+if __name__ == "__main__":
+    set_log_level()
+    welcome()
