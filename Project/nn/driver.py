@@ -462,5 +462,5 @@ def run_saved_nn_model(
         delta = 4
         plot_multivar_decision_regions(
             var_y, test_preds_var, ordered_predictor_indicies_var, y_var_unique_classes,
-            X_test_tensor, X_labels, wrap_nn_predict, delta, dataset_name, plots_folder_path,
-            use_tensors=True)
+            X_test_tensor, X_labels, wrap_nn_predict, delta, NN_MODEL_NAME, dataset_name,
+            plots_folder_path, use_tensors=True)

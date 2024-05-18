@@ -77,6 +77,7 @@ def plot_multivar_decision_regions(
     X_labels: List[str],
     predict_callback: callable,
     delta: int = 5,
+    model_name: str = None,
     dataset_name: str = None,
     plots_folder_path: str = None,
     use_tensors: bool = False,
@@ -94,6 +95,7 @@ def plot_multivar_decision_regions(
     - X_labels (List[str]): The labels of the features.
     - predict_callback (callable): The function to use to predict the labels for the meshgrid points.
     - delta (int): The number of top features to plot. Default is 5. Note this is not the number of plots.
+    - model_name (str): The name of the model. Default is None.
     - dataset_name (str): The name of the dataset. Default is None.
     - plots_folder_path (str): The path to save the plots to. Default is None.
     - use_tensors (bool): Whether to use tensors for the meshgrid. Default is False.
@@ -107,10 +109,10 @@ def plot_multivar_decision_regions(
 
     save_plot = False
     plot_path = ""
-    if dataset_name is not None and plots_folder_path is not None:
+    if model_name is not None and dataset_name is not None and plots_folder_path is not None:
         save_plot = True
         plot_path = os.path.join(
-            plots_folder_path, f"{dataset_name}_decision_boundaries_{output_variable_name}.png")
+            plots_folder_path, f"{model_name}_{dataset_name}_decision_boundaries_{output_variable_name}.png")
 
     # Clamp delta to the number of features
     if delta > len(X_labels):
