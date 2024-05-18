@@ -3,9 +3,8 @@ Decision tree classification class
 Hugo Burton
 """
 
-from typing import Any, Tuple
+from typing import Tuple
 from sklearn.tree import DecisionTreeClassifier
-import pandas as pd
 import numpy as np
 
 from model.classifier import Classifier
