@@ -6,7 +6,10 @@ Hugo Burton
 from typing import List
 import numpy as np
 
+from plot.plot import plot_multivar_decision_regions
+
 from dt import decision_tree
+
 from logger import *
 
 
@@ -112,8 +115,10 @@ def run_dt_model(
         if not variable_importance_only:
             log_title("Plotting decision regions...")
 
-            decision_tree_model.plot_multivar_decision_regions(
-                var_y, test_preds, predictors_ordered_var, y_var_unique_classes, delta=4, dataset_name=dataset_name, plots_folder_path=plots_folder_path)
+            predict_callback = decision_tree_model.model.predict
+
+            plot_multivar_decision_regions(
+                var_y, test_preds, predictors_ordered_var, y_var_unique_classes, decision_tree_model.X_test, decision_tree_model.X_labels, predict_callback, delta=4, dataset_name=dataset_name, plots_folder_path=plots_folder_path)
 
         predictors_ordered[i] = predictors_ordered_var
 

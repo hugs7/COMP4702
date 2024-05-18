@@ -17,6 +17,8 @@ from logger import *
 
 import model.classifier as classifier
 
+from plot.plot import plot_multivar_decision_regions
+
 from nn import train, nn_model
 from nn.train import CUDA, CPU
 from nn.model_handler import save_model, read_model, NN_MODEL_NAME
@@ -414,9 +416,15 @@ def run_saved_nn_model(
 
     # Decision boundary plots
 
-    for i, test_preds_var in enumerate(test_preds_arg_max):
-        log_title(f"Output variable {i}: {y_labels[i]}")
+    for i, var_y in enumerate(y_labels):
+        log_title(f"Output variable {i}: {var_y}")
+
+        test_preds_var = test_preds_arg_max[i]
+        var_classes = unique_classes[i]
+
         log_info(
-            f"Unique classes for output variable {i}: {unique_classes[i]}")
-        log_info(
+            f"Unique classes for output variable {i}: {var_classes}")
+        log_debug(
             f"Test predictions for output variable {i}:\n{test_preds_var}")
+
+        # plot_multivar_decision_regions()

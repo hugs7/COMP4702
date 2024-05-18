@@ -5,8 +5,9 @@ Helper script to decode data. Primarily decoding one-hot encoded data.
 from typing import Tuple
 import numpy as np
 
-from logger import *
 from check_log_level import set_log_level
+from logger import *
+import utils
 
 
 def decode_one_hot_encoded_data(y: np.ndarray) -> Tuple[np.ndarray]:
@@ -27,6 +28,9 @@ def decode_one_hot_encoded_data(y: np.ndarray) -> Tuple[np.ndarray]:
     # First we need to understand in axis 2 (k) this data may be padded with zeros to the maximum number of classes in any var.
     # This is done becasue np.ndarray requires all dimensions to be the same size.
     # We need to remove these padded zeros to decode the data.
+
+    # Move y to the CPU and convert to numpy array
+    y = utils.tensor_to_cpu(y, detach=True)
 
     # Find the indices of the non-zero elements along the last axis
     decoded_data = np.argmax(y, axis=-1)
