@@ -370,11 +370,11 @@ def plot_decision_regions(
     log_debug("Making predictions on meshgrid...")
     # Predict the labels for meshgrid points
     Z_preds = predict_callback(flattened_X_meshgrid)
-    log_debug(f"Predictions:\n{Z_preds}")
+    log_trace(f"Predictions:\n{Z_preds}")
     log_line(level="DEBUG")
     # Reshape the predictions to match the meshgrid dimensions
     Z_preds = Z_preds.reshape(xx.shape)
-    log_debug(f"Predictions (reshaped):\n{Z_preds}")
+    log_trace(f"Predictions (reshaped):\n{Z_preds}")
     log_line(level="DEBUG")
 
     # Plot the decision boundary
