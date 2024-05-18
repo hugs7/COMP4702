@@ -204,11 +204,14 @@ def main():
         )
 
         if third_arg and third_arg == "read":
+            predictors_ordered = dt_variable_ranking(dataset_name,
+                                                     dataset_file_path, X_vars, y_vars, test_train_ratio)
+
             # Read from saved final model
             log_info("Reading from saved final model")
             final_model = True
-            run_saved_nn_model(nn_folder_path, X_test, y_test, X_vars,
-                               y_vars, unique_classes, num_classes_in_vars, final_model)
+            run_saved_nn_model(dataset_name, X_test, y_test, X_vars,
+                               y_vars, unique_classes, num_classes_in_vars, predictors_ordered, nn_folder_path, final_model, plots_folder_path=plots_folder)
         else:
             # Grid search cv function (maybe)
             run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
