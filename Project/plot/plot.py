@@ -397,8 +397,22 @@ def plot_decision_regions(
         X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
     # Setup plot
-    dr_plot.set_xlim(xx.min(), xx.max())
-    dr_plot.set_ylim(yy.min(), yy.max())
+    xx_min, xx_max = xx.min(), xx.max()
+    yy_min, yy_max = yy.min(), yy.max()
+
+    if xx_min == xx_max:
+        xx_min -= 1
+        xx_max += 1
+
+    if yy_min == yy_max:
+        yy_min -= 1
+        yy_max += 1
+
+    log_debug(f"X min: {xx_min}, X max: {xx_max}")
+    log_debug(f"Y min: {yy_min}, Y max: {yy_max}")
+
+    dr_plot.set_xlim(xx_min, xx_max)
+    dr_plot.set_ylim(yy_min, yy_max)
     dr_plot.set_xlabel(x_label)
     dr_plot.set_ylabel(y_label)
     dr_plot.set_title(plot_title)
