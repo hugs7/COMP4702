@@ -16,7 +16,11 @@ from logger import *
 
 from nn import train, nn_model
 from nn.train import CUDA, CPU
-from nn.model_handler import save_model
+from nn.model_handler import save_model, read_model, NN_MODEL_NAME
+
+
+NN_MODEL_NORMALISING_FACTOR = 1.0
+NN_MODEL_HIDDEN_LAYER_DIMS = [100, 150, 100]
 
 
 def to_tensor(data: np.ndarray) -> torch.Tensor:
@@ -39,13 +43,26 @@ def get_device() -> torch.device:
     Returns:
     - torch.device: The device to train the model on.
     """
-    return torch.device(CUDA if torch.cuda.is_available() else CPU)
+
+    log_trace("Fetching device...")
+    device = torch.device(CUDA if torch.cuda.is_available() else CPU)
+    log_debug(f"Device fetched {device}")
+    return device
 
 
-def data_to_tensor_and_device(device: torch.device, X_train: np.ndarray, y_train: np.ndarray, X_validation: np.ndarray, y_validation: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+def train_val_data_to_tensor_and_device(device: torch.device, X_train: np.ndarray, y_train: np.ndarray, X_validation: np.ndarray, y_validation: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     """
     Converts data to tensor and moves it to the device.
 
+    Args:
+    - device (torch.device): The device to move the data to.
+    - X_train (ndarray): Training data features.
+    - y_train (ndarray): Training data target variable.
+    - X_validation (ndarray): Validation data features.
+    - y_validation (ndarray): Validation data target variable.
+
+    Returns:
+    - Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]: The training and validation data features and target variable as tensors.
     """
 
     log_title("Convert data to tensors...")
@@ -69,6 +86,51 @@ def data_to_tensor_and_device(device: torch.device, X_train: np.ndarray, y_train
              X_validation.shape, "x", y_validation.shape)
 
     return X_train, y_train, X_validation, y_validation
+
+
+def test_data_to_tensor_and_device(device: torch.device, X_test: np.ndarray, y_test: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Converts test data to tensor and moves it to the device.
+
+    Args:
+    - device (torch.device): The device to move the data to.
+    - X_test (ndarray): The test data features.
+    - y_test (ndarray): The test data target variable.
+
+    Returns:
+    - Tuple[torch.Tensor, torch.Tensor]: The test data features and target variable as tensors.
+    """
+
+    log_title("Convert test data to tensors...")
+
+    X_test = to_tensor(X_test)
+    y_test = to_tensor(y_test)
+
+    log_info("Test data converted to tensors")
+
+    # Move data to device
+    X_test = X_test.to(device)
+    y_test = y_test.to(device)
+
+    log_info("Test data shape:", X_test.shape, "x", y_test.shape)
+
+    return X_test, y_test
+
+
+def get_model_save_folders(nn_folder_path: str) -> Tuple[str, str]:
+    """
+    Get the paths of the final model and checkpoints folders.
+
+    Args:
+    - nn_folder_path (str): The path of the neural network model.
+
+    Returns:
+    - Tuple[str, str]: The paths of the final model and checkpoints folders.
+    """
+
+    final_model_folder = os.path.join(nn_folder_path, "final_model")
+    checkpoints_folder = os.path.join(nn_folder_path, "checkpoints")
+    return final_model_folder, checkpoints_folder
 
 
 def run_nn_model(
@@ -106,8 +168,8 @@ def run_nn_model(
 
     log_info(f"Configuring folders")
 
-    final_model_folder = os.path.join(nn_folder_path, "final_model")
-    checkpoints_folder = os.path.join(nn_folder_path, "checkpoints")
+    final_model_folder, checkpoints_folder = get_model_save_folders(
+        nn_folder_path)
     file_helper.make_folder_if_not_exists(final_model_folder)
     file_helper.make_folder_if_not_exists(checkpoints_folder)
 
@@ -132,8 +194,6 @@ def run_nn_model(
 
     # Assume the train and test data have the same dimension along axis 1
     dim_input = X_train.shape[1]
-    normalising_factor = 1.0
-    hidden_layer_dims = [100, 150, 100]
 
     # Hyperparameters
     epochs = int(2e4)
@@ -144,12 +204,12 @@ def run_nn_model(
 
     device = get_device()
 
-    X_train, y_train, X_validation, y_validation = data_to_tensor_and_device(
+    X_train, y_train, X_validation, y_validation = train_val_data_to_tensor_and_device(
         device, X_train, y_train, X_validation, y_validation)
 
     # Instantiate the model and move it to the specified device
     sequential_model = nn_model.create_sequential_model(
-        dim_input, dim_output_flattened, hidden_layer_dims).to(device)
+        dim_input, dim_output_flattened, NN_MODEL_HIDDEN_LAYER_DIMS).to(device)
 
     log_info(f"Model: \n{sequential_model}\n")
 
@@ -212,3 +272,89 @@ def run_nn_model(
     results.show_training_results(metrics)
 
     # Decision boundary plots
+
+
+def run_saved_nn_model(
+    nn_folder_path: str,
+    X_test: np.ndarray,
+    y_test: np.ndarray,
+    X_labels: List[str],
+    y_labels: List[List[str]],
+    unique_classes: List[List[str]],
+    num_classes_in_vars: List[int],
+    final_model: bool = True,
+    checkpoint_num: int = None,
+) -> None:
+    """
+    Run a saved neural network model on the test data.
+
+    Args:
+    - nn_folder_path (str): The path of the neural network model.
+    - X_test (ndarray): Test data features.
+    - y_test (ndarray): Test data target variable.
+    - X_labels (List[str]): The names of the (input) features.
+    - y_labels (List[List[str]]): The names of each class within each
+                                    target variable. Of which there can be multiple                 
+    - unique_classes (List[List[str]]): The unique classes in each target variable.
+    - num_classes_in_vars (List[int]): The number of classes in each target variable.
+    - final_model (bool): If true the final model will be used, otherwise the checkpoint model will be used. If true, ignore checkpoint_num.
+    - checkpoint_num (int): The checkpoint number to use. If None, the final model will be used. Should not be None in conjunction with final_model=False.
+    """
+
+    if not final_model and checkpoint_num is None:
+        log_error(
+            "Checkpoint number is None and final model is False. Please provide a checkpoint number or specify to use the final model.")
+        return
+
+    final_model_folder, checkpoints_folder = get_model_save_folders(
+        nn_folder_path)
+
+    save_folder = final_model_folder if final_model else checkpoints_folder
+
+    model_save_path = None
+    if final_model:
+        model_save_path = os.path.join(
+            save_folder, f"{NN_MODEL_NAME}_final_model.pt")
+    else:
+        # Load the checkpoint model
+        model_save_path = os.path.join(
+            save_folder, f"{NN_MODEL_NAME}_checkpoint_{checkpoint_num}.pt")
+
+    # Check if the model file exists
+    if not file_helper.file_exists(model_save_path):
+        log_error(
+            f"Model file does not exist: {model_save_path}. The files in the folder are:")
+        file_helper.show_files_in_folder(save_folder)
+        return
+
+    model_obj = read_model(model_save_path)
+
+    # Load data
+
+    device = get_device()
+
+    X_test, y_test = test_data_to_tensor_and_device(
+        device, X_test, y_test)
+
+    # Ouptut dimension is sum of classes in each output variable
+    # because of one hot encoding. Flatten the list of classes
+    dim_output_flattened = sum(num_classes_in_vars)
+    # Although this is different from the number of output variables, we will need to
+    # recover the true classification from the one-hot encoding by reshaping the output.
+
+    dim_input = X_test.shape[1]  # Should be the same as the training data
+    normalising_factor = 1.0
+
+    # Instantiate the model and move it to the specified device
+    sequential_model = nn_model.create_sequential_model(
+        dim_input, dim_output_flattened, NN_MODEL_HIDDEN_LAYER_DIMS).to(device)
+
+    # Load the model state dict
+    state_dict = model_obj["model_state_dict"]
+
+    log_info(f"Loading model state dict...")
+    log_debug(f"State dict: {state_dict}")
+
+    sequential_model.load_state_dict(state_dict)
+
+    log_info(f"Model state dict loaded from {model_save_path}")
