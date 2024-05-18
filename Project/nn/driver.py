@@ -14,9 +14,12 @@ import results
 import file_helper
 from logger import *
 
+import model.classifier as classifier
+
 from nn import train, nn_model
 from nn.train import CUDA, CPU
 from nn.model_handler import save_model, read_model, NN_MODEL_NAME
+from nn.predict import make_predictions, compute_accuracy
 
 
 NN_MODEL_NORMALISING_FACTOR = 1.0
@@ -48,6 +51,30 @@ def get_device() -> torch.device:
     device = torch.device(CUDA if torch.cuda.is_available() else CPU)
     log_debug(f"Device fetched {device}")
     return device
+
+
+def get_loss_weights(num_classes_in_vars: List[int]) -> List[float]:
+    """
+    Get the loss weights for the model.
+
+    Args:
+    - num_classes_in_vars (List[int]): The number of classes in each output variable.
+
+    Returns:
+    - List[float]: The loss weights.
+    """
+
+    log_trace("Calculating loss weights...")
+
+    # If there is only one output variable, the loss weight is 1.0
+    if len(num_classes_in_vars) == 1:
+        log_debug("Only one output variable. Loss weight is 1.0")
+        return [1.0]
+
+    # Calculate the loss weight for each output variable
+    loss_weights = [1.0 / num_classes for num_classes in num_classes_in_vars]
+    log_debug("Loss weights calculated", loss_weights)
+    return loss_weights
 
 
 def train_val_data_to_tensor_and_device(device: torch.device, X_train: np.ndarray, y_train: np.ndarray, X_validation: np.ndarray, y_validation: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -200,7 +227,7 @@ def run_nn_model(
     batch_size = 1000
     learning_rate = 2e-4
     weight_decay = 0.01
-    loss_weights = [1.0 for _ in range(len(num_classes_in_vars))]
+    loss_weights = get_loss_weights(num_classes_in_vars)
 
     device = get_device()
 
@@ -354,6 +381,7 @@ def run_saved_nn_model(
 
     dim_input = X_test.shape[1]  # Should be the same as the training data
     normalising_factor = 1.0
+    loss_weights = get_loss_weights(num_classes_in_vars)
 
     # Instantiate the model and move it to the specified device
     sequential_model = nn_model.create_sequential_model(
@@ -363,3 +391,20 @@ def run_saved_nn_model(
     sequential_model.load_state_dict(state_dict)
 
     log_info(f"Model state dict loaded from {model_save_path}")
+
+    log_info(
+        f"Making predictions on test data. Test data shape: {X_test.shape}")
+
+    test_preds = make_predictions(
+        X_test, sequential_model, num_classes_in_vars, classifier.TESTING)
+
+    log_debug(f"Predictions made on test data", test_preds)
+    log_info(f"Predictions shape: {test_preds.shape}")
+
+    num_output_vars = len(num_classes_in_vars)
+
+    # Compute the accuracy of the model
+    train_accuracy = compute_accuracy(
+        num_output_vars, y_test, test_preds, classifier.TESTING)
+
+    log_info(f"Accuracy of the model: {train_accuracy}")
