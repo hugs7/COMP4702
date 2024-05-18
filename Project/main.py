@@ -17,6 +17,7 @@ import correlation
 from check_log_level import set_log_level
 import utils
 import file_helper
+import encode_data
 
 from nn.driver import run_nn_model
 from knn.driver import run_knn_model
@@ -109,6 +110,7 @@ def main():
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
     columns: List[str]
+    log_info(f"Dataset columns: {columns}")
 
     folder_of_script = os.path.dirname(__file__)
     data_folder = os.path.join(folder_of_script, "data")
@@ -120,41 +122,46 @@ def main():
 
     dataset_file_path = os.path.join(data_folder, dataset_file_name)
 
+    # === Correlation Matrix ===
+
+    if first_arg == "corr":
+        log_info("Plotting the correlation matrix of the data")
+        data = load_data(dataset_file_path)
+        data = encode_data.encode_non_numeric_data(data)
+        title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
+        corr_plot_save_path = os.path.join(
+            plots_folder, f"{dataset_name}_corr_matrix.png")
+        file_helper.remove_file_if_exist(corr_plot_save_path)
+        log_info("Columns in data: ", data.columns)
+        correlation.plot_correlation_matrix(data, title, corr_plot_save_path)
+        sys.exit(0)
+
     # === Column Labels ===
 
     # Specify the indices of the columns that are the variables we are predicting
     y_col_names = ["Species", "Population"]
     y_col_indices = utils.col_names_to_indices(columns, y_col_names)
 
-    if model_name == "nn":
-        # Use all columns for neural network
-        x_col_indices = [i for i in range(
-            len(columns)) if i not in y_col_indices]
+    if model_name:
+        if model_name == "nn":
+            # Use all columns for neural network
+            x_col_indices = [i for i in range(
+                len(columns)) if i not in y_col_indices]
+        else:
+            x_col_names = ["Thorax_length", "Replicate", "Vial",
+                           "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
+            x_col_indices = utils.col_names_to_indices(columns, x_col_names)
+
+        # Obtain the vars of the x and y variables
+        X_vars = [columns[i] for i in x_col_indices]
+        y_vars = [columns[i] for i in y_col_indices]
+
+        log_info(f"X vars: {X_vars}")
+        log_info(f"y vars: {y_vars}")
+        log_line(level="INFO")
     else:
-        x_col_names = ["Thorax_length", "Replicate", "Vial",
-                       "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
-        x_col_indices = utils.col_names_to_indices(columns, x_col_names)
-
-    # Obtain the vars of the x and y variables
-    X_vars = [columns[i] for i in x_col_indices]
-    y_vars = [columns[i] for i in y_col_indices]
-
-    log_info(f"X vars: {X_vars}")
-    log_info(f"y vars: {y_vars}")
-    log_line(level="INFO")
-
-    # === Correlation Matrix ===
-
-    if first_arg == "corr":
-        log_info("Plotting the correlation matrix of the data")
-        data = load_data(dataset_file_path)
-        X = data[X_vars]
-        title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
-        corr_plot_save_path = os.path.join(
-            plots_folder, f"{dataset_name}_corr_matrix.png")
-        file_helper.remove_file_if_exist(corr_plot_save_path)
-        correlation.plot_correlation_matrix(data, title, corr_plot_save_path)
-        sys.exit(0)
+        log_error("Model not found")
+        sys.exit(1)
 
     # === Model ===
 
