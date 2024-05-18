@@ -279,7 +279,6 @@ def nn_train(
     log_line(level="TRACE")
     log_trace("Labels: ", y_train[indices])
     log_debug("Shape of labels: ", y_train[indices].shape)
-    # NEED TO FIX LABELS dimensionality
 
     train_preds = make_predictions(
         X, sequential_model, num_classes_in_vars, train_data=True)
