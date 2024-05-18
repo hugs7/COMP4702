@@ -150,7 +150,6 @@ def nn_train(
     train_preds = make_predictions(
         X, sequential_model, num_classes_in_vars, classifier.TRAINING)
 
-    # True labels
     y_train_batch = y_train[indices]
 
     log_trace("Y True Labels: ", y_train_batch)
