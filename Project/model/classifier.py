@@ -26,6 +26,30 @@ BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700",
 FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
                       "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
+TRAINING = "training"
+VALIDATION = "validation"
+TESTING = "testing"
+
+DATA_TYPES = {TRAINING, VALIDATION, TESTING}
+
+
+def check_data_type(data_type: str) -> int:
+    """
+    Checks if the data type is valid
+
+    Args:
+    - data_type (str): The data type
+
+    Returns:
+    - int: Error code for invalid data type. 0 if valid.
+    """
+
+    if data_type not in DATA_TYPES:
+        log_error(f"Invalid data type. Must be one of: {' '.join(DATA_TYPES)}")
+        return 1
+
+    return 0
+
 
 def construct_X_flattened_mesh(
     xx_flat: np.ndarray,
