@@ -21,6 +21,23 @@ def classification_model(
     batch_size: int = 256,
     learning_rate: float = 1e-3,
 ) -> None:
+    """
+    Create a classification model for the specified dataset.
+
+    Parameters:
+    - dataset_name (str): The name of the dataset.
+    - dim_input (int): The number of input features.
+    - dim_output (int): The number of output classes.
+    - hidden_layer_dims (List[int]): The dimensions of the hidden layers.
+    - normalising_factor (float): The normalising factor for the dataset.
+    - optimisation_steps (int): The number of optimisation steps.
+    - batch_size (int): The batch size.
+    - learning_rate (float): The learning rate.
+
+    Returns:
+    - None
+    """
+
     print(f"{Fore.GREEN}Creating model for {dataset_name} dataset{Style.RESET_ALL}")
 
     # Move model to GPU if available
@@ -74,7 +91,8 @@ def classification_model(
     }
 
     if dataset_name not in dataset_map:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(
+            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     # Get the dataset
     mappped_dataset = dataset_map[dataset_name]
@@ -111,7 +129,8 @@ def classification_model(
 
     criterion = torch.nn.CrossEntropyLoss(reduction="mean")
 
-    optimiser = torch.optim.SGD(sequential_model.parameters(), lr=learning_rate)
+    optimiser = torch.optim.SGD(
+        sequential_model.parameters(), lr=learning_rate)
 
     # --- Training Loop ---
 
