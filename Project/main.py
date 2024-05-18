@@ -19,12 +19,12 @@ import utils
 import file_helper
 import encode_data
 
-from nn.driver import run_nn_model
+from nn.driver import run_nn_model, run_saved_nn_model
 from knn.driver import run_knn_model
 from dt.driver import run_dt_model
 
 
-def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> np.ndarray:
+def dt_variable_ranking(dataset_name: str, dataset_file_path: str, X_vars: List[str], y_vars: List[str], test_train_ratio: float) -> np.ndarray:
     """
     Fits a decision tree model to the data and returns the ranking of the variables by importance.
 
@@ -46,6 +46,7 @@ def dt_variable_ranking(dataset_file_path, X_vars, y_vars, test_train_ratio) -> 
     max_tree_depth = 6
 
     predictors_ordered = run_dt_model(
+        dataset_name,
         X_train,
         y_train,
         X_test,
@@ -173,8 +174,8 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
-        predictors_ordered = dt_variable_ranking(
-            dataset_file_path, X_vars, y_vars, test_train_ratio)
+        predictors_ordered = dt_variable_ranking(dataset_name,
+                                                 dataset_file_path, X_vars, y_vars, test_train_ratio)
 
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
@@ -194,16 +195,27 @@ def main():
                                           X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars,
                                           max_tree_depth=max_tree_depth, plots_folder_path=plots_folder)
     elif model_name == "nn":
-        # Grid search cv function
+        third_arg = sys.argv[3] if len(sys.argv) > 3 else None
+        nn_folder_path = os.path.join(folder_of_script, "nn")
 
+        # Load data
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, True, False, test_train_ratio
         )
 
-        nn_folder_path = os.path.join(folder_of_script, "nn")
+        if third_arg and third_arg == "read":
+            predictors_ordered = dt_variable_ranking(dataset_name,
+                                                     dataset_file_path, X_vars, y_vars, test_train_ratio)
 
-        run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
-                     y_vars, unique_classes, num_classes_in_vars, nn_folder_path=nn_folder_path, plots_folder_path=plots_folder)
+            # Read from saved final model
+            log_info("Reading from saved final model")
+            final_model = True
+            run_saved_nn_model(dataset_name, X_test, y_test, X_vars,
+                               y_vars, unique_classes, num_classes_in_vars, predictors_ordered, nn_folder_path, final_model, plots_folder_path=plots_folder)
+        else:
+            # Grid search cv function (maybe)
+            run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
+                         y_vars, unique_classes, num_classes_in_vars, nn_folder_path=nn_folder_path, plots_folder_path=plots_folder)
 
 
 if __name__ == "__main__":

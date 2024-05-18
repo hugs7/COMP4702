@@ -6,6 +6,14 @@ from colorama import Fore, Style
 from typing import Any
 from utils import key_from_value
 
+LOG_LEVEL_COLOUR = {
+    "ERROR": Fore.RED,
+    "WARNING": Fore.YELLOW,
+    "DEBUG": Fore.LIGHTMAGENTA_EX,
+    "INFO": Fore.LIGHTCYAN_EX,
+    "TRACE": Fore.LIGHTBLACK_EX
+}
+
 
 def check_log_level(level: str) -> bool:
     """
@@ -41,7 +49,8 @@ def log(*messages: str, level: str, **kwargs: Any) -> None:
     Prints a message in white text.
     """
     if check_log_level(level):
-        log_colored(Fore.WHITE, *messages, **kwargs)
+        colour = LOG_LEVEL_COLOUR[level]
+        log_colored(colour, *messages, **kwargs)
 
 
 def log_error(*messages: str, **kwargs: Any) -> None:
@@ -49,7 +58,8 @@ def log_error(*messages: str, **kwargs: Any) -> None:
     Prints an error message in red text.
     """
     if check_log_level("ERROR"):
-        log_colored(Fore.RED, *messages, **kwargs)
+        colour = LOG_LEVEL_COLOUR["ERROR"]
+        log_colored(colour, *messages, **kwargs)
 
 
 def log_warning(*messages: str, **kwargs: Any) -> None:
@@ -57,7 +67,8 @@ def log_warning(*messages: str, **kwargs: Any) -> None:
     Prints a warning message in yellow text.
     """
     if check_log_level("WARNING"):
-        log_colored(Fore.YELLOW, *messages, **kwargs)
+        colour = LOG_LEVEL_COLOUR["WARNING"]
+        log_colored(colour, *messages, **kwargs)
 
 
 def log_debug(*messages: str, **kwargs: Any) -> None:
@@ -65,7 +76,8 @@ def log_debug(*messages: str, **kwargs: Any) -> None:
     Prints a debug message in magenta text.
     """
     if check_log_level("DEBUG"):
-        log_colored(Fore.LIGHTMAGENTA_EX, *messages, **kwargs)
+        colour = LOG_LEVEL_COLOUR["DEBUG"]
+        log_colored(colour, *messages, **kwargs)
 
 
 def log_info(*messages: str, **kwargs: Any) -> None:
@@ -73,7 +85,8 @@ def log_info(*messages: str, **kwargs: Any) -> None:
     Prints an info message in blue text.
     """
     if check_log_level("INFO"):
-        log_colored(Fore.LIGHTCYAN_EX, *messages, **kwargs)
+        colour = LOG_LEVEL_COLOUR["INFO"]
+        log_colored(colour, *messages, **kwargs)
 
 
 def log_trace(*messages: str, **kwargs: Any) -> None:
@@ -81,7 +94,8 @@ def log_trace(*messages: str, **kwargs: Any) -> None:
     Prints a trace message in cyan text.
     """
     if check_log_level("TRACE"):
-        log_colored(Fore.LIGHTBLACK_EX, *messages, **kwargs)
+        colour = LOG_LEVEL_COLOUR["TRACE"]
+        log_colored(colour, *messages, **kwargs)
 
 
 def log_colored(color: Any, *messages: str, **kwargs: Any) -> None:

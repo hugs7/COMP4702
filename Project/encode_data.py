@@ -1,5 +1,5 @@
 """
-Helper function to encode non-numeric data as numeric
+Helper script to encode non-numeric data as numeric
 """
 
 import numpy as np
@@ -14,7 +14,8 @@ def encode_non_numeric_data(data: pd.DataFrame) -> pd.DataFrame:
 
     for column in data.columns:
         sample_data_point = data[column].iloc[0]
-        log_trace(f"Column: {column}, Sample Data Point: {sample_data_point}, Data Type: {data[column].dtype}")
+        log_trace(
+            f"Column: {column}, Sample Data Point: {sample_data_point}, Data Type: {data[column].dtype}")
         if data[column].dtype == str or data[column].dtype == object:
             # Replace with mode
             data[column] = data[column].astype("category")
@@ -54,26 +55,31 @@ def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
         column_data = normalised_data[column]
 
         if np.issubdtype(column_data.dtype, np.number):
-            log_debug(f"Column: {column} is of type {column_data.dtype}. Normalising...")
+            log_debug(
+                f"Column: {column} is of type {column_data.dtype}. Normalising...")
 
             # Normalise the current column
             column_data = normalise_column(column_data)
 
         elif np.issubdtype(column_data.dtype, np.object_):
-            log_debug(f"Column: {column} is of type {column_data.dtype}. Attempting to convert object to number...")
+            log_debug(
+                f"Column: {column} is of type {column_data.dtype}. Attempting to convert object to number...")
             try:
                 # Try to convert the column to numeric
                 column_data = pd.to_numeric(column_data, errors="coerce")
-                log_debug(f"Column: {column} successfully converted to number.")
+                log_debug(
+                    f"Column: {column} successfully converted to number.")
 
                 # Normalise the current column
                 column_data = normalise_column(column_data)
 
             except ValueError:
-                log_error(f"Column: {column} cannot be converted to number. Skipping normalisation...")
+                log_error(
+                    f"Column: {column} cannot be converted to number. Skipping normalisation...")
 
         else:
-            log_debug(f"Column: {column} is of type {column_data.dtype}. Skipping normalisation...")
+            log_debug(
+                f"Column: {column} is of type {column_data.dtype}. Skipping normalisation...")
 
     return normalised_data
 
@@ -149,14 +155,16 @@ def one_hot_encode_separate_output_vars(y: np.ndarray) -> np.ndarray:
         log_debug(f"Unique Values: {unique_values}")
 
         # Initialize an empty array to store the encoded values for the current variable
-        padded_encoded_array = np.zeros((num_samples, max_num_classes), dtype=int)
+        padded_encoded_array = np.zeros(
+            (num_samples, max_num_classes), dtype=int)
 
         # For the current column, one-hot encode the values
         for i, value in enumerate(y[:, col]):
             one_hot = (unique_values == value).astype(int)
             padded_encoded_array[i, : len(one_hot)] = one_hot
 
-        log_debug(f"Padded Encoded Array Sample: \n{padded_encoded_array[:sample]}")
+        log_debug(
+            f"Padded Encoded Array Sample: \n{padded_encoded_array[:sample]}")
         log_debug("")
         log_info(f"Padded Encoded Array Shape: {padded_encoded_array.shape}")
 

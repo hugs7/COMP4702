@@ -5,7 +5,12 @@ This file contains utility functions that are used throughout the project.
 from typing import Dict, List
 import pandas as pd
 import numpy as np
+import torch
+
+# Cannot import onto the root level due to circular imports
 import logger
+
+import utils
 
 
 def key_from_value(dict: Dict, value: str) -> int:
@@ -23,17 +28,23 @@ def key_from_value(dict: Dict, value: str) -> int:
     return [k for k, v in dict.items() if v == value][0]
 
 
-def np_to_pd(df: np.ndarray, columns: List[str]) -> pd.DataFrame:
+def np_to_pd(df: np.ndarray | torch.Tensor, columns: List[str], use_tensors: bool = False) -> pd.DataFrame:
     """
     Converts a numpy array into a pandas DataFrame.
 
     Parameters:
-    - df (ndarray): The numpy array to print.
+    - df (ndarray | Tensor): The numpy array to print.
     - columns (List[str]): The column names for the DataFrame.
+    - use_tensors (bool): Whether to use tensors or numpy arrays. Default is False.
 
     Returns:
     - DataFrame: The DataFrame representation of the numpy array.
     """
+
+    if use_tensors:
+        logger.log_debug(
+            "Converting numpy array to tensor before Pandas DataFrame")
+        df = utils.tensor_to_cpu(torch.tensor(df), detach=True)
 
     df = pd.DataFrame(df, columns=columns)
     return df
@@ -66,3 +77,21 @@ def col_names_to_indices(all_col_names: List[str], col_names: List[str]) -> List
     """
 
     return [all_col_names.index(col) for col in col_names]
+
+
+def tensor_to_cpu(tensor: torch.Tensor, detach: bool) -> torch.Tensor:
+    """
+    Moves a tensor to the CPU
+
+    Args:
+    - tensor (torch.Tensor): The tensor to move
+    - detach (bool): Whether to detach the tensor
+
+    Returns:
+    - torch.Tensor: The tensor on the CPU
+    """
+
+    if detach:
+        return tensor.cpu().detach().numpy()
+    else:
+        return tensor.cpu().numpy()
