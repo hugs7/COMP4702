@@ -4,17 +4,12 @@ Hugo Burton
 06/05/2024
 """
 
-import itertools
 from typing import List
 import numpy as np
-import matplotlib.pyplot as plt
-import math
 
 
 from knn import knn_model
-from knn import variable_importance
 from logger import *
-import utils
 
 
 def run_knn_model(
@@ -49,12 +44,14 @@ def run_knn_model(
 
     log_title("Start of knn model driver...")
 
-    log_debug(f"Number of classes in each output variable: {num_classes_in_vars}")
+    log_debug(
+        f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # For multi-variable classification, we need to create a knn classifier for each output variable
     # These are independent of each other.
 
-    log_debug(f"Creating a knn classifier for each of the {len(y_labels)} output variables")
+    log_debug(
+        f"Creating a knn classifier for each of the {len(y_labels)} output variables")
 
     knn_classifiers = []
 
@@ -65,7 +62,8 @@ def run_knn_model(
         # ======== Train KNN classifier for this output variable ========
         log_title(f"Output variable {i}: {var_y}")
         y_var_unique_classes = unique_classes[i]
-        log_info(f"Unique classes for output variable {i}: {y_var_unique_classes}")
+        log_info(
+            f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
         # Get slice of y_train and y_test for this output variable
         var_y_train = y_train[:, i]
@@ -77,7 +75,8 @@ def run_knn_model(
         log_debug(f"y_train_var shape: {var_y_train.shape}")
         log_debug(f"y_test_var shape: {var_y_test.shape}")
 
-        knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=k)
+        knn_classifier = knn_model.KNNClassify(
+            X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=k)
 
         # Add the classifier to the list
         knn_classifiers.append(knn_classifier)
@@ -101,17 +100,21 @@ def run_knn_model(
 
         log_info(f"Variable importance for output variable {i}")
 
-        max_feature_name_length = max([len(feature_name) for feature_name in X_labels])
+        max_feature_name_length = max(
+            [len(feature_name) for feature_name in X_labels])
         var_y_predictor_importance = ordered_predictor_indicies[i, :]
-        log_info(f"  Predictors ordered by importance:", var_y_predictor_importance)
+        log_info(f"  Predictors ordered by importance:",
+                 var_y_predictor_importance)
         for feature_indx in var_y_predictor_importance:
             feature_name = X_labels[feature_indx]
-            log_info(f"    Feature {feature_indx:<2} {feature_name:<{max_feature_name_length+3}}")
+            log_info(
+                f"    Feature {feature_indx:<2} {feature_name:<{max_feature_name_length+3}}")
 
         # ======== Plot Decision Boundaries ========
 
         log_info(f"Plotting decision boundaries for output variable {i}...")
 
-        knn_classifier.plot_multivar_decision_regions(var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, 4)
+        knn_classifier.plot_multivar_decision_regions(
+            var_y, test_preds, var_y_predictor_importance, y_var_unique_classes, 4)
 
     return results
