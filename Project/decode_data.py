@@ -23,7 +23,7 @@ def decode_one_hot_encoded_data(y: np.ndarray) -> Tuple[np.ndarray]:
                         the index of the class with the highest probability.
     """
 
-    log_info("Decoding one-hot encoded data...")
+    log_trace("Decoding one-hot encoded data...")
 
     # First we need to understand in axis 2 (k) this data may be padded with zeros to the maximum number of classes in any var.
     # This is done becasue np.ndarray requires all dimensions to be the same size.
