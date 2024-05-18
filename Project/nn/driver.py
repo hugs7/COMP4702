@@ -305,20 +305,24 @@ def run_nn_model(
 
 
 def run_saved_nn_model(
-    nn_folder_path: str,
+    dataset_name: str,
     X_test: np.ndarray,
     y_test: np.ndarray,
     X_labels: List[str],
     y_labels: List[List[str]],
     unique_classes: List[List[str]],
     num_classes_in_vars: List[int],
+    ordered_predictor_indicies: np.ndarray,
+    nn_folder_path: str,
     final_model: bool = True,
     checkpoint_num: int = None,
+    plots_folder_path: str = None
 ) -> None:
     """
     Run a saved neural network model on the test data.
 
     Args:
+    - dataset_name (str): The name of the dataset.
     - nn_folder_path (str): The path of the neural network model.
     - X_test (ndarray): Test data features.
     - y_test (ndarray): Test data target variable.
@@ -327,8 +331,10 @@ def run_saved_nn_model(
                                     target variable. Of which there can be multiple                 
     - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
+    - ordered_predictor_indicies (ndarray): 2D array of indices of the predictors in descending order of importance. Rows are output
     - final_model (bool): If true the final model will be used, otherwise the checkpoint model will be used. If true, ignore checkpoint_num.
     - checkpoint_num (int): The checkpoint number to use. If None, the final model will be used. Should not be None in conjunction with final_model=False.
+    - plots_folder_path (str): The path to save the plots to.
     """
 
     if not final_model and checkpoint_num is None:
@@ -373,7 +379,7 @@ def run_saved_nn_model(
 
     device = get_device()
 
-    X_test, y_test = test_data_to_tensor_and_device(
+    X_test_tensor, y_test_tensor = test_data_to_tensor_and_device(
         device, X_test, y_test)
 
     # Ouptut dimension is sum of classes in each output variable
@@ -382,7 +388,8 @@ def run_saved_nn_model(
     # Although this is different from the number of output variables, we will need to
     # recover the true classification from the one-hot encoding by reshaping the output.
 
-    dim_input = X_test.shape[1]  # Should be the same as the training data
+    # Should be the same as the training data
+    dim_input = X_test_tensor.shape[1]
     normalising_factor = 1.0
     loss_weights = get_loss_weights(num_classes_in_vars)
 
@@ -396,10 +403,10 @@ def run_saved_nn_model(
     log_info(f"Model state dict loaded from {model_save_path}")
 
     log_info(
-        f"Making predictions on test data. Test data shape: {X_test.shape}")
+        f"Making predictions on test data. Test data shape: {X_test_tensor.shape}")
 
     test_preds = make_predictions(
-        X_test, sequential_model, num_classes_in_vars, classifier.TESTING)
+        X_test_tensor, sequential_model, num_classes_in_vars, classifier.TESTING)
 
     log_debug(f"Predictions made on test data", test_preds)
     log_info(f"Predictions shape: {test_preds.shape}")
@@ -407,7 +414,7 @@ def run_saved_nn_model(
     # Compute the accuracy of the model
     num_output_vars = len(num_classes_in_vars)
     train_accuracy = compute_accuracy(
-        num_output_vars, y_test, test_preds, classifier.TESTING)
+        num_output_vars, y_test_tensor, test_preds, classifier.TESTING)
 
     # Decode the one-hot encoded test predictions
     test_preds_arg_max = decode_data.decode_one_hot_encoded_data(test_preds)
@@ -417,14 +424,43 @@ def run_saved_nn_model(
     # Decision boundary plots
 
     for i, var_y in enumerate(y_labels):
+        def wrap_nn_predict(X: torch.Tensor) -> torch.Tensor:
+            """
+            Wrapper for the neural network model to make predictions on the given data.
+            Shit but can't see a better alternative because we need to index into preds_arg_max
+
+            Args:
+            - X (torch.Tensor): The data to make predictions on.
+
+            Returns:
+            - torch.Tensor: The predictions.
+            """
+
+            log_trace("X in wrap_nn_predict", X)
+
+            preds = make_predictions(
+                X, sequential_model, num_classes_in_vars, classifier.TESTING)
+
+            # Decode the one-hot encoded test predictions
+            preds_arg_max = decode_data.decode_one_hot_encoded_data(preds)
+
+            log_trace(f"Preds arg max in wrap_nn_predict", preds_arg_max)
+
+            return preds_arg_max[i]
+
         log_title(f"Output variable {i}: {var_y}")
 
         test_preds_var = test_preds_arg_max[i]
-        var_classes = unique_classes[i]
+        y_var_unique_classes = unique_classes[i]
+        ordered_predictor_indicies_var = ordered_predictor_indicies[i]
 
         log_info(
-            f"Unique classes for output variable {i}: {var_classes}")
+            f"Unique classes for output variable {i}: {y_var_unique_classes}")
         log_debug(
             f"Test predictions for output variable {i}:\n{test_preds_var}")
 
-        # plot_multivar_decision_regions()
+        delta = 4
+        plot_multivar_decision_regions(
+            var_y, test_preds_var, ordered_predictor_indicies_var, y_var_unique_classes,
+            X_test_tensor, X_labels, wrap_nn_predict, delta, dataset_name, plots_folder_path,
+            use_tensors=True)
