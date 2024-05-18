@@ -225,6 +225,10 @@ def main():
                 log_warning("Not saving model checkpoints or final")
                 save_model = False
 
+            else:
+                log_error("Invalid third argument")
+                sys.exit(1)
+
         # Grid search cv function (maybe)
         run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
                      y_vars, unique_classes, num_classes_in_vars, nn_folder_path=nn_folder_path, plots_folder_path=plots_folder, save_model=save_model)
