@@ -216,6 +216,9 @@ def main():
                 # Read from saved final model
                 log_info("Reading from saved final model")
                 final_model = False if checkpoint_num else True
+                model_str = "final" if final_model else f"checkpoint {checkpoint_num}"
+                log_info(f"Using {model_str} model")
+
                 run_saved_nn_model(dataset_name, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars,
                                    predictors_ordered, nn_folder_path, final_model, checkpoint_num=checkpoint_num, plots_folder_path=plots_folder)
 
