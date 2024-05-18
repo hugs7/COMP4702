@@ -357,7 +357,6 @@ class Classifier(Model):
         # Calculate mean values of non-variable features
         constant_feature_indices = list(
             set(range(self.X_test.shape[1])) - set(variable_feature_indices))
-        # constant_feature_indices = ~np.isin(np.arange(self.X_test.shape[1]), variable_feature_indices)
 
         log_debug(f"Variable feature indices: {variable_feature_indices}")
         log_debug(f"Constant feature indices: {constant_feature_indices}")
