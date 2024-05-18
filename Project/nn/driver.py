@@ -226,7 +226,7 @@ def run_nn_model(
     dim_input = X_train.shape[1]
 
     # Hyperparameters
-    epochs = int(2e4)
+    epochs = int(8e4)
     batch_size = 1000
     learning_rate = 2e-4
     weight_decay = 0.01
