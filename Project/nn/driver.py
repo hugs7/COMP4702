@@ -311,6 +311,9 @@ def run_saved_nn_model(
 
     save_folder = final_model_folder if final_model else checkpoints_folder
 
+    log_debug(f"Save folder: {save_folder}")
+    file_helper.show_files_in_folder(save_folder, level="DEBUG")
+
     model_save_path = None
     if final_model:
         model_save_path = os.path.join(
@@ -320,6 +323,8 @@ def run_saved_nn_model(
         model_save_path = os.path.join(
             save_folder, f"{NN_MODEL_NAME}_checkpoint_{checkpoint_num}.pt")
 
+    log_debug(f"Checking model exists at path: {model_save_path}")
+
     # Check if the model file exists
     if not file_helper.file_exists(model_save_path):
         log_error(
@@ -327,7 +332,12 @@ def run_saved_nn_model(
         file_helper.show_files_in_folder(save_folder)
         return
 
+    log_debug("Reading model...")
     model_obj = read_model(model_save_path)
+
+    # Load the model state dict
+    state_dict = model_obj["model_state_dict"]
+    log_debug(f"State dict: {state_dict}")
 
     # Load data
 
@@ -349,12 +359,7 @@ def run_saved_nn_model(
     sequential_model = nn_model.create_sequential_model(
         dim_input, dim_output_flattened, NN_MODEL_HIDDEN_LAYER_DIMS).to(device)
 
-    # Load the model state dict
-    state_dict = model_obj["model_state_dict"]
-
-    log_info(f"Loading model state dict...")
-    log_debug(f"State dict: {state_dict}")
-
+    log_info(f"Loading model state dict into model...")
     sequential_model.load_state_dict(state_dict)
 
     log_info(f"Model state dict loaded from {model_save_path}")
