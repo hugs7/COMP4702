@@ -10,7 +10,7 @@ import torch
 import torch.optim as optim
 import numpy as np
 
-import results
+import nn.results as results
 import file_helper
 import decode_data
 from logger import *
@@ -299,9 +299,7 @@ def run_nn_model(
 
     # Show training results
     log_title("Training Results")
-    results.show_training_results(metrics)
-
-    # Decision boundary plots
+    results.show_training_results(metrics, plots_folder_path)
 
 
 def run_saved_nn_model(

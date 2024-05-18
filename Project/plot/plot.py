@@ -22,13 +22,14 @@ FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
                       "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
 
-def lineplot(x_label: str, y_label: str, *args: Tuple[np.ndarray, np.ndarray, str]):
+def lineplot(x_label: str, y_label: str, save_path: str = None, *args: Tuple[np.ndarray, np.ndarray, str]):
     """
     Plots a line plot of the given data.
 
     Parameters:
     - x_label (str): The label for the x-axis.
     - y_label (str): The label for the y-axis.
+    - save_path (str): The path to save the plot to. Default is None.
     - args (Tuple[np.ndarray, np.ndarray, str]): The data to plot. Each tuple contains 
         - x (np.ndarray): The x values.
         - y (np.ndarray): The y values.
@@ -43,6 +44,11 @@ def lineplot(x_label: str, y_label: str, *args: Tuple[np.ndarray, np.ndarray, st
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
+
+    if save_path is not None:
+        file_helper.remove_file_if_exist(save_path)
+        plt.savefig(save_path)
+
     plt.show()
 
 
@@ -52,7 +58,7 @@ def plot_gelu():
     input = torch.arange(-6, 6, step=0.1)
     output = geLu(input)
 
-    lineplot("X", "GeLU(X)", (input, output, "GeLU"))
+    lineplot("X", "GeLU(X)", None, (input, output, "GeLU"))
 
     return input
 
@@ -65,7 +71,7 @@ def plot_sigmoid(input):
     # Input remains the same
     output = sigmoid(input)
 
-    lineplot("X", "Sigmoid(X)", (input, output, "Sigmoid"))
+    lineplot("X", "Sigmoid(X)", None, (input, output, "Sigmoid"))
 
 
 def plot_multivar_decision_regions(

@@ -1,13 +1,12 @@
-from typing import List, Tuple
-import Project.nn.nn_model as nn_model
+from typing import List
+import nn.nn_model as nn_model
 from colorama import Fore, Style
 import os
-import numpy as np
 import torch
 import torchvision
-from Project.process_data import preprocess_data
-import Project.nn.train as train
-from results import show_training_results
+from process_data import preprocess_data
+import nn.train as train
+from nn.results import show_training_results
 from tqdm import tqdm
 
 
