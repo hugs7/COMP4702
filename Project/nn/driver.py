@@ -191,7 +191,7 @@ def run_nn_model(
     - plots_folder_path (str): The path to save the plots to.
     """
 
-    log_title("Start of nn model driver...")
+    log_title(f"Start of nn model driver for dataset: {dataset_name}...")
 
     log_info(f"Configuring folders")
 
@@ -408,3 +408,7 @@ def run_saved_nn_model(
         num_output_vars, y_test, test_preds, classifier.TESTING)
 
     log_info(f"Accuracy of the model: {train_accuracy}")
+
+    # Decision boundary plots
+
+    # Annoying! We need to reshape the predictions by separating each output variable (axis 1)
