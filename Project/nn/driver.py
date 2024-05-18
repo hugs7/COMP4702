@@ -162,7 +162,6 @@ def run_nn_model(
     # --- Training Loop ---
 
     metrics = []
-    # for i in tqdm(range(int(epochs))):
     for i in range(int(epochs)):
         metrics = train.nn_train(
             i,
