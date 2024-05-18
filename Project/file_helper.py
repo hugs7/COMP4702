@@ -83,6 +83,6 @@ def show_files_in_folder(folder_path: str, level: str = "INFO") -> None:
     - folder_path (str): The path of the folder to show the files of.
     """
 
-    log(f"Files in folder: {folder_path}", leve=level)
+    log(f"Files in folder: {folder_path}", level=level)
     for file in os.listdir(folder_path):
-        log(file, leve=level)
+        log(file, level=level)
