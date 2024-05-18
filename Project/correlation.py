@@ -22,7 +22,7 @@ def plot_correlation_matrix(data: DataFrame, title: str, save_path: Union[str | 
     corr = data.corr(numeric_only=True)
 
     # Setup matplotlib figure
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(13, 10))
 
     cmap = sns.diverging_palette(220, 10, as_cmap=True)
 
