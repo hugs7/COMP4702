@@ -35,15 +35,13 @@ class DTClassifier(Classifier):
             - A tuple containing the test predictions, train accuracy, and test accuracy.
         """
 
-        X = pd.DataFrame(self.X_train, columns=self.X_labels)
-        y = self.y_train
-
-        log_debug(f"X_train dim: {X.shape}, y_train dim: {y.shape}")
+        log_debug(
+            f"X_train dim: {self.X_train.shape}, y_train dim: {self.y_train.shape}")
 
         log_title("Training decision tree model...")
 
         # Fit model
-        self.model.fit(X, y)
+        self.model.fit(self.X_train, self.y_train)
 
         log_info("Decision tree model trained")
 
@@ -51,7 +49,7 @@ class DTClassifier(Classifier):
         log_title("Getting results...")
 
         # Results from training
-        train_accuracy = self.model.score(X, y)
+        train_accuracy = self.model.score(self.X_train, self.y_train)
 
         # Test predictions
         test_predictions = self.model.predict(self.X_test)
