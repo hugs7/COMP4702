@@ -16,6 +16,7 @@ from logger import *
 
 from nn import train, nn_model
 from nn.train import CUDA, CPU
+from nn.model_handler import save_model
 
 
 def to_tensor(data: np.ndarray) -> torch.Tensor:
@@ -179,5 +180,15 @@ def run_nn_model(
             checkpoints_folder,
             loss_weights,
         )
+
+    # Save the final model
+    log_info("Saving final model...")
+    save_model(final_model_folder, sequential_model, "nn", metrics)
+
+    log_info("Final Model saved")
+    log_line(level="INFO")
+
+    # Show training results
+    log_title("Training Results")
 
     results.show_training_results(metrics)
