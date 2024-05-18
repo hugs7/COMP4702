@@ -79,6 +79,7 @@ def plot_multivar_decision_regions(
     delta: int = 5,
     dataset_name: str = None,
     plots_folder_path: str = None,
+    use_tensors: bool = False,
 ) -> None:
     """
     Wrapper for plotting decision regions for more than 2 features. Places the top Delta
@@ -95,6 +96,7 @@ def plot_multivar_decision_regions(
     - delta (int): The number of top features to plot. Default is 5. Note this is not the number of plots.
     - dataset_name (str): The name of the dataset. Default is None.
     - plots_folder_path (str): The path to save the plots to. Default is None.
+    - use_tensors (bool): Whether to use tensors for the meshgrid. Default is False.
 
     Returns:
     - None
@@ -116,9 +118,15 @@ def plot_multivar_decision_regions(
             f"Delta value {delta} exceeds the number of features {len(X_labels)}. Clamping to {len(X_labels)}")
         delta = min(delta, len(X_labels))
 
+    # Check dimensions of ordered_predictor_indicies
+    if len(ordered_predictor_indicies.shape) != 1:
+        raise ValueError(
+            "Ordered predictor indicies must be a 1D array of indices")
+
     # Plot decision regions for the top delta features
     top_predictor_indices = ordered_predictor_indicies[:delta]
     log_info(f"Top {delta} feature indices: {top_predictor_indices}")
+    log_debug("X Labels: ", X_labels)
     top_delta_feature_cols = [X_labels[idx]
                               for idx in top_predictor_indices]
 
@@ -166,7 +174,7 @@ def plot_multivar_decision_regions(
         # Generate and plot decision regions for the current pair of input variables
         subplot, scatter = plot_decision_regions(
             output_variable_name, test_preds, feature_pair, X_labels, y_var_unique_classes, X_points, predict_callback, plot_title=plot_title,
-            show_plot=False, resolution=1, show_legend=False, x_label=feature_label_x, y_label=feature_label_y)
+            show_plot=False, resolution=1, show_legend=False, x_label=feature_label_x, y_label=feature_label_y, use_tensors=use_tensors)
 
         # Add subplot to the list of plots
         if num_plots_per_row > 1:
@@ -188,7 +196,7 @@ def plot_multivar_decision_regions(
     log_debug("X Test points:")
     X_test_important_features = X_points[:, top_predictor_indices]
     log_debug(utils.np_to_pd(
-        X_test_important_features, top_delta_feature_cols))
+        X_test_important_features, top_delta_feature_cols, use_tensors=use_tensors))
     log_line(level="DEBUG")
 
     # Adjust layout to prevent overlap
@@ -215,7 +223,7 @@ def plot_decision_regions(
     variable_feature_indices: tuple,
     all_col_labels: list[str],
     classes: list[str],
-    X_points: np.ndarray,
+    X_points: np.ndarray | torch.Tensor,
     predict_callback: callable,
     resolution=0.02,
     plot_title="Decision Regions",
@@ -224,13 +232,14 @@ def plot_decision_regions(
     show_legend: bool = True,
     x_label: str = "X",
     y_label: str = "Y",
+    use_tensors: bool = False,
 ) -> Tuple[plt.Axes, PathCollection]:
     """
     Plots the decision regions for a classifier.
 
     Parameters:
     - output_variable_name (str): The name of the output variable.
-    - test_preds (ndarray): The predicted labels for the test data.
+    - test_preds (ndarray | Tensor): The predicted labels for the test data.
     - variable_feature_indices (tuple): The indices of the two features to be used for plotting decision regions.
     - all_col_labels (list[str]): The labels of all the features.
     - classes (list[str]): The unique class labels.
@@ -243,6 +252,7 @@ def plot_decision_regions(
     - show_legend (bool): Whether to display the legend. Default is True.
     - x_label (str): The label for the x-axis. Default is "X".
     - y_label (str): The label for the y-axis. Default is "Y".
+    - use_tensors (bool): Whether to use tensors for the meshgrid. Default is False.
 
     Returns:
     - Tuple[plt.Axes, PathCollection]: The plot and the scatter plot object.
@@ -279,8 +289,14 @@ def plot_decision_regions(
     # Extract feature columns based on the provided indices
     X_variable_features = X_points[:, variable_feature_indices]
     log_debug(f"X variable features:\n{X_variable_features}")
+    log_debug(f"X points shape: {X_points.shape}")
+    log_debug(f"X points dtype: {X_points.dtype}")
 
-    mean_values = np.mean(X_points[:, constant_feature_indices], axis=0)
+    if use_tensors:
+        mean_values = torch.mean(X_points[:, constant_feature_indices], dim=0)
+    else:
+        mean_values = np.mean(X_points[:, constant_feature_indices], axis=0)
+
     log_debug(f"Mean values:")
     max_label_length = max([len(label) for label in all_col_labels])
     for i, mean_val in enumerate(mean_values):
@@ -289,14 +305,25 @@ def plot_decision_regions(
 
     log_debug("Generating X meshgrid...")
     # Generate meshgrid of points to cover the feature space while holding other features constant at their mean values
-    mins = X_variable_features.min(axis=0) - buffer
-    maxs = X_variable_features.max(axis=0) + buffer
+    if use_tensors:
+        mins, _ = X_variable_features.min(axis=0)
+        maxs, _ = X_variable_features.max(axis=0)
+    else:
+        mins = X_variable_features.min(axis=0)
+        maxs = X_variable_features.max(axis=0)
+
+    mins -= buffer
+    maxs += buffer
 
     log_debug(f"Feature mins: {mins}")
     log_debug(f"Feature maxs: {maxs}")
 
-    x = np.arange(mins[0], maxs[0], resolution)
-    y = np.arange(mins[1], maxs[1], resolution)
+    if use_tensors:
+        x = torch.arange(mins[0], maxs[0], resolution)
+        y = torch.arange(mins[1], maxs[1], resolution)
+    else:
+        x = np.arange(mins[0], maxs[0], resolution)
+        y = np.arange(mins[1], maxs[1], resolution)
 
     log_trace(f"X:\n{x}")
     log_trace(f"Y:\n{y}")
@@ -305,9 +332,14 @@ def plot_decision_regions(
     log_debug(f"Y shape: {y.shape}")
 
     # Create meshgrid and flatten for predictions
-    xx, yy = np.meshgrid(x, y)
-    xx_flat = xx.ravel()
-    yy_flat = yy.ravel()
+    if use_tensors:
+        xx, yy = torch.meshgrid(x, y)
+        xx_flat = xx.flatten()
+        yy_flat = yy.flatten()
+    else:
+        xx, yy = np.meshgrid(x, y)
+        xx_flat = xx.ravel()
+        yy_flat = yy.ravel()
 
     log_trace(f"Meshgrid flat XX:\n{xx_flat}")
     log_trace(f"Meshgrid flat YY:\n{yy_flat}")
@@ -320,10 +352,11 @@ def plot_decision_regions(
 
     # Construct a "fake" / contrived test set retaining original feature variable order
     flattened_X_meshgrid = mesh.construct_X_flattened_mesh(
-        xx_flat, yy_flat, mean_values, variable_feature_indices, constant_feature_indices, all_col_labels
+        xx_flat, yy_flat, mean_values, variable_feature_indices, constant_feature_indices, all_col_labels, use_tensors=use_tensors
     )
 
-    log_trace(utils.np_to_pd(flattened_X_meshgrid, all_col_labels))
+    log_trace(utils.np_to_pd(flattened_X_meshgrid,
+              all_col_labels, use_tensors=use_tensors))
 
     log_debug(f"Meshgrid shape: {flattened_X_meshgrid.shape}")
     if flattened_X_meshgrid.shape[1] != X_points.shape[1]:
@@ -348,8 +381,16 @@ def plot_decision_regions(
     dr_plot: plt.Axes = plt.gca()
     dr_plot.pcolormesh(xx, yy, Z_preds, cmap=cmap_bg, shading="auto")
 
+    if use_tensors:
+        # Move X_variable_features to CPU if it is a tensor
+        X_variable_features = utils.tensor_to_cpu(
+            X_variable_features, detach=True)
+
     # Overlay the test points
     cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
+
+    log_debug(f"Test preds: {test_preds}")
+    log_debug(f"X variable features shape: {X_variable_features.shape}")
     scatter = dr_plot.scatter(
         X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 

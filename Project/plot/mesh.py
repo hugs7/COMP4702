@@ -4,18 +4,20 @@ Helper script to construct a mesh grid used in plotting
 
 from typing import List
 import numpy as np
+import torch
 
 from logger import *
 import utils
 
 
 def construct_X_flattened_mesh(
-    xx_flat: np.ndarray,
-    yy_flat: np.ndarray,
-    mean_values: np.ndarray,
+    xx_flat: np.ndarray | torch.Tensor,
+    yy_flat: np.ndarray | torch.Tensor,
+    mean_values: np.ndarray | torch.Tensor,
     variable_indices: List[int],
     constant_indices: List[int],
     all_col_labels: List[str],
+    use_tensors: bool = False,
 ) -> np.ndarray:
     """
     Constructs a flattened meshgrid of points of which the variable columns contain the range of the plot and the
@@ -23,12 +25,13 @@ def construct_X_flattened_mesh(
     Z_preds on the background of the decision boundary plot.
 
     Parameters:
-    - xx_flat (ndarray): The flattened meshgrid of points for the first variable feature.
-    - yy_flat (ndarray): The flattened meshgrid of points for the second variable feature.
-    - mean_values (ndarray): The means of non-variable features.
+    - xx_flat (ndarray | Tensor): The flattened meshgrid of points for the first variable feature.
+    - yy_flat (ndarray | Tensor): The flattened meshgrid of points for the second variable feature.
+    - mean_values (ndarray | Tensor): The means of non-variable features.
     - variable_indices (List[int]): The indices of the variable features in the meshgrid.
     - constant_indices (List[int]): The indices of the non-variable features.
     - all_col_labels (List[str]): The labels of all the features.
+    - use_tensors (bool): Whether to use tensors or numpy arrays.
 
     Returns:
     - flattened_meshgrid (ndarray): The flattened meshgrid of points with the variable features and constant features.
@@ -67,15 +70,25 @@ def construct_X_flattened_mesh(
     constant_col_labels = [all_col_labels[cfi] for cfi in constant_indices]
 
     log_trace(f"Mean values:\n{mean_values}")
-    tiled_means = np.tile(mean_values, (meshgrid_length, 1))
+    if use_tensors:
+        tiled_means = mean_values.repeat(meshgrid_length, 1)
+    else:
+        tiled_means = np.tile(mean_values, (meshgrid_length, 1))
+
     log_debug(f"Tiled means shape: {tiled_means.shape}")
     log_trace(
-        f"Tiled means:\n{utils.np_to_pd(tiled_means, constant_col_labels)}")
+        f"Tiled means:\n{utils.np_to_pd(tiled_means, constant_col_labels, use_tensors=use_tensors)}")
 
-    flattened_meshgrid = np.empty((meshgrid_length, total_meshgrid_features))
+    if use_tensors:
+        flattened_meshgrid = torch.empty(
+            (meshgrid_length, total_meshgrid_features)).to(mean_values.device)
+    else:
+        flattened_meshgrid = np.empty(
+            (meshgrid_length, total_meshgrid_features))
+
     log_debug(f"Empty flattened meshgrid shape: {flattened_meshgrid.shape}")
     log_trace(
-        f"Empty flattened meshgrid:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+        f"Empty flattened meshgrid:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels, use_tensors=use_tensors)}")
 
     # Insert the variable features into the meshgrid
     # Split variable indices into x and y indices
@@ -86,13 +99,17 @@ def construct_X_flattened_mesh(
     variable_col_labels = [all_col_labels[vfi] for vfi in variable_indices]
     log_debug(f"Variable column labels: {variable_col_labels}")
     log_trace(
-        f"Flattened meshgrid with only variable columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+        f"Flattened meshgrid with only variable columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels, use_tensors=use_tensors)}")
 
     # Insert the means of non-variable features into the meshgrid
+    if use_tensors:
+        tiled_means_device = tiled_means.device
+        log_debug(f"Tiled means device: {tiled_means_device}")
+
     flattened_meshgrid[:, constant_indices] = tiled_means
 
     log_debug(f"Constant column labels: {constant_col_labels}")
     log_trace(
-        f"Flattened meshgrid with variable and constant columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels)}")
+        f"Flattened meshgrid with variable and constant columns inserted:\n{utils.np_to_pd(flattened_meshgrid, all_col_labels, use_tensors=use_tensors)}")
 
     return flattened_meshgrid
