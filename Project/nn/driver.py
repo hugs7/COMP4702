@@ -5,7 +5,7 @@ Hugo Burton
 """
 
 import os
-from typing import List
+from typing import List, Tuple
 import torch
 import torch.optim as optim
 import numpy as np
@@ -30,6 +30,45 @@ def to_tensor(data: np.ndarray) -> torch.Tensor:
     - torch.Tensor: The converted tensor.
     """
     return torch.tensor(data, dtype=torch.float32)
+
+
+def get_device() -> torch.device:
+    """
+    Get the device to train the model on.
+
+    Returns:
+    - torch.device: The device to train the model on.
+    """
+    return torch.device(CUDA if torch.cuda.is_available() else CPU)
+
+
+def data_to_tensor_and_device(device: torch.device, X_train: np.ndarray, y_train: np.ndarray, X_validation: np.ndarray, y_validation: np.ndarray) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    Converts data to tensor and moves it to the device.
+
+    """
+
+    log_title("Convert data to tensors...")
+
+    X_train = to_tensor(X_train)
+    y_train = to_tensor(y_train)
+
+    X_validation = to_tensor(X_validation)
+    y_validation = to_tensor(y_validation)
+
+    log_info("Data converted to tensors")
+
+    # Move data to device
+    X_train = X_train.to(device)
+    y_train = y_train.to(device)
+    X_validation = X_validation.to(device)
+    y_validation = y_validation.to(device)
+
+    log_info("Training data shape:", X_train.shape, "x", y_train.shape)
+    log_info("Validation data shape:",
+             X_validation.shape, "x", y_validation.shape)
+
+    return X_train, y_train, X_validation, y_validation
 
 
 def run_nn_model(
@@ -101,32 +140,12 @@ def run_nn_model(
     batch_size = 1000
     learning_rate = 2e-4
     weight_decay = 0.01
-
     loss_weights = [1.0 for _ in range(len(num_classes_in_vars))]
 
-    log_title("Convert data to tensors...")
+    device = get_device()
 
-    X_train = to_tensor(X_train)
-    y_train = to_tensor(y_train)
-
-    X_validation = to_tensor(X_validation)
-    y_validation = to_tensor(y_validation)
-
-    log_info("Data converted to tensors")
-
-    # ----- Device ------
-    # Move model to GPU if available
-    device = torch.device(CUDA if torch.cuda.is_available() else CPU)
-
-    # Move data to device
-    X_train = X_train.to(device)
-    y_train = y_train.to(device)
-    X_validation = X_validation.to(device)
-    y_validation = y_validation.to(device)
-
-    log_info("Training data shape:", X_train.shape, "x", y_train.shape)
-    log_info("Validation data shape:",
-             X_validation.shape, "x", y_validation.shape)
+    X_train, y_train, X_validation, y_validation = data_to_tensor_and_device(
+        device, X_train, y_train, X_validation, y_validation)
 
     # Instantiate the model and move it to the specified device
     sequential_model = nn_model.create_sequential_model(
@@ -190,5 +209,6 @@ def run_nn_model(
 
     # Show training results
     log_title("Training Results")
-
     results.show_training_results(metrics)
+
+    # Decision boundary plots
