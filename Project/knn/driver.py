@@ -119,7 +119,8 @@ def run_knn_model(
             fold_results.append(
                 (y_test, test_preds, train_accuracy, test_accuracy))
 
-            log_trace(f"Output variable {i} results: {results[i]}")
+            log_trace(
+                f"Output variable {i}, fold {fold}, results: {fold_results[fold]}")
 
             log_line(level="DEBUG")
 
