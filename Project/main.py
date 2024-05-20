@@ -142,7 +142,7 @@ def main():
     y_col_names = ["Species", "Population"]
     y_col_indices = utils.col_names_to_indices(columns, y_col_names)
 
-    x_exclude_names = ["Year_start", "Year_end"]
+    x_exclude_names = ["Year_start", "Year_end", "Latitude", "Longitude"]
     x_exclude_indices = utils.col_names_to_indices(columns, x_exclude_names)
 
     if model_name:
