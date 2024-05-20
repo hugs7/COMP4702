@@ -27,13 +27,14 @@ PLOT_WIDTH_PIXELS = 540
 PLOT_HEIGHT_PIXELS = 360
 
 
-def lineplot(x_label: str, y_label: str, save_path: str = None, *args: Tuple[np.ndarray, np.ndarray, str]):
+def lineplot(x_label: str, y_label: str, plot_title: str = "", save_path: str = None, *args: Tuple[np.ndarray, np.ndarray, str]):
     """
     Plots a line plot of the given data.
 
     Parameters:
     - x_label (str): The label for the x-axis.
     - y_label (str): The label for the y-axis.
+    - plot_title (str): The title of the plot. Default is "".
     - save_path (str): The path to save the plot to. Default is None.
     - args (Tuple[np.ndarray, np.ndarray, str]): The data to plot. Each tuple contains
         - x (np.ndarray): The x values.
@@ -43,10 +44,12 @@ def lineplot(x_label: str, y_label: str, save_path: str = None, *args: Tuple[np.
 
     sb.set_context("talk")
     sb.set_style("dark")
+    plt.figure(figsize=(PLOT_WIDTH / 3, PLOT_HEIGHT / 2.2))
 
     for x, y, label in args:
         sb.lineplot(x=x, y=y, label=label)
 
+    plt.title(plot_title)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
 
@@ -63,7 +66,7 @@ def plot_gelu():
     input = torch.arange(-6, 6, step=0.1)
     output = geLu(input)
 
-    lineplot("X", "GeLU(X)", None, (input, output, "GeLU"))
+    lineplot("X", "GeLU(X)", "GeLU", None, (input, output, "GeLU"))
 
     return input
 
@@ -76,18 +79,15 @@ def plot_sigmoid(input):
     # Input remains the same
     output = sigmoid(input)
 
-    lineplot("X", "Sigmoid(X)", None, (input, output, "Sigmoid"))
+    lineplot("X", "Sigmoid(X)", "Sigmoid", None, (input, output, "Sigmoid"))
 
 
-def plot_knn_accuracies(
-    accuracies_by_k: Dict[int, float], k_range: range, dataset_name: str, var_y_name: str, plots_folder_path: str
-) -> None:
+def plot_knn_accuracies(accuracies_by_k: Dict[int, float], dataset_name: str, var_y_name: str, plots_folder_path: str) -> None:
     """
     Plots the accuracies for different values of k as a line plot.
 
     Parameters:
     - accuracies_by_k (Dict[int, float]): The accuracies for different values of k.
-    - k_range (range): The range of k values.
     - dataset_name (str): The name of the dataset.
     - var_y_name (str): The name of the output variable.
     - plots_folder_path (str): The path to save the plots to.
@@ -98,10 +98,8 @@ def plot_knn_accuracies(
 
     log_info("Plotting k-NN accuracies...")
 
-    save_plot = False
     plot_path = ""
     if plots_folder_path is not None:
-        save_plot = True
         plot_path = os.path.join(plots_folder_path, f"{dataset_name}_knn_accuracies_{var_y_name}.png")
 
     k_vals = list(accuracies_by_k.keys())
@@ -112,7 +110,7 @@ def plot_knn_accuracies(
 
     data_tuple = (np.array(k_vals), np.array(accuracies), "Accuracy")
 
-    lineplot("k", "Accuracy", plot_path, data_tuple)
+    lineplot("k", "Accuracy", f"kNN Cross Validation Accuracies for var {var_y_name} on data {dataset_name}", plot_path, data_tuple)
 
 
 def plot_multivar_decision_regions(

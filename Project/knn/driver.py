@@ -103,7 +103,8 @@ def run_knn_model(
         # Iterate over each parameter setting in the grid search
         for params, accuracy in zip(cv_results["params"], cv_results["mean_test_score"]):
             # Extract the value of k from the parameters
-            log_debug(params)
+            log_trace(f"Params: {params}, accuracy: {accuracy}")
+
             k_value = params["n_neighbors"]
 
             # Check if the k_value already exists in the accuracies dictionary
@@ -118,9 +119,8 @@ def run_knn_model(
 
         # Plot the accuracies for each k as a line plot
         log_debug(f"Plotting accuracies for each k as a line plot for output variable {i}...")
-        plot_knn_accuracies(accuracies_by_k, k_range, dataset_name, var_y, plots_folder_path)
+        plot_knn_accuracies(accuracies_by_k, dataset_name, var_y, plots_folder_path)
 
-        exit(0)
         # Final Classifier trained on best_k
         log_info(f"Fitting Final Classifier trained on best k: {best_k}")
         cv_knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=best_k)
