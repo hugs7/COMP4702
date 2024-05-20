@@ -79,6 +79,12 @@ def process_classification_data(
     X = encode_data.encode_non_numeric_data(X)
     y = encode_data.encode_non_numeric_data(y)
 
+    # For any missing values, fill with the mean of the column
+    X = X.fillna(X.mean())
+
+    # For any values which are 0, replace with the mean of the column
+    X = X.replace(0, X.mean())
+
     log_line()
     log_info(f"Data sample X:")
     print(X.head())
@@ -112,12 +118,10 @@ def process_classification_data(
 
     log_title(f"Splitting data into training and testing data...")
 
-    X_train, y_train, X_test, y_test = test_train_split(
-        X, y, ratio=test_train_split_ratio)
+    X_train, y_train, X_test, y_test = test_train_split(X, y, ratio=test_train_split_ratio)
 
     log_info(f"Data split into training and testing data")
-    log_debug(
-        f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
+    log_debug(f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
     log_debug(f"X_test shape: {X_test.shape},\ny_test shape: {y_test.shape}")
 
     log_line()
@@ -156,8 +160,7 @@ def preprocess_data(
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = torch.as_tensor(data.data.reshape(
-            (-1, dim_input)) / normalising_factor, dtype=torch.float32)
+        new_data = torch.as_tensor(data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32)
         labels = torch.as_tensor(data.targets)
 
         return_data.append(new_data)
