@@ -82,7 +82,7 @@ def process_classification_data(
     # For any missing values, fill with the mean of the column
     X = X.fillna(X.mean())
 
-    # For any values which are 0, replace with the mean of the column
+    # For any values which are 0, replace with the mean of the column. Ensure this is done BEFORE one-hot encoding
     X = X.replace(0, X.mean())
 
     log_line()
