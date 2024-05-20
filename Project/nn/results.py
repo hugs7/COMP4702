@@ -16,4 +16,4 @@ def show_training_results(metrics):
     train_metrics = (epochs_x, training_accuracy_y, "Training")
     val_metrics = (epochs_x, val_accuracy_y, "Validation")
 
-    lineplot("Epoch", "Accuracy", None, train_metrics, val_metrics)
+    lineplot("Epoch", "Accuracy", "Neural Network Train & Validation Accuracies", None, train_metrics, val_metrics)

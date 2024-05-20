@@ -24,7 +24,9 @@ from knn.driver import run_knn_model
 from dt.driver import run_dt_model
 
 
-def dt_variable_ranking(dataset_name: str, dataset_file_path: str, X_vars: List[str], y_vars: List[str], test_train_ratio: float) -> np.ndarray:
+def dt_variable_ranking(
+    dataset_name: str, dataset_file_path: str, X_vars: List[str], y_vars: List[str], test_train_ratio: float
+) -> np.ndarray:
     """
     Fits a decision tree model to the data and returns the ranking of the variables by importance.
 
@@ -66,8 +68,7 @@ def main():
     set_log_level()
     welcome()
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree",
-              "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         if len(sys.argv) == 2:
@@ -106,8 +107,7 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(
-            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
     columns: List[str]
@@ -130,8 +130,7 @@ def main():
         data = load_data(dataset_file_path)
         data = encode_data.encode_non_numeric_data(data)
         title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
-        corr_plot_save_path = os.path.join(
-            plots_folder, f"{dataset_name}_corr_matrix.png")
+        corr_plot_save_path = os.path.join(plots_folder, f"{dataset_name}_corr_matrix.png")
         file_helper.remove_file_if_exist(corr_plot_save_path)
         log_info("Columns in data: ", data.columns)
         correlation.plot_correlation_matrix(data, title, corr_plot_save_path)
@@ -149,11 +148,9 @@ def main():
     if model_name:
         if model_name == "nn":
             # Use all columns for neural network
-            x_col_indices = [i for i in range(
-                len(columns)) if i not in y_col_indices and i not in x_exclude_indices]
+            x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in x_exclude_indices]
         else:
-            x_col_names = ["Thorax_length", "Replicate", "Vial",
-                           "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
+            x_col_names = ["Thorax_length", "Replicate", "Vial", "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
             x_col_indices = utils.col_names_to_indices(columns, x_col_names)
 
         # Obtain the vars of the x and y variables
@@ -177,26 +174,55 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
-        predictors_ordered = dt_variable_ranking(dataset_name,
-                                                 dataset_file_path, X_vars, y_vars, test_train_ratio)
+        predictors_ordered = dt_variable_ranking(dataset_name, dataset_file_path, X_vars, y_vars, test_train_ratio)
 
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
         )
 
-        k = 30
+        k_range = range(3, 100, 1)
+        n_splits = 5
 
-        run_knn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars, y_vars,
-                      unique_classes, num_classes_in_vars, predictors_ordered, k=k, plots_folder_path=plots_folder)
+        run_knn_model(
+            dataset_name,
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            X_vars,
+            y_vars,
+            unique_classes,
+            num_classes_in_vars,
+            predictors_ordered,
+            k_range=k_range,
+            n_splits=n_splits,
+            plots_folder_path=plots_folder,
+        )
     elif model_name == "dt":
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
-            dataset_file_path, X_vars, y_vars, False, False, test_train_ratio, )
+            dataset_file_path,
+            X_vars,
+            y_vars,
+            False,
+            False,
+            test_train_ratio,
+        )
 
         max_tree_depth = 10
 
-        predictors_ordered = run_dt_model(dataset_name,
-                                          X_train, y_train, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars,
-                                          max_tree_depth=max_tree_depth, plots_folder_path=plots_folder)
+        predictors_ordered = run_dt_model(
+            dataset_name,
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            X_vars,
+            y_vars,
+            unique_classes,
+            num_classes_in_vars,
+            max_tree_depth=max_tree_depth,
+            plots_folder_path=plots_folder,
+        )
     elif model_name == "nn":
         third_arg = sys.argv[3] if len(sys.argv) > 3 else None
         checkpoint_num = sys.argv[4] if len(sys.argv) > 4 else None
@@ -210,8 +236,7 @@ def main():
         save_model = True
         if third_arg:
             if third_arg == "read":
-                predictors_ordered = dt_variable_ranking(dataset_name,
-                                                         dataset_file_path, X_vars, y_vars, test_train_ratio)
+                predictors_ordered = dt_variable_ranking(dataset_name, dataset_file_path, X_vars, y_vars, test_train_ratio)
 
                 # Read from saved final model
                 log_info("Reading from saved final model")
@@ -219,8 +244,20 @@ def main():
                 model_str = "final" if final_model else f"checkpoint {checkpoint_num}"
                 log_info(f"Using {model_str} model")
 
-                run_saved_nn_model(dataset_name, X_test, y_test, X_vars, y_vars, unique_classes, num_classes_in_vars,
-                                   predictors_ordered, nn_folder_path, final_model, checkpoint_num=checkpoint_num, plots_folder_path=plots_folder)
+                run_saved_nn_model(
+                    dataset_name,
+                    X_test,
+                    y_test,
+                    X_vars,
+                    y_vars,
+                    unique_classes,
+                    num_classes_in_vars,
+                    predictors_ordered,
+                    nn_folder_path,
+                    final_model,
+                    checkpoint_num=checkpoint_num,
+                    plots_folder_path=plots_folder,
+                )
 
                 sys.exit(0)
 
@@ -233,8 +270,20 @@ def main():
                 sys.exit(1)
 
         # Grid search cv function (maybe)
-        run_nn_model(dataset_name, X_train, y_train, X_test, y_test, X_vars,
-                     y_vars, unique_classes, num_classes_in_vars, nn_folder_path=nn_folder_path, plots_folder_path=plots_folder, save_model=save_model)
+        run_nn_model(
+            dataset_name,
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+            X_vars,
+            y_vars,
+            unique_classes,
+            num_classes_in_vars,
+            nn_folder_path=nn_folder_path,
+            plots_folder_path=plots_folder,
+            save_model=save_model,
+        )
 
 
 if __name__ == "__main__":
