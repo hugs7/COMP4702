@@ -180,7 +180,7 @@ def main():
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
         )
 
-        k_range = range(3, 15, 1)
+        k_range = range(3, 100, 1)
         n_splits = 5
 
         run_knn_model(
