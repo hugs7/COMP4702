@@ -23,8 +23,8 @@ PLOT_WIDTH = 25
 PLOT_HEIGHT = 13
 
 # 540p resolution for each subplot :)
-PLOT_WIDTH_PIXELS = 540
-PLOT_HEIGHT_PIXELS = 360
+PLOT_WIDTH_PIXELS = 340
+PLOT_HEIGHT_PIXELS = 160
 
 
 def lineplot(x_label: str, y_label: str, plot_title: str = "", save_path: str = None, *args: Tuple[np.ndarray, np.ndarray, str]):
