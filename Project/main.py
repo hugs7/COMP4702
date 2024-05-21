@@ -123,6 +123,16 @@ def main():
 
     dataset_file_path = os.path.join(data_folder, dataset_file_name)
 
+    # Check for third argument
+    no_save_arg = ""
+    if len(sys.argv) > 3:
+        no_save_arg = sys.argv[3]
+
+    save_plots = True if no_save_arg != "nosave" else False
+    if not save_plots:
+        # Set the plots folder to None
+        plots_folder = None
+
     # === Correlation Matrix ===
 
     if first_arg == "corr":
