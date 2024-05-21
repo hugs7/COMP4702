@@ -53,6 +53,15 @@ def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
     for column in normalised_data.columns:
         # Check if the column contains numerical data
         column_data = normalised_data[column]
+        column_name = column_data.name
+
+        if column_name == "Thorax_length" or column_name == "wing_loading":
+            # Convert to numeric
+            normalised_data[column] = pd.to_numeric(
+                column_data, errors='coerce')
+
+            # Reobtain the column data
+            column_data = normalised_data[column]
 
         if np.issubdtype(column_data.dtype, np.number):
             log_debug(
