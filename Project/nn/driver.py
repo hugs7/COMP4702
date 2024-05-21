@@ -380,6 +380,9 @@ def run_saved_nn_model(
     state_dict = model_obj["model_state_dict"]
     log_debug(f"State dict: {state_dict}")
 
+    metrics = model_obj["metrics"]
+    log_info(f"Metrics: {metrics}")
+
     # Load data
 
     device = get_device()
