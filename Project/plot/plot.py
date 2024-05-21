@@ -16,10 +16,8 @@ import utils
 
 import plot.mesh as mesh
 
-BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700",
-                      "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
-FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700",
-                      "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+BACKGROUND_COLOURS = ["#FFAAAA", "#AAFFAA", "#AAAAFF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
+FOREGROUND_COLOURS = ["#FF0000", "#00FF00", "#0000FF", "#FFD700", "#00CED1", "#FFA07A", "#98FB98", "#AFEEEE", "#D8BFD8", "#FFFFE0"]
 
 PLOT_WIDTH = 25
 PLOT_HEIGHT = 13
@@ -102,8 +100,7 @@ def plot_knn_accuracies(accuracies_by_k: Dict[int, float], dataset_name: str, va
 
     plot_path = ""
     if plots_folder_path is not None:
-        plot_path = os.path.join(
-            plots_folder_path, f"{dataset_name}_knn_accuracies_{var_y_name}.png")
+        plot_path = os.path.join(plots_folder_path, f"{dataset_name}_knn_accuracies_{var_y_name}.png")
 
     k_vals = list(accuracies_by_k.keys())
     accuracies = list(accuracies_by_k.values())
@@ -113,8 +110,7 @@ def plot_knn_accuracies(accuracies_by_k: Dict[int, float], dataset_name: str, va
 
     data_tuple = (np.array(k_vals), np.array(accuracies), "Accuracy")
 
-    lineplot("k", "Accuracy",
-             f"kNN Cross Validation Accuracies for var {var_y_name} on data {dataset_name}", plot_path, data_tuple)
+    lineplot("k", "Accuracy", f"kNN Cross Validation Accuracies for var {var_y_name} on data {dataset_name}", plot_path, data_tuple)
 
 
 def plot_multivar_decision_regions(
@@ -153,26 +149,22 @@ def plot_multivar_decision_regions(
     - None
     """
 
-    log_info(
-        f"Plotting decision boundaries for output variable {output_variable_name}...")
+    log_info(f"Plotting decision boundaries for output variable {output_variable_name}...")
 
     save_plot = False
     plot_path = ""
     if model_name is not None and dataset_name is not None and plots_folder_path is not None:
         save_plot = True
-        plot_path = os.path.join(
-            plots_folder_path, f"{model_name}_{dataset_name}_decision_boundaries_{output_variable_name}.png")
+        plot_path = os.path.join(plots_folder_path, f"{model_name}_{dataset_name}_decision_boundaries_{output_variable_name}.png")
 
     # Clamp delta to the number of features
     if delta > len(X_labels):
-        log_warning(
-            f"Delta value {delta} exceeds the number of features {len(X_labels)}. Clamping to {len(X_labels)}")
+        log_warning(f"Delta value {delta} exceeds the number of features {len(X_labels)}. Clamping to {len(X_labels)}")
         delta = min(delta, len(X_labels))
 
     # Check dimensions of ordered_predictor_indicies
     if len(ordered_predictor_indicies.shape) != 1:
-        raise ValueError(
-            "Ordered predictor indicies must be a 1D array of indices")
+        raise ValueError("Ordered predictor indicies must be a 1D array of indices")
 
     # Plot decision regions for the top delta features
     top_predictor_indices = ordered_predictor_indicies[:delta]
@@ -181,8 +173,7 @@ def plot_multivar_decision_regions(
     top_delta_feature_cols = [X_labels[idx] for idx in top_predictor_indices]
 
     # Calculate the total number of plots
-    feature_combinations = list(
-        itertools.combinations(top_predictor_indices, 2))
+    feature_combinations = list(itertools.combinations(top_predictor_indices, 2))
     log_trace(f"Feature combinations: {feature_combinations}")
     num_feature_pairs = len(feature_combinations)
     log_debug(f"Total number of plots: {num_feature_pairs}")
@@ -192,8 +183,7 @@ def plot_multivar_decision_regions(
     num_plots_per_col = math.ceil(num_feature_pairs / num_plots_per_row)
 
     # Create a square grid of subplots
-    fig, axs = plt.subplots(
-        num_plots_per_row, num_plots_per_col, figsize=(PLOT_WIDTH, PLOT_HEIGHT))
+    fig, axs = plt.subplots(num_plots_per_row, num_plots_per_col, figsize=(PLOT_WIDTH, PLOT_HEIGHT))
 
     # Flatten the axs array to iterate over it easily
     # Flatten only if there is more than one row
@@ -204,8 +194,7 @@ def plot_multivar_decision_regions(
     plot_index = 0
 
     for i, feature_pair in enumerate(feature_combinations):
-        log_info(
-            f"Plotting decision boundary for feature pair {feature_pair}. Progress: {i} / {num_feature_pairs}")
+        log_info(f"Plotting decision boundary for feature pair {feature_pair}. Progress: {i} / {num_feature_pairs}")
 
         # Get the current axes
         # If only 1 plot, axs is not an array
@@ -257,8 +246,7 @@ def plot_multivar_decision_regions(
     log_line(level="TRACE")
     log_trace("X Test points:")
     X_test_important_features = X_points[:, top_predictor_indices]
-    log_trace(utils.np_to_pd(X_test_important_features,
-              top_delta_feature_cols, use_tensors=use_tensors))
+    log_trace(utils.np_to_pd(X_test_important_features, top_delta_feature_cols, use_tensors=use_tensors))
     log_line(level="TRACE")
 
     # Adjust layout to prevent overlap
@@ -266,8 +254,7 @@ def plot_multivar_decision_regions(
 
     # Add a global legend
     # Set the position of the legend to the top right of the plot
-    scatter_legend = Legend(fig, scatter.legend_elements(
-    )[0], y_var_unique_classes, title=output_variable_name, loc="upper right")
+    scatter_legend = Legend(fig, scatter.legend_elements()[0], y_var_unique_classes, title=output_variable_name, loc="upper right")
     fig.add_artist(scatter_legend)
 
     if save_plot:
@@ -288,7 +275,7 @@ def plot_decision_regions(
     X_points: np.ndarray | torch.Tensor,
     predict_callback: callable,
     plot_title="Decision Regions",
-    buffer: float = 0.5,
+    buffer: float = 0.25,
     show_plot: bool = True,
     show_legend: bool = True,
     x_label: str = "X",
@@ -307,7 +294,7 @@ def plot_decision_regions(
     - X_points (ndarray): The test data features.
     - predict_callback (callable): The function to use to predict the labels for the meshgrid points.
     - plot_title (str): The title of the plot. Default is "Decision Regions".
-    - buffer (float): The buffer to add to the minimum and maximum values of the features. Default is 0.5.
+    - buffer (float): The buffer to add to the minimum and maximum values of the features. Default is 0.25.
     - show_plot (bool): Whether to display the plot. Default is True. Function will always return the plot object.
     - show_legend (bool): Whether to display the legend. Default is True.
     - x_label (str): The label for the x-axis. Default is "X".
@@ -331,16 +318,13 @@ def plot_decision_regions(
             raise ValueError(f"Feature index {index} is out of bounds")
 
     # Calculate mean values of non-variable features
-    constant_feature_indices = list(
-        set(range(X_points.shape[1])) - set(variable_feature_indices))
+    constant_feature_indices = list(set(range(X_points.shape[1])) - set(variable_feature_indices))
 
     log_debug(f"Variable feature indices: {variable_feature_indices}")
     log_debug(f"Constant feature indices: {constant_feature_indices}")
 
-    variable_feature_labels = [all_col_labels[vfi]
-                               for vfi in variable_feature_indices]
-    constant_feature_labels = [all_col_labels[cfi]
-                               for cfi in constant_feature_indices]
+    variable_feature_labels = [all_col_labels[vfi] for vfi in variable_feature_indices]
+    constant_feature_labels = [all_col_labels[cfi] for cfi in constant_feature_indices]
 
     log_debug(f"Variable feature labels: {variable_feature_labels}")
 
@@ -426,13 +410,11 @@ def plot_decision_regions(
         xx_flat, yy_flat, mean_values, variable_feature_indices, constant_feature_indices, all_col_labels, use_tensors=use_tensors
     )
 
-    log_trace(utils.np_to_pd(flattened_X_meshgrid,
-              all_col_labels, use_tensors=use_tensors))
+    log_trace(utils.np_to_pd(flattened_X_meshgrid, all_col_labels, use_tensors=use_tensors))
 
     log_debug(f"Meshgrid shape: {flattened_X_meshgrid.shape}")
     if flattened_X_meshgrid.shape[1] != X_points.shape[1]:
-        log_warning(
-            f"Meshgrid shape {flattened_X_meshgrid.shape} does not match the number of features in the test data {X_points.shape}")
+        log_warning(f"Meshgrid shape {flattened_X_meshgrid.shape} does not match the number of features in the test data {X_points.shape}")
 
     log_line(level="DEBUG")
     log_debug("Making predictions on meshgrid...")
@@ -453,16 +435,14 @@ def plot_decision_regions(
 
     if use_tensors:
         # Move X_variable_features to CPU if it is a tensor
-        X_variable_features = utils.tensor_to_cpu(
-            X_variable_features, detach=True)
+        X_variable_features = utils.tensor_to_cpu(X_variable_features, detach=True)
 
     # Overlay the test points
     cmap_points = ListedColormap(FOREGROUND_COLOURS[:num_test_classes])
 
     log_debug(f"Test preds: {test_preds}")
     log_debug(f"X variable features shape: {X_variable_features.shape}")
-    scatter = dr_plot.scatter(
-        X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
+    scatter = dr_plot.scatter(X_variable_features[:, 0], X_variable_features[:, 1], c=test_preds, cmap=cmap_points)
 
     # Setup plot
     xx_min, xx_max = xx.min(), xx.max()
@@ -491,8 +471,7 @@ def plot_decision_regions(
 
         log_debug("classes: ", classes)
 
-        scatter_legend = Legend(dr_plot, scatter.legend_elements(
-        )[0], classes, title=output_variable_name, loc="upper right")
+        scatter_legend = Legend(dr_plot, scatter.legend_elements()[0], classes, title=output_variable_name, loc="upper right")
 
         dr_plot.add_artist(scatter_legend)
 
