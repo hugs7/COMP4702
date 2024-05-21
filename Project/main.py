@@ -68,7 +68,8 @@ def main():
     set_log_level()
     welcome()
 
-    models = {"knn": "k Nearest Neighbours", "dt": "Decision Tree", "nn": "Neural Network"}
+    models = {"knn": "k Nearest Neighbours",
+              "dt": "Decision Tree", "nn": "Neural Network"}
 
     if len(sys.argv) < 3:
         if len(sys.argv) == 2:
@@ -107,7 +108,8 @@ def main():
         sys.exit(1)
 
     if dataset_name not in DATASET_MAPPING:
-        raise ValueError(f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
+        raise ValueError(
+            f"{Fore.RED}Dataset {dataset_name} not found{Style.RESET_ALL}")
 
     dataset_file_name, columns = DATASET_MAPPING[dataset_name]
     columns: List[str]
@@ -140,7 +142,8 @@ def main():
         data = load_data(dataset_file_path)
         data = encode_data.encode_non_numeric_data(data)
         title = f"Correlation matrix of predictor variables from {dataset_name} dataset"
-        corr_plot_save_path = os.path.join(plots_folder, f"{dataset_name}_corr_matrix.png")
+        corr_plot_save_path = os.path.join(
+            plots_folder, f"{dataset_name}_corr_matrix.png")
         file_helper.remove_file_if_exist(corr_plot_save_path)
         log_info("Columns in data: ", data.columns)
         correlation.plot_correlation_matrix(data, title, corr_plot_save_path)
@@ -158,9 +161,11 @@ def main():
     if model_name:
         if model_name == "nn":
             # Use all columns for neural network
-            x_col_indices = [i for i in range(len(columns)) if i not in y_col_indices and i not in x_exclude_indices]
+            x_col_indices = [i for i in range(
+                len(columns)) if i not in y_col_indices and i not in x_exclude_indices]
         else:
-            x_col_names = ["Thorax_length", "Replicate", "Vial", "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
+            x_col_names = ["Thorax_length", "Replicate", "Vial",
+                           "Temperature", "Sex", "w1", "w2", "w3", "wing_loading"]
             x_col_indices = utils.col_names_to_indices(columns, x_col_names)
 
         # Obtain the vars of the x and y variables
@@ -184,7 +189,8 @@ def main():
     test_train_ratio = 0.3
 
     if model_name == "knn":
-        predictors_ordered = dt_variable_ranking(dataset_name, dataset_file_path, X_vars, y_vars, test_train_ratio)
+        predictors_ordered = dt_variable_ranking(
+            dataset_name, dataset_file_path, X_vars, y_vars, test_train_ratio)
 
         X_train, y_train, X_test, y_test, unique_classes, num_classes_in_vars = process_data.process_classification_data(
             dataset_file_path, X_vars, y_vars, False, True, test_train_ratio
@@ -246,7 +252,8 @@ def main():
         save_model = True
         if third_arg:
             if third_arg == "read":
-                predictors_ordered = dt_variable_ranking(dataset_name, dataset_file_path, X_vars, y_vars, test_train_ratio)
+                predictors_ordered = dt_variable_ranking(
+                    dataset_name, dataset_file_path, X_vars, y_vars, test_train_ratio)
 
                 # Read from saved final model
                 log_info("Reading from saved final model")
@@ -292,7 +299,7 @@ def main():
             num_classes_in_vars,
             nn_folder_path=nn_folder_path,
             plots_folder_path=plots_folder,
-            save_model=save_model,
+            is_save_model=save_model,
         )
 
 
