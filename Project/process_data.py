@@ -76,10 +76,10 @@ def process_classification_data(
             if X[col].isnull().sum() > 0:
                 log_info(
                     f"Column {col} has missing values. Filling with mean.")
-                X[col].fillna(X[col].mean(), inplace=True)
+                X.fillna({col: X[col].mean()}, inplace=True)
             if (X[col] == 0).sum() > 0:
                 log_info(f"Column {col} has zero values. Filling with mean.")
-                X[col].replace(0, X[col].mean(), inplace=True)
+                X.replace({col: 0}, X[col].mean(), inplace=True)
 
     # Normalise the data
     if normalise_data:
