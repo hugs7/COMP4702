@@ -4,6 +4,7 @@ Hugo Burton
 06/05/2024
 """
 
+import sys
 from typing import List
 import numpy as np
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
@@ -54,12 +55,14 @@ def run_knn_model(
 
     log_title("Start of knn model driver...")
 
-    log_debug(f"Number of classes in each output variable: {num_classes_in_vars}")
+    log_debug(
+        f"Number of classes in each output variable: {num_classes_in_vars}")
 
     # For multi-variable classification, we need to create a knn classifier for each output variable
     # These are independent of each other.
 
-    log_debug(f"Creating a knn classifier for each of the {len(y_labels)} output variables")
+    log_debug(
+        f"Creating a knn classifier for each of the {len(y_labels)} output variables")
 
     knn_classifiers = []
 
@@ -70,7 +73,8 @@ def run_knn_model(
         # ======== Train KNN classifier for this output variable ========
         log_title(f"Output variable {i}: {var_y}")
         y_var_unique_classes = unique_classes[i]
-        log_info(f"Unique classes for output variable {i}: {y_var_unique_classes}")
+        log_info(
+            f"Unique classes for output variable {i}: {y_var_unique_classes}")
 
         # Get slice of y_train and y_test for this output variable
         var_y_train = y_train[:, i]
@@ -83,14 +87,18 @@ def run_knn_model(
         log_debug(f"y_test_var shape: {var_y_test.shape}")
 
         # Cross Validation Setup
-        log_info(f"Performing Cross validation with n_splits: {n_splits}, k_range: {k_range}...")
+        log_info(
+            f"Performing Cross validation with n_splits: {n_splits}, k_range: {k_range}...")
         kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=1)
 
-        cv_knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=5)
+        cv_knn_classifier = knn_model.KNNClassify(
+            X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=5)
         cv_knn_classifier_model = cv_knn_classifier.model
 
         param_grid = {"n_neighbors": k_range}
-        grid_search = GridSearchCV(cv_knn_classifier_model, param_grid, cv=kf, scoring="accuracy")
+        grid_search = GridSearchCV(
+            cv_knn_classifier_model, param_grid, cv=kf, scoring="accuracy")
+
         grid_search.fit(X_train, var_y_train)
 
         best_k = grid_search.best_params_["n_neighbors"]
@@ -109,7 +117,8 @@ def run_knn_model(
 
             # Check if the k_value already exists in the accuracies dictionary
             if k_value in accuracies_by_k:
-                log_warning(f"Duplicate accuracy for k value found: {k_value}. Continuing...")
+                log_warning(
+                    f"Duplicate accuracy for k value found: {k_value}. Continuing...")
                 continue
 
             # Append the accuracy to the list corresponding to the k_value
@@ -118,12 +127,15 @@ def run_knn_model(
         log_debug(f"Accuracies: {accuracies_by_k}")
 
         # Plot the accuracies for each k as a line plot
-        log_debug(f"Plotting accuracies for each k as a line plot for output variable {i}...")
-        plot_knn_accuracies(accuracies_by_k, dataset_name, var_y, plots_folder_path)
+        log_debug(
+            f"Plotting accuracies for each k as a line plot for output variable {i}...")
+        plot_knn_accuracies(accuracies_by_k, dataset_name,
+                            var_y, plots_folder_path)
 
         # Final Classifier trained on best_k
         log_info(f"Fitting Final Classifier trained on best k: {best_k}")
-        cv_knn_classifier = knn_model.KNNClassify(X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=best_k)
+        cv_knn_classifier = knn_model.KNNClassify(
+            X_train, var_y_train, X_test, var_y_test, X_labels, y_var_unique_classes, k=best_k)
 
         # Add the classifier to the list
         knn_classifiers.append(cv_knn_classifier)
@@ -147,12 +159,15 @@ def run_knn_model(
 
         log_info(f"Variable importance for output variable {i}")
 
-        max_feature_name_length = max([len(feature_name) for feature_name in X_labels])
+        max_feature_name_length = max(
+            [len(feature_name) for feature_name in X_labels])
         var_y_predictor_importance = ordered_predictor_indicies[i, :]
-        log_info(f"  Predictors ordered by importance:", var_y_predictor_importance)
+        log_info(f"  Predictors ordered by importance:",
+                 var_y_predictor_importance)
         for feature_indx in var_y_predictor_importance:
             feature_name = X_labels[feature_indx]
-            log_info(f"    Feature {feature_indx:<2} {feature_name:<{max_feature_name_length+3}}")
+            log_info(
+                f"    Feature {feature_indx:<2} {feature_name:<{max_feature_name_length+3}}")
 
         # ======== Plot Decision Boundaries ========
 

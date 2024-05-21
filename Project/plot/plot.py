@@ -254,12 +254,12 @@ def plot_multivar_decision_regions(
     for j in range(num_feature_pairs, num_axes):
         axs[j].axis("off")
 
-    log_line(level="DEBUG")
-    log_debug("X Test points:")
+    log_line(level="TRACE")
+    log_trace("X Test points:")
     X_test_important_features = X_points[:, top_predictor_indices]
-    log_debug(utils.np_to_pd(X_test_important_features,
+    log_trace(utils.np_to_pd(X_test_important_features,
               top_delta_feature_cols, use_tensors=use_tensors))
-    log_line(level="DEBUG")
+    log_line(level="TRACE")
 
     # Adjust layout to prevent overlap
     plt.tight_layout()
