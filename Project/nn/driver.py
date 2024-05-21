@@ -175,7 +175,7 @@ def run_nn_model(
     num_classes_in_vars: List[int],
     nn_folder_path: str,
     plots_folder_path: str = None,
-    save_model: bool = True
+    is_save_model: bool = True
 ) -> None:
     """
     Driver script for Neural Network model. Takes in training, test data along with labels and trains
@@ -193,7 +193,7 @@ def run_nn_model(
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     - nn_folder_path (str): The path of the neural network model.
     - plots_folder_path (str): The path to save the plots to.
-    - save_model (bool): If true, the final model will be saved. Default is True.
+    - is_save_model (bool): If true, the final model will be saved. Default is True.
     """
 
     log_title(f"Start of nn model driver for dataset: {dataset_name}...")
@@ -202,7 +202,7 @@ def run_nn_model(
 
     final_model_folder, checkpoints_folder = get_model_save_folders(
         nn_folder_path)
-    if save_model:
+    if is_save_model:
         file_helper.make_folder_if_not_exists(final_model_folder)
         file_helper.make_folder_if_not_exists(checkpoints_folder)
 
@@ -297,7 +297,7 @@ def run_nn_model(
         )
 
     # Save the final model
-    if save_model:
+    if is_save_model:
         log_info("Saving final model...")
         save_model(final_model_folder, sequential_model,  metrics)
 
