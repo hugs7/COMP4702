@@ -377,18 +377,24 @@ def plot_decision_regions(
     log_debug(f"Feature maxs: {maxs}")
 
     # Compute resolution from the range of the features
-    resolution_x = (maxs[0] - mins[0]) / PLOT_WIDTH_PIXELS
-    resolution_y = (maxs[1] - mins[1]) / PLOT_HEIGHT_PIXELS
+    x_increment = (maxs[0] - mins[0]) / PLOT_WIDTH_PIXELS
+    y_increment = (maxs[1] - mins[1]) / PLOT_HEIGHT_PIXELS
 
-    log_debug(f"Resolution X: {resolution_x}")
-    log_debug(f"Resolution Y: {resolution_y}")
+    log_debug(f"X Increment: {x_increment}")
+    log_debug(f"Y Increment: {y_increment}")
+
+    x_resolution = int((maxs[0] - mins[0]) / x_increment)
+    y_resolution = int((maxs[1] - mins[1]) / y_increment)
+
+    log_debug(f"X Resolution: {x_resolution}")
+    log_debug(f"Y Resolution: {y_resolution}")
 
     if use_tensors:
-        x = torch.arange(mins[0], maxs[0], resolution_x)
-        y = torch.arange(mins[1], maxs[1], resolution_y)
+        x = torch.arange(mins[0], maxs[0], x_increment)
+        y = torch.arange(mins[1], maxs[1], y_increment)
     else:
-        x = np.arange(mins[0], maxs[0], resolution_x)
-        y = np.arange(mins[1], maxs[1], resolution_y)
+        x = np.arange(mins[0], maxs[0], x_increment)
+        y = np.arange(mins[1], maxs[1], y_increment)
 
     log_trace(f"X:\n{x}")
     log_trace(f"Y:\n{y}")
