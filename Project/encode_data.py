@@ -59,23 +59,11 @@ def normalise_data(data: pd.DataFrame) -> pd.DataFrame:
                 f"Column: {column} is of type {column_data.dtype}. Normalising...")
 
             # Normalise the current column
-            column_data = normalise_column(column_data)
+            normalised_data[column] = normalise_column(column_data)
 
         elif np.issubdtype(column_data.dtype, np.object_):
             log_debug(
-                f"Column: {column} is of type {column_data.dtype}. Attempting to convert object to number...")
-            try:
-                # Try to convert the column to numeric
-                column_data = pd.to_numeric(column_data, errors="coerce")
-                log_debug(
-                    f"Column: {column} successfully converted to number.")
-
-                # Normalise the current column
-                column_data = normalise_column(column_data)
-
-            except ValueError:
-                log_error(
-                    f"Column: {column} cannot be converted to number. Skipping normalisation...")
+                f"Column: {column} is of type {column_data.dtype}. Skipping normalisation")
 
         else:
             log_debug(

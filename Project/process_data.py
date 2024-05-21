@@ -2,6 +2,7 @@
 Processing data helper
 """
 
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from typing import List, Tuple
 from colorama import Fore, Style
@@ -85,6 +86,10 @@ def process_classification_data(
     # For any values which are 0, replace with the mean of the column. Ensure this is done BEFORE one-hot encoding
     X = X.replace(0, X.mean())
 
+    # Print all rows
+    pd.set_option('display.max_rows', None)
+    log_trace(f"Data all encoded: \n{X}")
+
     log_line()
     log_info(f"Data sample X:")
     print(X.head())
@@ -118,10 +123,12 @@ def process_classification_data(
 
     log_title(f"Splitting data into training and testing data...")
 
-    X_train, y_train, X_test, y_test = test_train_split(X, y, ratio=test_train_split_ratio)
+    X_train, y_train, X_test, y_test = test_train_split(
+        X, y, ratio=test_train_split_ratio)
 
     log_info(f"Data split into training and testing data")
-    log_debug(f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
+    log_debug(
+        f"X_train shape: {X_train.shape},\ny_train shape: {y_train.shape}\n")
     log_debug(f"X_test shape: {X_test.shape},\ny_test shape: {y_test.shape}")
 
     log_line()
@@ -160,7 +167,8 @@ def preprocess_data(
     return_data = []
 
     for data in [train_data, validation_data]:
-        new_data = torch.as_tensor(data.data.reshape((-1, dim_input)) / normalising_factor, dtype=torch.float32)
+        new_data = torch.as_tensor(data.data.reshape(
+            (-1, dim_input)) / normalising_factor, dtype=torch.float32)
         labels = torch.as_tensor(data.targets)
 
         return_data.append(new_data)
