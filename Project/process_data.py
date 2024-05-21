@@ -69,6 +69,18 @@ def process_classification_data(
     y_unique_classes = [list(y[col].unique()) for col in y.columns]
     log_debug(f"Unique classes in each target variable: {y_unique_classes}")
 
+    # Loop over each column and if there are any missing or zero values, fill them with the mean
+    for col in X.columns:
+        # Check dtype of column
+        if X[col].dtype == np.float64 or X[col].dtype == np.int64:
+            if X[col].isnull().sum() > 0:
+                log_info(
+                    f"Column {col} has missing values. Filling with mean.")
+                X[col].fillna(X[col].mean(), inplace=True)
+            if (X[col] == 0).sum() > 0:
+                log_info(f"Column {col} has zero values. Filling with mean.")
+                X[col].replace(0, X[col].mean(), inplace=True)
+
     # Normalise the data
     if normalise_data:
         log_title(f"Normalising X data...")
@@ -82,9 +94,6 @@ def process_classification_data(
 
     # For any missing values, fill with the mean of the column
     X = X.fillna(X.mean())
-
-    # For any values which are 0, replace with the mean of the column. Ensure this is done BEFORE one-hot encoding
-    X = X.replace(0, X.mean())
 
     # Print all rows
     pd.set_option('display.max_rows', None)
