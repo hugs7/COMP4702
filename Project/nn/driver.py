@@ -333,7 +333,7 @@ def run_saved_nn_model(
     - y_test (ndarray): Test data target variable.
     - X_labels (List[str]): The names of the (input) features.
     - y_labels (List[List[str]]): The names of each class within each
-                                    target variable. Of which there can be multiple                 
+                                  target variable. Of which there can be multiple.
     - unique_classes (List[List[str]]): The unique classes in each target variable.
     - num_classes_in_vars (List[int]): The number of classes in each target variable.
     - ordered_predictor_indicies (ndarray): 2D array of indices of the predictors in descending order of importance. Rows are output
@@ -381,7 +381,23 @@ def run_saved_nn_model(
     log_debug(f"State dict: {state_dict}")
 
     metrics = model_obj["metrics"]
-    log_info(f"Metrics: {metrics}")
+    metrics = metrics[-20000:]
+    train_accuracies_last = []
+    test_accuracies_last = []
+    # Loop over the metrics to get the last 20000 training and test accuracies
+    for metric in metrics:
+        log_trace(f"Metric: {metric}")
+        train_acc = metric[2]
+        test_acc = metric[4]
+        train_accuracies_last.append(train_acc)
+        test_accuracies_last.append(test_acc)
+
+    average_train_accuracy_last = np.mean(train_accuracies_last)
+    average_test_accuracy_last = np.mean(test_accuracies_last)
+    log_info(
+        f"Average training accuracy of last 20000 epochs: {average_train_accuracy_last}")
+    log_info(
+        f"Average test accuracy of last 20000 epochs: {average_test_accuracy_last}")
 
     # Load data
 
